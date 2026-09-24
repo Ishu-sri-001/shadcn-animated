@@ -264,18 +264,20 @@ export default function ToastPage() {
       rounded={values.rounded as ToastRounded}
       position={values.position as ToastPosition}
     >
-      <h1 className="text-2xl font-semibold">Toast</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Brief messages that stack in the corner and can be swiped away.
-      </p>
-      <div className="mt-6 flex min-h-48 items-center justify-center">
-        <Button
-          variant="outline"
-          onClick={(event) => showToast(event.currentTarget)}
-          className='text-xl py-5 px-8'
-        >
-          Show toast
-        </Button>
+      <div className="mx-auto w-full max-w-2xl">
+        <h1 className="text-2xl font-semibold">Toast</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Brief messages that stack in the corner and can be swiped away.
+        </p>
+        <div className="mt-6 flex min-h-48 items-center justify-center">
+          <Button
+            variant="outline"
+            onClick={(event) => showToast(event.currentTarget)}
+            className='text-xl py-5 px-8'
+          >
+            Show toast
+          </Button>
+        </div>
       </div>
 
       <ControlsPanel title="Toast" {...panel} />

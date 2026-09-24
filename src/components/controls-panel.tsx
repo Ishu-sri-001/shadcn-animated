@@ -91,7 +91,7 @@ export function ControlsPanel<S extends ControlSchema>({
   return (
     <aside
       className={cn(
-        "fixed top-[10vh] right-[1.5vw] z-40 flex max-h-[80vh] w-[20vw] flex-col overflow-hidden rounded-lg border bg-background/95 text-sm shadow-lg backdrop-blur max-[1025px]:w-[35vw] max-md:inset-x-[4vw] max-md:top-auto max-md:bottom-[2vh] max-md:w-auto max-md:max-h-[50vh]",
+        "fixed top-[10vh] right-[1.5vw] z-40 flex max-h-[80vh] w-[20vw] flex-col overflow-hidden rounded-lg border bg-background/95 text-sm shadow-lg backdrop-blur max-[1025px]:hidden",
         className
       )}
     >

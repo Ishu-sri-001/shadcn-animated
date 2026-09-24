@@ -166,7 +166,7 @@ export default function DatePickerPage() {
   const { values } = panel
 
   return (
-    <>
+    <div className="mx-auto w-full max-w-2xl">
       <h1 className="text-2xl font-semibold">Date Picker</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         A button that opens a calendar to pick a single date.
@@ -201,6 +201,6 @@ export default function DatePickerPage() {
       </div>
 
       <ControlsPanel title="Date Picker" {...panel} />
-    </>
+    </div>
   )
 }

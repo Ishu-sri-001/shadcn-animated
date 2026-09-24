@@ -131,7 +131,7 @@ export default function AccordionPage() {
   const { values } = panel
 
   return (
-    <>
+    <div className="mx-auto w-full max-w-2xl">
       <h1 className="text-2xl font-semibold">Accordion</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Expandable sections that reveal their answers with a staggered fade.
@@ -174,6 +174,6 @@ export default function AccordionPage() {
       </div>
 
       <ControlsPanel title="Accordion" {...panel} />
-    </>
+    </div>
   )
 }

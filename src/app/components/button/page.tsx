@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 
 export default function ButtonPage() {
   return (
-    <>
+    <div className="mx-auto w-full max-w-2xl">
       <h1 className="text-2xl font-semibold">Button</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Displays a button or a component that looks like a button.
@@ -15,6 +15,6 @@ export default function ButtonPage() {
         <Button variant="destructive">Destructive</Button>
         <Button variant="link">Link</Button>
       </div>
-    </>
+    </div>
   )
 }

@@ -31,4 +31,9 @@ export const registry: RegistryItem[] = [
     name: "Attachment",
     description: "File chips that show upload progress, errors and previews.",
   },
+  {
+    slug: "bubble",
+    name: "Bubble",
+    description: "Chat message bubbles with variants, grouping and reactions.",
+  },
 ]
