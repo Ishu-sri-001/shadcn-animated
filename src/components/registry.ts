@@ -26,4 +26,9 @@ export const registry: RegistryItem[] = [
     name: "Button",
     description: "Displays a button or a component that looks like a button.",
   },
+  {
+    slug: "attachment",
+    name: "Attachment",
+    description: "File chips that show upload progress, errors and previews.",
+  },
 ]
