@@ -533,30 +533,59 @@ function BubbleContent({
   className,
   render,
   typing = false,
+  grow = false,
   layoutId,
   children,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  /** Shows bouncing dots; when it turns false, the bubble grows to fit the message. */
+  /** Shows bouncing dots in place of the message. */
   typing?: boolean
+  /**
+   * The bubble eases to its new size as the content changes: from the typing
+   * dots to the message, and word by word while text streams in. Off, the
+   * finished message pops in at full size in one go.
+   */
+  grow?: boolean
   /** Shared layout id, e.g. to morph a BubbleSuggestion into this message. */
   layoutId?: string
 }) {
+  const reduceMotion = useReducedMotion()
+  const node = React.useRef<HTMLDivElement>(null)
+
+  // Without `grow`, the message replaces the typing dots by popping in whole.
+  const wasTyping = React.useRef(typing)
+  // Before paint, so the full-size message never shows for a frame first.
+  React.useLayoutEffect(() => {
+    const was = wasTyping.current
+    wasTyping.current = typing
+    const el = node.current
+    if (grow || !was || typing || !el || reduceMotion) return
+    el.style.opacity = "0"
+    animate(el, { opacity: [0, 1], scale: [0.85, 1] }, spring)
+  }, [typing, grow, reduceMotion])
+
   return useRender({
     defaultTagName: "div",
-    // A Motion element by default, so size changes (typing → message,
-    // streaming text) ease instead of jumping.
+    ref: node,
+    // A Motion element by default, so size changes can ease (see `grow`).
     render: render ?? (
-      <motion.div layout layoutId={layoutId} transition={{ layout: spring }} />
+      <motion.div layout={grow} layoutId={layoutId} transition={{ layout: spring }} />
     ),
     props: mergeProps<"div">(
       {
         className: cn(
-          "relative w-fit max-w-full min-w-0 overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50",
+          "relative w-fit max-w-full min-w-0 origin-bottom-left overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:origin-bottom-right group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50",
           className
         ),
         children: render ? (
           children
+        ) : !grow ? (
+          // Swaps straight to the message; the pop above is its entrance.
+          typing ? (
+            <TypingDots />
+          ) : (
+            children
+          )
         ) : (
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div
@@ -597,27 +626,60 @@ function TypingDots() {
 }
 
 /**
- * Message text. Words added after mount (streaming) fade in; long text
- * collapses behind "Show more".
+ * Message text. By default it all shows at once; with `stream` it comes in
+ * word by word and the bubble grows with it. Long text collapses behind
+ * "Show more".
  */
 function BubbleText({
   className,
   text,
+  stream = false,
+  wordDelay = 70,
+  onStreamEnd,
   fade = true,
   collapsible = true,
   lines = 6,
 }: {
   className?: string
   text: string
-  /** Words added after mount fade in one by one, e.g. while a reply streams in. */
+  /** Reveals the text word by word when mounted, growing the bubble as it goes. */
+  stream?: boolean
+  /** Gap between streamed words, in ms. */
+  wordDelay?: number
+  /** Called once the last word has streamed in. */
+  onStreamEnd?: () => void
+  /** Words added after mount (e.g. streamed) fade in. */
   fade?: boolean
   /** Text over `lines` lines collapses with a fade and a "Show more" button. */
   collapsible?: boolean
   lines?: number
 }) {
-  const words = text.split(/(\s+)/)
+  // Words and the spaces between them.
+  const tokens = text.split(/(\s+)/)
+  // Read on mount only, so turning `stream` on later doesn't replay shown messages.
+  const [streams] = React.useState(stream)
+  const [shown, setShown] = React.useState(streams ? 1 : tokens.length)
   // Words present on mount show at once; only later ones fade in.
-  const [initialWords] = React.useState(words.length)
+  const [initialWords] = React.useState(shown)
+  const endStream = React.useEffectEvent(() => onStreamEnd?.())
+  const total = tokens.length
+
+  React.useEffect(() => {
+    if (!streams) return
+    let count = 1
+    const timer = window.setInterval(() => {
+      // The next word and the space before it.
+      count = Math.min(count + 2, total)
+      setShown(count)
+      if (count >= total) {
+        window.clearInterval(timer)
+        endStream()
+      }
+    }, wordDelay)
+    return () => window.clearInterval(timer)
+  }, [streams, total, wordDelay])
+
+  const words = tokens.slice(0, shown)
   const [expanded, setExpanded] = React.useState(false)
   const [overflowing, setOverflowing] = React.useState(false)
   const inner = React.useRef<HTMLDivElement>(null)
@@ -653,8 +715,8 @@ function BubbleText({
             fade && i >= initialWords ? (
               <motion.span
                 key={i}
-                initial={{ opacity: 0, filter: "blur(2px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.35 }}
               >
                 {word}

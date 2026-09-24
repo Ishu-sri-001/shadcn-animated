@@ -57,6 +57,8 @@ type Message = {
   flyFrom?: { x: number; y: number; width: number; height: number }
   /** Shared with the suggestion it was sent from. */
   layoutId?: string
+  /** Text streams in word by word, growing the bubble. */
+  stream?: boolean
 }
 
 const seed: Message[] = [
@@ -95,7 +97,7 @@ const controls = {
   staggerDelay: { group: "Arriving", type: "slider", label: "Stagger gap", value: 0.12, min: 0.03, max: 0.4, step: 0.01, unit: "s" },
   makeRoom: { group: "Arriving", type: "checkbox", label: "Make room", value: true },
   typing: { group: "Arriving", type: "checkbox", label: "Typing indicator", value: true },
-  streaming: { group: "Arriving", type: "checkbox", label: "Streaming text", value: true },
+  streaming: { group: "Arriving", type: "checkbox", label: "Stream text (bubble grows)", value: false },
 
   flyIn: { group: "Sending", type: "checkbox", label: "Fly from input", value: true },
   status: { group: "Sending", type: "checkbox", label: "Delivery status", value: true },
@@ -118,8 +120,6 @@ const controls = {
 } satisfies ControlSchema
 
 const FAIL_CHANCE = 0.25
-// Gap between streamed words, in ms.
-const WORD_MS = 70
 
 function now() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
@@ -147,6 +147,8 @@ export function ChatDemo() {
   const [suggestions, setSuggestions] = React.useState<{ id: string; texts: string[] } | null>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const replyIndex = React.useRef(0)
+  // Suggestions waiting for a streamed reply to finish, by message id.
+  const pendingSuggestions = React.useRef(new Map<string, () => void>())
   const timers = React.useRef(new Set<number>())
 
   React.useEffect(() => {
@@ -179,36 +181,21 @@ export function ChatDemo() {
     const text = replies[replyIndex.current % replies.length]
     const nextSuggestions = suggestionSets[replyIndex.current % suggestionSets.length]
     replyIndex.current += 1
+    const stream = values.streaming
     const showSuggestions = () => setSuggestions({ id: crypto.randomUUID(), texts: nextSuggestions })
+    // A streamed reply shows its suggestions once it finishes (see onStreamEnd).
+    if (stream) pendingSuggestions.current.set(id, showSuggestions)
 
+    setMessages((current) => [
+      ...current,
+      { id, from: "them", text, time: now(), reactions: {}, typing: values.typing, stream },
+    ])
     const reveal = () => {
-      if (!values.streaming) {
-        update(id, { typing: false, text })
-        later(showSuggestions, 300)
-        return
-      }
-      const words = text.split(" ")
-      update(id, { typing: false, text: words[0] })
-      words.slice(1).forEach((_, i) => {
-        later(() => update(id, { text: words.slice(0, i + 2).join(" ") }), (i + 1) * WORD_MS)
-      })
-      later(showSuggestions, words.length * WORD_MS + 300)
+      update(id, { typing: false })
+      if (!stream) later(showSuggestions, 300)
     }
-
-    if (values.typing) {
-      setMessages((current) => [
-        ...current,
-        { id, from: "them", text: "", time: now(), reactions: {}, typing: true },
-      ])
-      later(reveal, 1400)
-    } else {
-      setMessages((current) => [
-        ...current,
-        { id, from: "them", text: values.streaming ? "" : text, time: now(), reactions: {} },
-      ])
-      if (values.streaming) later(reveal, 50)
-      else later(showSuggestions, 300)
-    }
+    if (values.typing) later(reveal, 1400)
+    else if (!stream) later(showSuggestions, 300)
   }
 
   // Walks a sent message through sending → sent → delivered → read, or fails it.
@@ -296,13 +283,22 @@ export function ChatDemo() {
         picker={values.picker}
         magnify={values.magnify}
       >
-        <BubbleContent typing={message.typing} layoutId={message.layoutId}>
+        <BubbleContent typing={message.typing} grow={message.stream} layoutId={message.layoutId}>
           {message.replyTo && (
             <span className="line-clamp-1 border-l-2 border-current/40 px-2 text-xs opacity-80">
               {message.replyTo}
             </span>
           )}
-          <BubbleText text={message.text} fade={values.streaming} collapsible={values.readMore} />
+          <BubbleText
+            text={message.text}
+            stream={message.stream}
+            onStreamEnd={() => {
+              const show = pendingSuggestions.current.get(message.id)
+              pendingSuggestions.current.delete(message.id)
+              if (show) later(show, 300)
+            }}
+            collapsible={values.readMore}
+          />
         </BubbleContent>
         <AnimatePresence initial={false}>
           {total > 0 && (
