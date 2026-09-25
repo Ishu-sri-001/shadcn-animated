@@ -37,9 +37,14 @@ export const registry: RegistryItem[] = [
     description: "Chat message bubbles with variants, grouping and reactions.",
   },
   {
-    slug: "choice",
-    name: "Checkbox & Radio",
-    description: "One component for checkboxes and radio buttons, switched by a type prop.",
+    slug: "checkbox",
+    name: "Checkbox",
+    description: "Pick any number of options, with select all, shift-click ranges and limits.",
+  },
+  {
+    slug: "radio",
+    name: "Radio",
+    description: "Pick exactly one option; the dot glides between choices.",
   },
   {
     slug: "sidebar",
