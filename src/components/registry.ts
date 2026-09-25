@@ -50,4 +50,9 @@ export const registry: RegistryItem[] = [
     name: "Sidebar",
     description: "A collapsible side navigation with groups, badges and sub-menus.",
   },
+  {
+    slug: "dropdown-menu",
+    name: "Dropdown Menu",
+    description: "A menu of actions or options that opens from a button.",
+  },
 ]
