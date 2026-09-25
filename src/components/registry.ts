@@ -58,6 +58,6 @@ export const registry: RegistryItem[] = [
   {
     slug: "table",
     name: "Table",
-    description: "A responsive table for rows of data, with a header, body and footer.",
+    description: "Sort, filter, select and reorder rows that glide into place.",
   },
 ]

@@ -15,6 +15,9 @@ import {
 
 const MotionChevronRightIcon = motion.create(ChevronRightIcon)
 
+/** Plus ↔ minus timing, matching the dropdown trigger icon. */
+const plusTurn = { duration: 0.3, ease: "easeInOut" } as const
+
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const fillEase = [0.215, 0.61, 0.355, 1] as const
 
@@ -26,7 +29,6 @@ type MotionPreset = {
   fillOpen: Transition
   fillClose: Transition
   fillClosedScaleX: number
-  plus: Transition
   chevron: Transition
   lineDraw: Transition
   lineRetract: Transition
@@ -63,7 +65,6 @@ function buildPreset({
       fillOpen: fill,
       fillClose: fill,
       fillClosedScaleX: 1,
-      plus: fill,
       chevron: quick,
       lineDraw: { duration, ease: "easeOut" },
       lineRetract: { duration, ease: "easeOut" },
@@ -83,7 +84,6 @@ function buildPreset({
     fillOpen: spring(bounce),
     fillClose: settle,
     fillClosedScaleX: 0.94,
-    plus: icon,
     chevron: icon,
     lineDraw: spring(bounce - 0.1),
     lineRetract: settle,
@@ -353,7 +353,9 @@ function AccordionTrigger({
           <button {...triggerProps}>
             {triggerProps.children}
             {icon === "plus" ? (
-              <svg
+              // Same as the dropdown trigger: the whole icon turns 180° while the vertical
+              // line turns 90° to lie flat, into a minus. Closing plays it back.
+              <motion.svg
                 data-slot="accordion-trigger-icon"
                 aria-hidden
                 viewBox="0 0 24 24"
@@ -362,15 +364,18 @@ function AccordionTrigger({
                 strokeWidth={2}
                 strokeLinecap="round"
                 className="pointer-events-none shrink-0"
+                initial={false}
+                animate={{ rotate: state.open ? 180 : 0 }}
+                transition={plusTurn}
               >
                 <path d="M5 12h14" />
                 <motion.path
                   d="M5 12h14"
                   initial={false}
                   animate={{ rotate: state.open ? 0 : 90 }}
-                  transition={preset.plus}
+                  transition={plusTurn}
                 />
-              </svg>
+              </motion.svg>
             ) : (
               <MotionChevronRightIcon
                 data-slot="accordion-trigger-icon"

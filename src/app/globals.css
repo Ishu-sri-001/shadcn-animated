@@ -4,6 +4,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Keep the old theme underneath the new theme's left-to-right reveal. */
+html.theme-sweeping::view-transition-old(root),
+html.theme-sweeping::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html.theme-sweeping::view-transition-old(root) {
+  z-index: 1;
+}
+
+html.theme-sweeping::view-transition-new(root) {
+  z-index: 2;
+}
+
+html.theme-sweeping::view-transition {
+  pointer-events: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
