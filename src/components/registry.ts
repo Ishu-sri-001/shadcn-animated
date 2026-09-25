@@ -41,4 +41,9 @@ export const registry: RegistryItem[] = [
     name: "Checkbox & Radio",
     description: "One component for checkboxes and radio buttons, switched by a type prop.",
   },
+  {
+    slug: "sidebar",
+    name: "Sidebar",
+    description: "A collapsible side navigation with groups, badges and sub-menus.",
+  },
 ]

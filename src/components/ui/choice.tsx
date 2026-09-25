@@ -81,6 +81,14 @@ const ChoiceGroupContext = React.createContext<ChoiceGroupContextValue | null>(n
 // Position within the group, for the staggered entrance.
 const ChoiceIndexContext = React.createContext(0)
 
+// Select all / Clear all: the underline draws in from the left on hover and
+// retracts to the right (as "Show more" in Bubble).
+const toolbarButton = cn(
+  "relative font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:text-foreground",
+  "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out",
+  "hover:after:origin-left hover:after:scale-x-100 focus-visible:after:origin-left focus-visible:after:scale-x-100"
+)
+
 // Delay between choices ticking in turn (Select all / Clear all), in ms.
 const CASCADE_MS = 60
 
@@ -244,21 +252,21 @@ function ChoiceGroup({
   return (
     <MotionConfig reducedMotion="user">
       <ChoiceGroupContext.Provider value={context}>
-        <div data-slot="choice-group" data-type={type} className="flex flex-col gap-3">
+        <div data-slot="choice-group" data-type={type} className="flex flex-col gap-14">
           {type === "checkbox" && (
             <div className="flex items-center justify-between gap-3 text-sm">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => cascade(allValues.filter((v) => !latest.current.includes(v)), true)}
-                  className="font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:text-foreground focus-visible:underline"
+                  className={toolbarButton}
                 >
                   Select all
                 </button>
                 <button
                   type="button"
                   onClick={() => cascade([...latest.current].reverse(), false)}
-                  className="font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:text-foreground focus-visible:underline"
+                  className={toolbarButton}
                 >
                   Clear all
                 </button>
