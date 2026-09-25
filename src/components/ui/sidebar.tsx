@@ -44,6 +44,20 @@ const MAX_WIDTH = 400
 const COLLAPSE_BELOW = 150
 
 /** Animation options, set on SidebarProvider. */
+/** Tailwind radius names for menu items, resolved against the theme's `--radius` scale. */
+type SidebarItemRadius = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full"
+
+// Mirrors the `--radius-*` scale in globals.css, as `rounded-(--sidebar-item-radius)` needs a value.
+const ITEM_RADIUS: Record<SidebarItemRadius, string> = {
+  none: "0px",
+  sm: "calc(var(--radius) * 0.6)",
+  md: "calc(var(--radius) * 0.8)",
+  lg: "var(--radius)",
+  xl: "calc(var(--radius) * 1.4)",
+  "2xl": "calc(var(--radius) * 1.8)",
+  full: "9999px",
+}
+
 type SidebarOptions = {
   resizable: boolean
   slidingHighlight: boolean
@@ -54,7 +68,7 @@ type SidebarOptions = {
   springTooltips: boolean
   rollingBadge: boolean
   highlightTone: "primary" | "muted"
-  itemRadius: number
+  itemRadius: SidebarItemRadius
 }
 
 type SidebarContextProps = SidebarOptions & {
@@ -94,7 +108,7 @@ function SidebarProvider({
   springTooltips = false,
   rollingBadge = true,
   highlightTone = "primary",
-  itemRadius = 0,
+  itemRadius = "none",
   className,
   style,
   children,
@@ -204,7 +218,7 @@ function SidebarProvider({
               "--sidebar-width": width === null ? SIDEBAR_WIDTH : `${width}px`,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               "--sidebar-ease": SMOOTH_EASE,
-              "--sidebar-item-radius": `${itemRadius}vw`,
+              "--sidebar-item-radius": ITEM_RADIUS[itemRadius],
               ...style,
             } as React.CSSProperties
           }
@@ -1372,6 +1386,7 @@ function SidebarMenuSubButton({
 }
 
 export {
+  type SidebarItemRadius,
   Sidebar,
   SidebarContent,
   SidebarFooter,

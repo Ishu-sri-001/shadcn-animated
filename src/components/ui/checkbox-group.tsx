@@ -14,6 +14,14 @@ import {
 
 type CheckboxVariant = "default" | "card"
 type CheckboxAppearance = "filled" | "outline"
+/** Tailwind radius names for the box. */
+type CheckboxRadius = "none" | "xs" | "sm" | "md" | "lg" | "full"
+
+// The box is 24px, so these are the Tailwind / globals.css radius scale (--radius: 0.625rem) in px,
+// kept numeric so Motion can spring between them. `full` is half the box: a circle.
+const BOX_RADIUS: Record<CheckboxRadius, number> = { none: 0, xs: 2, sm: 6, md: 8, lg: 10, full: 12 }
+/** What appears inside a ticked box: a check, or a radio-style circle. */
+type CheckboxMark = "check" | "circle-filled" | "circle-outline"
 type CheckboxCardFill = "muted" | "primary"
 
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.3 } as const
@@ -28,7 +36,8 @@ type CheckboxOptions = {
   showIcon: boolean
   /** Filled or outline box. */
   appearance: CheckboxAppearance
-  radius: number
+  mark: CheckboxMark
+  radius: CheckboxRadius
 }
 
 const defaultOptions: CheckboxOptions = {
@@ -37,7 +46,8 @@ const defaultOptions: CheckboxOptions = {
   strike: false,
   showIcon: true,
   appearance: "filled",
-  radius: 0.25,
+  mark: "check",
+  radius: "sm",
 }
 
 type CheckboxGroupContextValue = {
@@ -375,8 +385,8 @@ function CheckboxItem({
   const onFill = solid && checked
   const showControl = options.showIcon
   const filled = options.appearance === "filled"
-  const roundness = Math.min(Math.max(options.radius, 0), 1)
-  const cornerRadius = roundness * 12
+  const cornerRadius = BOX_RADIUS[options.radius]
+  const roundness = cornerRadius / BOX_RADIUS.full
   const marked = checked || mixed
   const markOnAccent = filled !== onFill
 
@@ -540,15 +550,44 @@ function CheckboxItem({
               markOnAccent ? "text-(--checkbox-on-accent)" : "text-(--checkbox-accent)"
             )}
           >
-            <motion.path
-              d="M5 12.5 10 17.5 19 7"
-              initial={false}
-              animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
-              transition={{
-                pathLength: { duration: 0.25, ease: "easeOut", delay: checked ? 0.08 : 0 },
-                opacity: { duration: 0.1 },
-              }}
-            />
+            {options.mark === "check" && (
+              <motion.path
+                d="M5 12.5 10 17.5 19 7"
+                initial={false}
+                animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+                transition={{
+                  pathLength: { duration: 0.25, ease: "easeOut", delay: checked ? 0.08 : 0 },
+                  opacity: { duration: 0.1 },
+                }}
+              />
+            )}
+            {/* Radio-style marks: a dot that springs in, or a ring that draws itself round. */}
+            {options.mark === "circle-filled" && (
+              <motion.circle
+                cx={12}
+                cy={12}
+                r={5}
+                fill="currentColor"
+                stroke="none"
+                initial={false}
+                animate={{ scale: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+                transition={{ scale: checked ? spring : snappy, opacity: { duration: 0.1 } }}
+              />
+            )}
+            {options.mark === "circle-outline" && (
+              <motion.circle
+                cx={12}
+                cy={12}
+                r={5}
+                strokeWidth={2.5}
+                initial={false}
+                animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+                transition={{
+                  pathLength: { duration: 0.3, ease: "easeOut", delay: checked ? 0.08 : 0 },
+                  opacity: { duration: 0.1 },
+                }}
+              />
+            )}
             <motion.path
               d="M6 12h12"
               initial={false}
@@ -626,4 +665,12 @@ function RollingDigit({ digit }: { digit: number }) {
   )
 }
 
-export { CheckboxGroup, CheckboxItem, type CheckboxVariant, type CheckboxCardFill, type CheckboxAppearance }
+export {
+  CheckboxGroup,
+  CheckboxItem,
+  type CheckboxVariant,
+  type CheckboxCardFill,
+  type CheckboxAppearance,
+  type CheckboxMark,
+  type CheckboxRadius,
+}

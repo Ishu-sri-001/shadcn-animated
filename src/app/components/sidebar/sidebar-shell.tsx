@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { CheckIcon, ChevronRightIcon, ChevronsUpDownIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { cn } from "cn"
 import { AnimatePresence, motion } from "motion/react"
 
@@ -16,6 +16,7 @@ import { SearchIcon } from "@/components/animated-icons/search-icon"
 import { SettingsIcon } from "@/components/animated-icons/settings-icon"
 import { UtensilsIcon } from "@/components/animated-icons/utensils-icon"
 import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { MorphChevron } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Sidebar,
@@ -37,6 +38,7 @@ import {
   SidebarRail,
   SidebarTrigger,
   useGlide,
+  type SidebarItemRadius,
 } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
@@ -58,13 +60,18 @@ const controls = {
   },
   itemRadius: {
     group: "Active item",
-    type: "slider",
+    type: "select",
     label: "Roundness",
-    value: 0,
-    min: 0,
-    max: 1.2,
-    step: 0.1,
-    unit: "vw",
+    value: "none",
+    options: [
+      { label: "None", value: "none" },
+      { label: "SM", value: "sm" },
+      { label: "MD", value: "md" },
+      { label: "LG", value: "lg" },
+      { label: "XL", value: "xl" },
+      { label: "2XL", value: "2xl" },
+      { label: "Full", value: "full" },
+    ],
   },
   slidingHighlight: {
     group: "Active item",
@@ -243,13 +250,7 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
   const content = (
     <>
       <TeamIdentity team={team} iconRef={icon} />
-      <motion.span
-        className="flex"
-        animate={{ rotate: switcher && open ? 180 : 0 }}
-        transition={spring}
-      >
-        <ChevronsUpDownIcon />
-      </motion.span>
+      <MorphChevron open={switcher && open} className="size-3.5!" />
     </>
   )
 
@@ -395,7 +396,15 @@ const projects = ["Saturday roast", "Oat milk supplier", "New cups"]
 
 export function SidebarShell({ children }: { children: React.ReactNode }) {
   const panel = useControls(controls)
-  const { teamSwitcher, breadcrumb, activeIndicator, highlightTone, scaleContent, ...options } =
+  const {
+    teamSwitcher,
+    breadcrumb,
+    activeIndicator,
+    highlightTone,
+    itemRadius,
+    scaleContent,
+    ...options
+  } =
     panel.values
   const [active, setActive] = React.useState("Home")
   const [unread, setUnread] = React.useState(4)
@@ -416,6 +425,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
             className="min-h-[calc(100svh-3.5rem)]"
             activeIndicator={activeIndicator as "bar" | "dot" | "none"}
             highlightTone={highlightTone as "primary" | "muted"}
+            itemRadius={itemRadius as SidebarItemRadius}
             {...options}
           >
             <Sidebar collapsible="icon" className="z-60">
@@ -465,13 +475,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                           onClick={() => setProjectsOpen((o) => !o)}
                         >
                           <span className="flex-1">Projects</span>
-                          <motion.span
-                            className="flex"
-                            animate={{ rotate: projectsOpen ? 90 : 0 }}
-                            transition={spring}
-                          >
-                            <ChevronRightIcon />
-                          </motion.span>
+                          <MorphChevron open={projectsOpen} className="size-3.5!" />
                         </NavButton>
                         <SidebarMenuSub open={projectsOpen}>
                           {projects.map((project) => (
@@ -522,7 +526,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                   <SidebarTrigger className="m-3 border bg-background shadow-xs" />
                 </div>
               )}
-              <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-8 max-md:px-4">
+              <div className="flex w-full flex-1 flex-col px-[3vw] py-8 max-[1025px]:px-[4vw] max-md:px-4">
                 {children}
               </div>
             </SidebarInset>

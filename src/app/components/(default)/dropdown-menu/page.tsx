@@ -117,7 +117,6 @@ const controls = {
     value: "plus",
     options: [
       { label: "Plus / minus", value: "plus" },
-      { label: "Chevrons", value: "chevrons" },
       { label: "Chevron", value: "chevron" },
     ],
   },
@@ -184,7 +183,7 @@ export default function DropdownMenuPage() {
               </DropdownMenuValue>
             </span>
             <DropdownMenuTriggerIcon
-              icon={values.icon as "chevrons" | "chevron" | "plus"}
+              icon={values.icon as "chevron" | "plus"}
               className="text-muted-foreground"
             />
           </DropdownMenuTrigger>

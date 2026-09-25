@@ -18,7 +18,6 @@ import {
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const easeOutCubic = [0.33, 1, 0.68, 1] as const
-const easeInOutSine = [0.37, 0, 0.63, 1] as const
 /** A long, gentle deceleration for panel movement. */
 const glideEase = [0.32, 0.72, 0, 1] as const
 
@@ -329,22 +328,66 @@ function DropdownMenuTrigger({
   )
 }
 
-const chevronPaths = {
-  closed: ["M7 9 L12 4 L17 9", "M7 15 L12 20 L17 15"],
-  open: ["M7 4 L12 9 L17 4", "M7 20 L12 15 L17 20"],
+
+function MorphChevron({
+  open,
+  duration = 0.35,
+  className,
+  ...props
+}: Omit<React.ComponentProps<"svg">, "children"> & { open: boolean; duration?: number }) {
+  const reduceMotion = useReducedMotion()
+  const transition = reduceMotion ? "none" : `transform ${duration}s ease-in-out`
+  const half = (d: string, angle: number) => (
+    <path
+      d={d}
+      style={{
+        transformBox: "view-box",
+        transformOrigin: "50px 50px",
+        transform: `rotate(${angle}deg)`,
+        transition,
+      }}
+    />
+  )
+
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 100 100"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={10}
+      strokeLinecap="square"
+      className={cn("pointer-events-none size-4 shrink-0", className)}
+      style={{ transform: open ? "translateY(-25%)" : "translateY(0%)", transition }}
+      {...props}
+    >
+      {half("M10 50H50", open ? -42 : 42)}
+      {half("M90 50H50", open ? 42 : -42)}
+    </svg>
+  )
 }
 
 function DropdownMenuTriggerIcon({
   icon = "plus",
   className,
 }: {
-  icon?: "chevrons" | "chevron" | "plus"
+  icon?: "chevron" | "plus"
   className?: string
 }) {
   const { open, preset } = useDropdownMenu()
-  const paths = open ? chevronPaths.open : chevronPaths.closed
-  // A full turn needs more time than the panel to read smoothly, with a soft sine-like in-out.
-  const spin = { duration: Math.max(preset.iconDuration * 1.6, 0.5), ease: easeInOutSine }
+  // Plus ↔ minus: a quick turn, eased in and out.
+  const spin = { duration: 0.3, ease: "easeInOut" } as const
+
+  if (icon === "chevron") {
+    return (
+      <MorphChevron
+        data-slot="dropdown-menu-trigger-icon"
+        open={open}
+        duration={preset.iconDuration}
+        className={cn("size-4", className)}
+      />
+    )
+  }
 
   return (
     <motion.svg
@@ -358,32 +401,18 @@ function DropdownMenuTriggerIcon({
       strokeLinejoin="round"
       className={cn("pointer-events-none size-5 shrink-0", className)}
       initial={false}
-      animate={{ rotate: icon === "chevron" && open ? 180 : 0 }}
-      transition={preset.icon}
+      animate={{ rotate: open ? 180 : 0 }}
+      transition={spin}
     >
-      {icon === "chevrons" &&
-        paths.map((d, i) => (
-          <motion.path key={i} initial={false} animate={{ d }} transition={preset.icon} />
-        ))}
-      {icon === "chevron" && <path d="M6 9 L12 15 L18 9" />}
-      {icon === "plus" && (
-        <>
-          {/* Together into a minus: the horizontal line spins a full turn while the vertical
-              one turns a quarter to lie flat. Closing plays it back. */}
-          <motion.path
-            d="M5 12h14"
-            initial={false}
-            animate={{ rotate: open ? 360 : 0 }}
-            transition={spin}
-          />
-          <motion.path
-            d="M5 12h14"
-            initial={false}
-            animate={{ rotate: open ? 180 : 90 }}
-            transition={spin}
-          />
-        </>
-      )}
+      {/* Into a minus: the whole icon turns 180° while the vertical line turns 90° to lie
+          flat. Closing plays it back. */}
+      <path d="M5 12h14" />
+      <motion.path
+        d="M5 12h14"
+        initial={false}
+        animate={{ rotate: open ? 0 : 90 }}
+        transition={spin}
+      />
     </motion.svg>
   )
 }
@@ -1107,6 +1136,7 @@ export {
   DropdownMenuPortal,
   DropdownMenuTrigger,
   DropdownMenuTriggerIcon,
+  MorphChevron,
   DropdownMenuValue,
   DropdownMenuContent,
   DropdownMenuGroup,

@@ -7,6 +7,8 @@ import {
   CheckboxGroup,
   CheckboxItem,
   type CheckboxAppearance,
+  type CheckboxMark,
+  type CheckboxRadius,
   type CheckboxCardFill,
   type CheckboxVariant,
 } from "@/components/ui/checkbox-group"
@@ -46,6 +48,17 @@ const controls = {
   fill: { group: "Ticking", type: "checkbox", label: "Fill from centre", value: true },
   bounce: { group: "Ticking", type: "checkbox", label: "Springy tick", value: true },
 
+  mark: {
+    group: "Box",
+    type: "select",
+    label: "Mark",
+    value: "check",
+    options: [
+      { label: "Check", value: "check" },
+      { label: "Filled circle", value: "circle-filled" },
+      { label: "Outline circle", value: "circle-outline" },
+    ],
+  },
   appearance: {
     group: "Box",
     type: "select",
@@ -56,7 +69,20 @@ const controls = {
       { label: "Outline", value: "outline" },
     ],
   },
-  radius: { group: "Box", type: "slider", label: "Corner radius", value: 25, min: 0, max: 100, step: 5, unit: "%" },
+  radius: {
+    group: "Box",
+    type: "select",
+    label: "Corner radius",
+    value: "sm",
+    options: [
+      { label: "None", value: "none" },
+      { label: "XS", value: "xs" },
+      { label: "SM", value: "sm" },
+      { label: "MD", value: "md" },
+      { label: "LG", value: "lg" },
+      { label: "Full", value: "full" },
+    ],
+  },
 
   strike: { group: "Label", type: "checkbox", label: "Strike-through", value: false },
 
@@ -97,7 +123,8 @@ const controls = {
 export function CheckboxDemo() {
   const panel = useControls(controls)
   const { values } = panel
-  const { variant, cardFill, appearance, radius, colorful, min, max, ...groupOptions } = values
+  const { variant, cardFill, mark, appearance, radius, colorful, min, max, ...groupOptions } =
+    values
   const cards = variant === "card"
   const [picks, setPicks] = React.useState(["Olives", "Basil"])
   const [terms, setTerms] = React.useState(false)
@@ -115,8 +142,9 @@ export function CheckboxDemo() {
             max={max === "any" ? undefined : Number(max)}
             variant={variant as CheckboxVariant}
             cardFill={cardFill as CheckboxCardFill}
+            mark={mark as CheckboxMark}
             appearance={appearance as CheckboxAppearance}
-            radius={radius / 100}
+            radius={radius as CheckboxRadius}
             value={picks}
             onValueChange={setPicks}
             aria-label="Toppings"
