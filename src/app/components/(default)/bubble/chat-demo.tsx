@@ -43,24 +43,17 @@ type Message = {
   from: "me" | "them"
   text: string
   time: string
-  /** When it was sent (ms), for splitting a sender's run after a minute's gap. */
   at: number
-  /** Style of your own messages, chosen when sending. */
   variant?: Variant
   status?: BubbleStatusValue
   reactions: Record<string, number>
-  /** Emojis you've reacted with; each counts once. */
   mine?: string[]
   typing?: boolean
-  /** Text of the message this one replies to. */
   replyTo?: string
   /** Seeded messages don't animate in. */
   seed?: boolean
-  /** Input rect the text flies from. */
   flyFrom?: { x: number; y: number; width: number; height: number }
-  /** Shared with the suggestion it was sent from. */
   layoutId?: string
-  /** Text streams in word by word, growing the bubble. */
   stream?: boolean
 }
 
@@ -126,11 +119,8 @@ function now() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
 }
 
-// A sender's run starts a new group after this long, leaving a small gap (as in WhatsApp).
 const GROUP_GAP_MS = 60_000
 
-// Consecutive messages from the same sender, less than a minute apart, form a
-// group, keyed by its first message.
 function groupMessages(messages: Message[]) {
   const groups: { id: string; from: Message["from"]; messages: Message[] }[] = []
   for (const message of messages) {
@@ -155,14 +145,12 @@ export function ChatDemo() {
   const [replyTo, setReplyTo] = React.useState<Message | null>(null)
   const [suggestions, setSuggestions] = React.useState<{ id: string; texts: string[] } | null>(null)
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  // Off: sent messages get no reply, so you can send several and see the layout.
   const [autoReply, setAutoReply] = React.useState(true)
   const autoReplyRef = React.useRef(autoReply)
   React.useEffect(() => {
     autoReplyRef.current = autoReply
   })
   const replyIndex = React.useRef(0)
-  // Suggestions waiting for a streamed reply to finish, by message id.
   const pendingSuggestions = React.useRef(new Map<string, () => void>())
   const timers = React.useRef(new Set<number>())
 
@@ -183,7 +171,6 @@ export function ChatDemo() {
     setMessages((current) => current.map((m) => (m.id === id ? { ...m, ...patch } : m)))
   }
 
-  // Takes back one of your reactions (double-clicking a message you've hearted).
   function unreact(id: string, emoji: string) {
     setMessages((current) =>
       current.map((m) => {
@@ -198,7 +185,6 @@ export function ChatDemo() {
     )
   }
 
-  // You can react with each emoji once per message.
   function react(id: string, emoji: string) {
     setMessages((current) =>
       current.map((m) => {
@@ -219,7 +205,6 @@ export function ChatDemo() {
     replyIndex.current += 1
     const stream = values.streaming
     const showSuggestions = () => setSuggestions({ id: crypto.randomUUID(), texts: nextSuggestions })
-    // A streamed reply shows its suggestions once it finishes (see onStreamEnd).
     if (stream) pendingSuggestions.current.set(id, showSuggestions)
 
     setMessages((current) => [
@@ -234,7 +219,6 @@ export function ChatDemo() {
     else if (!stream) later(showSuggestions, 300)
   }
 
-  // Walks a sent message through sending → sent → delivered → read, or fails it.
   function deliver(id: string, canFail: boolean) {
     later(() => {
       if (canFail && values.failures && Math.random() < FAIL_CHANCE) {
@@ -277,7 +261,6 @@ export function ChatDemo() {
     deliver(id, true)
   }
 
-  // One at a time, as if typed and sent one after another.
   function simulateIncoming() {
     incoming.forEach((text, i) =>
       later(
@@ -342,7 +325,6 @@ export function ChatDemo() {
           {total > 0 && (
             <BubbleReactions
               key="reactions"
-              // Bottom-right of your messages, bottom-left of theirs.
               align={mine ? "end" : "start"}
               pop={values.pop}
               rolling={values.rolling}
@@ -385,8 +367,6 @@ export function ChatDemo() {
           </Button>
         </div>
       </div>
-      {/* Fixed height: a growing message box shrinks the thread instead of pushing the page down. */}
-      {/* Mobile: nearly full width (out past the page's side padding), with a 4vw gutter each side. */}
       <div className="flex h-[75vh] flex-col overflow-hidden rounded-lg border max-md:mx-[calc(50%-46vw)]">
         <BubbleThread className="min-h-0 flex-1 px-6 py-6 max-md:px-4">
           {groupMessages(messages).map((group) => (
@@ -394,8 +374,6 @@ export function ChatDemo() {
               {group.messages.map(renderMessage)}
             </BubbleGroup>
           ))}
-          {/* popLayout: leaving suggestions free their space at once, so the sent
-              message takes it in one move instead of the thread jumping when they're removed. */}
           <AnimatePresence mode="popLayout">
             {suggestions && (
               <BubbleSuggestions key={suggestions.id} stagger={values.suggestions}>
@@ -444,7 +422,6 @@ export function ChatDemo() {
           )}
          
           <div className="flex items-end gap-2 max-md:flex-wrap">
-            {/* Enter sends; Shift+Enter starts a new line. Grows with the text. */}
             <textarea
               ref={inputRef}
               value={draft}

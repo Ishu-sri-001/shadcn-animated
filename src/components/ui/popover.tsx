@@ -25,7 +25,6 @@ function PopoverContent({
     PopoverPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   > & {
-    /** Classes for the positioning layer, e.g. to change its z-index. */
     positionerClassName?: string
   }) {
   return (

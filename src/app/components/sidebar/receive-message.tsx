@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 
 import { useInbox } from "./sidebar-shell"
 
-/** Adds an unread message, so the Inbox badge in the sidebar rolls to its new count. */
 export function ReceiveMessage() {
   const { receive } = useInbox()
   return (

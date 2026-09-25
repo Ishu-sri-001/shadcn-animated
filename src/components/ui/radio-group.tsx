@@ -4,31 +4,18 @@ import * as React from "react"
 import { cn } from "cn"
 import { animate, AnimatePresence, motion, MotionConfig, Reorder, useReducedMotion } from "motion/react"
 
-/** "default": a radio beside its label. "card": each option is a small card that highlights when chosen. */
 type RadioVariant = "default" | "card"
-/**
- * "outline": the ring stays empty and the dot is coloured.
- * "filled": the ring fills and the dot sits on it.
- * "full": the ring fills completely, as one solid circle, with no separate dot.
- */
 type RadioAppearance = "outline" | "filled" | "full"
-/** Card highlight: "muted" is a soft grey; "primary" is solid, with the text switching to sit on it. */
 type RadioCardFill = "muted" | "primary"
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.3 } as const
 const glide = { type: "spring", visualDuration: 0.4, bounce: 0.15 } as const
 const snappy = { type: "spring", visualDuration: 0.25, bounce: 0 } as const
-// Overshooting ease for CSS transitions (focus ring).
 const springyEase = "ease-[cubic-bezier(0.34,1.56,0.64,1)]"
 
-/** Animation options set on RadioGroup and shared by its radios. */
 type RadioOptions = {
-  /** The dot glides from the old choice to the new one. Off, it shrinks away as the new one grows. */
   dotSlide: boolean
-  /** Cards only: the highlight glides from the old card to the new one. Off, it shrinks away as the new one grows. */
   cardSlide: boolean
-  /** The radio squashes and springs back with an overshoot when chosen. */
   bounce: boolean
-  /** Show the radio. Off, the label (or card) alone shows what's chosen. */
   showIcon: boolean
   /** Outline or filled radio. */
   appearance: RadioAppearance
@@ -43,7 +30,6 @@ const defaultOptions: RadioOptions = {
 }
 
 type RadioGroupContextValue = RadioOptions & {
-  /** Scopes the shared-layout ids, so two groups' dots don't fly between each other. */
   id: string
   variant: RadioVariant
   cardFill: RadioCardFill
@@ -53,7 +39,6 @@ type RadioGroupContextValue = RadioOptions & {
 }
 
 const RadioGroupContext = React.createContext<RadioGroupContextValue | null>(null)
-// Position within the group, for the staggered entrance.
 const RadioIndexContext = React.createContext(0)
 
 type RadioGroupProps = Partial<RadioOptions> & {
@@ -63,20 +48,12 @@ type RadioGroupProps = Partial<RadioOptions> & {
   value?: string
   defaultValue?: string
   onValueChange?: (value: string) => void
-  /** "card" turns each option into a small card that highlights when chosen. */
   variant?: RadioVariant
-  /** Cards only: colour the chosen card highlights with. */
   cardFill?: RadioCardFill
-  /** Drag options to change their order. */
   reorder?: boolean
-  /** Called with the options' values in their new order after a drag. */
   onReorder?: (order: string[]) => void
 }
 
-/**
- * A list of radios: exactly one option can be chosen. Arrow keys move the
- * choice, Home and End jump to the first and last option.
- */
 function RadioGroup({
   value,
   defaultValue,
@@ -96,7 +73,6 @@ function RadioGroup({
   const selected = value !== undefined ? value : internal
 
   const valueOf = (child: React.ReactElement) => (child.props as { value?: string }).value
-  // Order after dragging; options added later go at the end.
   const [order, setOrder] = React.useState<string[]>([])
   const childElements = React.Children.toArray(children).filter(React.isValidElement)
   const childValues = childElements.flatMap((child) => valueOf(child) ?? [])
@@ -114,7 +90,6 @@ function RadioGroup({
     onValueChange?.(next)
   }
 
-  // Arrow keys move between radios and choose them, as in a native radio group.
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (!groupRef.current) return
     const radios = Array.from(
@@ -147,10 +122,8 @@ function RadioGroup({
   return (
     <MotionConfig reducedMotion="user">
       <RadioGroupContext.Provider value={context}>
-        {/* Always a Reorder.Group, so turning `reorder` on or off doesn't remount the options. */}
         <Reorder.Group
           as="div"
-          // "xy" reorders across wrapped rows and grid cells too.
           axis="xy"
           values={currentOrder}
           onReorder={(next: string[]) => {
@@ -162,7 +135,6 @@ function RadioGroup({
           aria-label={ariaLabel}
           data-slot="radio-group"
           onKeyDown={onKeyDown}
-          // Isolated, so the card highlight can sit behind the cards' text while it slides.
           className={cn("isolate grid w-full gap-3", className)}
         >
           {items.map((child, index) => (
@@ -178,12 +150,10 @@ function RadioGroup({
 
 type RadioGroupItemProps = {
   className?: string
-  /** Identifies this option within its group. */
   value: string
   label?: React.ReactNode
   description?: React.ReactNode
   disabled?: boolean
-  /** Colour this option shows when chosen (any CSS colour). Defaults to the primary colour. */
   accent?: string
 }
 
@@ -205,7 +175,6 @@ function RadioItem({
   const index = React.useContext(RadioIndexContext)
   const reduceMotion = useReducedMotion()
   const visual = React.useRef<HTMLSpanElement>(null)
-  // Set when a drag starts, so the click that ends it is ignored.
   const dragged = React.useRef(false)
   const [entered, setEntered] = React.useState(false)
 
@@ -213,7 +182,6 @@ function RadioItem({
   const card = group.variant === "card"
   const draggable = group.reorder && !disabled
 
-  // Counts each time this option becomes chosen, to replay the bounce.
   const [wasChecked, setWasChecked] = React.useState(checked)
   const [pulse, setPulse] = React.useState(0)
   if (checked !== wasChecked) {
@@ -233,11 +201,9 @@ function RadioItem({
   const hasText = label !== undefined || description !== undefined
   const solid = card && group.cardFill === "primary"
   const onFill = solid && checked
-  // The radio can be hidden; the (visually hidden) button still carries focus and state.
   const showControl = group.showIcon
   const filled = group.appearance === "filled"
   const full = group.appearance === "full"
-  // The dot contrasts with whatever it sits on: the radio's fill, or the card's.
   const dotOnAccent = filled !== onFill
   const dotClass = cn(
     "pointer-events-none absolute z-10 size-3 rounded-full",
@@ -257,7 +223,6 @@ function RadioItem({
     className: cn(
       "group/radio relative flex cursor-pointer gap-3 text-lg select-none [--radio-accent:var(--primary)] [--radio-on-accent:var(--primary-foreground)] data-disabled:cursor-not-allowed",
       description !== undefined ? "items-start" : "items-center",
-      // No radio: the focus ring goes around the whole option instead.
       !showControl &&
         "rounded-md has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:ring-offset-4 has-[:focus-visible]:ring-offset-background",
       card &&
@@ -277,7 +242,6 @@ function RadioItem({
     style: accent
       ? ({ "--radio-accent": accent, "--radio-on-accent": "white" } as React.CSSProperties)
       : undefined,
-    // Options appear one after another when the list first shows; opacity also dims disabled ones.
     initial: { opacity: 0, y: 6 },
     animate: { opacity: disabled ? 0.5 : 1, y: 0 },
     onAnimationComplete: () => setEntered(true),
@@ -288,13 +252,11 @@ function RadioItem({
     <Reorder.Item
       as="label"
       value={value}
-      // Only draggable with `reorder`; otherwise a plain (layout-animated) item.
       drag={draggable}
       whileDrag={{ scale: 1.03, zIndex: 10 }}
       onDragStart={() => (dragged.current = true)}
       onPointerDown={() => (dragged.current = false)}
       onClickCapture={(event) => {
-        // The click that ends a drag shouldn't also choose the option.
         if (!dragged.current) return
         event.preventDefault()
         event.stopPropagation()
@@ -303,7 +265,6 @@ function RadioItem({
     >
       {card &&
         (group.cardSlide ? (
-          // One highlight for the whole group, gliding from card to card.
           checked && (
             <motion.span
               layoutId={`${group.id}-card`}
@@ -324,9 +285,7 @@ function RadioItem({
         ))}
 
       <motion.span
-        // Hidden radio: only the button remains, visually hidden but focusable.
         className={showControl ? "relative grid size-6 shrink-0 place-items-center" : "sr-only"}
-        // Press squish, part of the springy effect: with it off, pressing doesn't move the control.
         whileTap={disabled || !group.bounce ? undefined : { scale: 0.85 }}
       >
         <span
@@ -366,7 +325,6 @@ function RadioItem({
         {showControl &&
           !full &&
           (group.dotSlide ? (
-            // One dot for the whole group, travelling to whichever radio is chosen.
             checked && (
               <motion.span layoutId={`${group.id}-dot`} aria-hidden className={dotClass} transition={glide} />
             )
@@ -386,8 +344,6 @@ function RadioItem({
             </AnimatePresence>
           ))}
 
-        {/* The real control, transparent over the visuals. Only the chosen radio
-            (or every radio, when none is chosen) is a Tab stop. */}
         <button
           type="button"
           data-slot="radio-control"
@@ -404,7 +360,6 @@ function RadioItem({
         <span className="flex flex-col gap-1">
           {label !== undefined && (
             <span className="inline-grid w-fit leading-none">
-              {/* Reserves the bold width, so choosing doesn't nudge the next option. */}
               <span aria-hidden className="invisible col-start-1 row-start-1 font-medium">
                 {label}
               </span>

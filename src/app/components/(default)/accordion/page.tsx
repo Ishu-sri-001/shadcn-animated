@@ -153,7 +153,6 @@ export default function AccordionPage() {
               key={faq.question}
               value={`item-${i + 1}`}
               line={values.line}
-              // Open item fills with the muted background.
               fill={values.fill ? "bg-muted" : undefined}
               rounded={values.rounded}
             >

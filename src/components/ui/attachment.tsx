@@ -31,14 +31,12 @@ import { Button } from "@/components/ui/button"
 
 if (typeof window !== "undefined") gsap.registerPlugin(useGSAP, Flip, MorphSVGPlugin)
 
-// Motion props minus the ones Reorder types more narrowly.
 type MotionDivProps = Omit<HTMLMotionProps<"div">, "layout" | "values">
 
 type AttachmentState = "idle" | "uploading" | "processing" | "error" | "done"
 
 const spring = { type: "spring", visualDuration: 0.4, bounce: 0.25 } as const
 const settle = { type: "spring", visualDuration: 0.3, bounce: 0 } as const
-// Overshooting ease for CSS transitions (hover reveal, zoom).
 const springyEase = "ease-[cubic-bezier(0.34,1.56,0.64,1)]"
 
 function assignRef<T>(ref: React.Ref<T> | undefined, node: T | null) {
@@ -46,8 +44,6 @@ function assignRef<T>(ref: React.Ref<T> | undefined, node: T | null) {
   else if (ref) (ref as React.RefObject<T | null>).current = node
 }
 
-// Rounds an SVG outline to its parent's corners (the parent's radius can be
-// any Tailwind class, so it's read from the computed style).
 function matchParentRadius(rect: SVGRectElement | null) {
   const parent = rect?.ownerSVGElement?.parentElement
   if (!rect || !parent) return
@@ -57,7 +53,6 @@ function matchParentRadius(rect: SVGRectElement | null) {
 }
 
 const subscribeNoop = () => () => {}
-/** False on the server and during hydration, true after. */
 function useIsClient() {
   return React.useSyncExternalStore(
     subscribeNoop,
@@ -66,11 +61,8 @@ function useIsClient() {
   )
 }
 
-// Set by an AttachmentGroup given `values` and `onReorder`: attachments with a
-// `value` render as Reorder items, and can be dragged while `draggable`.
 const AttachmentReorderContext = React.createContext<{ draggable: boolean } | null>(null)
 
-// Set by AttachmentGroup when `tilt` is on: the skew (degrees) attachments lean by while scrolling.
 const AttachmentTiltContext = React.createContext<MotionValue<number> | null>(null)
 
 const attachmentVariants = cva(
@@ -114,25 +106,16 @@ function Attachment({
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentVariants> & {
     state?: AttachmentState
-    /** Springs in (scale + fade) when mounted. Inside AnimatePresence with `initial={false}`, only items added later play it. */
     enter?: boolean
-    /** Wait before the enter animation, in seconds; stagger a batch by passing index × gap. */
     enterDelay?: number
-    /** Screen point (e.g. where a file was dropped) the attachment flies in from when mounted. */
     enterFrom?: { x: number; y: number }
-    /** Shrinks and fades out when removed (needs AnimatePresence around the list). */
     leave?: boolean
-    /** A line runs around the border while uploading or processing. */
     borderTrace?: boolean
-    /** Shakes sideways when the state changes to "error". */
     shake?: boolean
-    /** The card's background fills with muted colour as `progress` rises while uploading. */
     fill?: boolean
-    /** Direction the upload fill grows in. */
     fillDirection?: "left-to-right" | "bottom-to-top"
     /** 0–100. Drives the upload fill. */
     progress?: number
-    /** Identifies the attachment inside an AttachmentGroup with `reorder`. */
     value?: string | number
   }) {
   const reduceMotion = useReducedMotion()
@@ -152,9 +135,6 @@ function Attachment({
     [ref]
   )
 
-  // Fly in: a copy of the attachment travels from `enterFrom` to where the
-  // attachment sits, then the real one takes its place. A fixed-position copy
-  // isn't clipped by a scrolling group.
   const flyFrom = React.useRef(enterFrom)
   React.useLayoutEffect(() => {
     const el = node.current
@@ -173,7 +153,6 @@ function Attachment({
       zIndex: "50",
       pointerEvents: "none",
       transform: "none",
-      // Hidden until its (possibly staggered) flight starts.
       opacity: "0",
     })
     document.body.append(ghost)
@@ -197,7 +176,6 @@ function Attachment({
       flight.stop()
       land()
     }
-    // Plays once, on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -216,7 +194,6 @@ function Attachment({
     ref: setRef,
     "data-slot": "attachment",
     "data-state": state,
-    // Lets the image sit on a solid backing, so the fill stays behind it.
     "data-filling": filling || undefined,
     "data-size": size,
     "data-orientation": orientation,
@@ -225,7 +202,6 @@ function Attachment({
       draggable && "cursor-grab select-none",
       className
     ),
-    // Skews from the bottom edge, so only the top leans while scrolling.
     style: { ...style, x, ...(skewX && { skewX, originY: 1 }) },
     initial: enter && !flying ? { opacity: 0, scale: 0.8 } : false,
     animate: { opacity: 1, scale: 1, transition: { ...spring, delay: enterDelay } },
@@ -239,8 +215,6 @@ function Attachment({
     <>
       <AnimatePresence>
         {filling && (
-          // Behind the content (the card is isolated), fading out once the upload ends.
-          // The wrapper clips to the card's corners; the fill itself is square.
           <motion.span
             key="fill"
             aria-hidden
@@ -261,7 +235,6 @@ function Attachment({
       </AnimatePresence>
       <AnimatePresence>
         {borderTrace && (state === "uploading" || state === "processing") && (
-          // One key for both states, so the line keeps running from uploading into processing.
           <AttachmentBorderTrace key="trace" />
         )}
       </AnimatePresence>
@@ -275,7 +248,6 @@ function Attachment({
         <Reorder.Item
           as="div"
           value={value}
-          // Drag starts only with a mouse, so touch still scrolls the group.
           dragListener={false}
           dragControls={dragControls}
           whileDrag={{ scale: 1.04, zIndex: 10, cursor: "grabbing" }}
@@ -290,8 +262,6 @@ function Attachment({
         </Reorder.Item>
       ) : (
         <motion.div
-          // Eases size changes (e.g. longer description text) and sliding into
-          // a removed neighbour's place.
           layout
           onPointerDown={onPointerDown}
           {...motionProps}
@@ -303,7 +273,6 @@ function Attachment({
   )
 }
 
-/** A dash that runs around the attachment's border. */
 function AttachmentBorderTrace() {
   const rect = React.useRef<SVGRectElement>(null)
 
@@ -365,11 +334,8 @@ function AttachmentMedia({
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentMediaVariants> & {
-    /** Image variant: zooms in slightly while the attachment is hovered. */
     zoom?: boolean
-    /** Image variant: blurred and faded while uploading, sharpening as it finishes. */
     develop?: boolean
-    /** Image variant: click to grow the image into a full-screen preview. */
     expandable?: boolean
   }) {
   const isImage = variant === "image"
@@ -458,29 +424,21 @@ function AttachmentMedia({
   )
 }
 
-// Single-path shapes the status icon morphs between (Lucide geometry).
 const SPINNER_PATH = "M21 12a9 9 0 1 1-6.219-8.56"
 const CHECK_PATH = "M20 6 9 17l-5-5"
 const CROSS_PATH = "M18 6 6 18M6 6l12 12"
 
-/**
- * Status icon for AttachmentMedia. While uploading it's a spinner, which
- * reshapes into a check on success (then gives way to `icon`) or a
- * cross on error, and back into a spinner on retry.
- */
 function AttachmentStatusIcon({
   state,
   icon: Icon,
 }: {
   state: AttachmentState
-  /** Shown once done, e.g. the file type's icon. */
   icon: React.ElementType
 }) {
   const reduceMotion = useReducedMotion()
   const loading = state === "uploading" || state === "processing"
   const svg = React.useRef<SVGSVGElement>(null)
   const path = React.useRef<SVGPathElement>(null)
-  // Started done: show the icon straight away, no morph.
   const [showIcon, setShowIcon] = React.useState(state === "done" || state === "idle")
   const [iconEnters] = React.useState(!showIcon)
   const [initialPath] = React.useState(state === "error" ? CROSS_PATH : SPINNER_PATH)
@@ -504,7 +462,6 @@ function AttachmentStatusIcon({
           transformOrigin: "50% 50%",
         })
       } else {
-        // Finish the current turn so the check lands upright.
         const turned = Number(gsap.getProperty(svg.current, "rotation"))
         gsap.to(svg.current, {
           rotation: Math.ceil(turned / 360) * 360,
@@ -568,7 +525,6 @@ function AttachmentTitle({
   shimmer = true,
   ...props
 }: React.ComponentProps<"span"> & {
-  /** Light sweeps across the title while uploading or processing. */
   shimmer?: boolean
 }) {
   return (
@@ -602,7 +558,6 @@ function AttachmentDescription({
   )
 }
 
-/** A percentage, e.g. inside AttachmentDescription. With `rolling`, each digit rolls to its new value. */
 function AttachmentProgress({
   className,
   value,
@@ -628,7 +583,6 @@ function AttachmentProgress({
     <span data-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
       <span className="sr-only">{text}%</span>
       {digits.map((digit, i) => (
-        // Keyed from the right, so the ones digit keeps rolling when a tens digit appears.
         <RollingDigit key={digits.length - i} digit={Number(digit)} />
       ))}
       <span aria-hidden>%</span>
@@ -636,13 +590,10 @@ function AttachmentProgress({
   )
 }
 
-// Quick enough to settle between frequent progress updates.
 const digitRoll = { type: "spring", visualDuration: 0.15, bounce: 0 } as const
 
 function RollingDigit({ digit }: { digit: number }) {
   return (
-    // The hidden digit keeps the text baseline and width; clip-path (unlike
-    // overflow) clips the rolling column without moving the baseline.
     <span aria-hidden className="relative inline-block [clip-path:inset(0)]">
       <span className="invisible">{digit}</span>
       <motion.span
@@ -684,10 +635,6 @@ function AttachmentAction({
   children,
   ...props
 }: React.ComponentProps<typeof Button> & {
-  /**
-   * With a mouse, the button stays hidden until the attachment is hovered or
-   * focused, then scales and rotates in; hovering it turns the icon a quarter.
-   */
   reveal?: boolean
 }) {
   const [turns, setTurns] = React.useState(0)
@@ -699,7 +646,6 @@ function AttachmentAction({
       size={size}
       onClick={(event) => {
         onClick?.(event)
-        // The icon spins a full turn on each click (e.g. retry).
         setTurns((t) => t + 1)
       }}
       className={cn(
@@ -761,22 +707,14 @@ function AttachmentGroup({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
-  /** Drag attachments (by `value`) to reorder them; needs `values` and `onReorder`. */
   reorder?: boolean
   values?: (string | number)[]
   onReorder?: (values: (string | number)[]) => void
-  /** Attachments skew with the scroll speed and straighten when scrolling stops. */
   tilt?: boolean
-  /**
-   * Wraps attachments onto more rows so all are visible, instead of one
-   * scrolling row. Switching animates each attachment to its new place.
-   */
   wrap?: boolean
 }) {
   const scroller = React.useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
-  // React sets `data-wrap` once; after that the effect below switches it, so
-  // it can record positions first.
   const [initialWrap] = React.useState(wrap)
 
   React.useEffect(() => {
@@ -787,17 +725,12 @@ function AttachmentGroup({
     }
     if (reduceMotion) return apply()
     const flip: { tween?: gsap.core.Timeline } = {}
-    // A frame later, so Motion (which measures layout right after React
-    // renders) doesn't also animate the change.
     const frame = requestAnimationFrame(() => {
       const items = Array.from(
         group.querySelectorAll<HTMLElement>(":scope > [data-slot=attachment]")
       )
       const state = Flip.getState([group, ...items])
       apply()
-      // Clip to the group while moving: attachments that were scrolled out of
-      // view stay hidden until they slide inside, instead of flying in from
-      // beyond the edge.
       group.style.overflow = "clip"
       flip.tween = Flip.from(state, {
         duration: 0.6,
@@ -815,9 +748,6 @@ function AttachmentGroup({
       flip.tween?.progress(1)
     }
   }, [wrap, reduceMotion])
-  // Marks whether the row overflows. The edge fade is scroll-driven, and Chrome
-  // leaves it stuck when the row stops being scrollable (e.g. after removing
-  // everything), so it's switched off while nothing overflows.
   React.useEffect(() => {
     const group = scroller.current
     if (!group) return
@@ -842,11 +772,8 @@ function AttachmentGroup({
 
   const { scrollX } = useScroll({ container: scroller })
   const speed = useSpring(useVelocity(scrollX), { stiffness: 300, damping: 40 })
-  // Full lean from about 1500px/s of scrolling, opposite the scroll direction.
   const lean = useTransform(speed, [-1500, 1500], [12, -12], { clamp: true })
 
-  // Stays a Reorder.Group while `reorder` or `wrap` change, so attachments
-  // aren't remounted; `draggable` just pauses dragging.
   const reorderable = values !== undefined && onReorder !== undefined
   const reorderContext = React.useMemo(() => ({ draggable: reorder }), [reorder])
   const groupProps = {
@@ -869,7 +796,6 @@ function AttachmentGroup({
           {reorderable ? (
             <Reorder.Group
               as="div"
-              // "xy" reorders across wrapped rows too.
               axis={wrap ? "xy" : "x"}
               values={values}
               onReorder={onReorder}
@@ -886,10 +812,6 @@ function AttachmentGroup({
   )
 }
 
-/**
- * Area that accepts dropped files. `onFiles` gets the files and the drop point
- * (pass it to Attachment's `enterFrom` to fly them in).
- */
 function AttachmentDropzone({
   className,
   onFiles,
@@ -898,7 +820,6 @@ function AttachmentDropzone({
   ...props
 }: React.ComponentProps<"div"> & {
   onFiles?: (files: File[], point: { x: number; y: number }) => void
-  /** A dashed border that runs around the area while files are dragged over it. */
   marching?: boolean
 }) {
   const [dragging, setDragging] = React.useState(false)

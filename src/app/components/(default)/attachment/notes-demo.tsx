@@ -40,7 +40,6 @@ export function NotesDemo() {
   ])
   const [text, setText] = React.useState("")
   const [size, setSize] = React.useState<Size>("default")
-  // Only goes up, so keys stay unique after removals.
   const [nextId, setNextId] = React.useState(2)
 
   function addNote(event: React.FormEvent) {
@@ -91,7 +90,6 @@ export function NotesDemo() {
         </Button>
       </form>
       <div className="flex min-h-24 flex-col justify-center rounded-lg border p-6 max-md:p-4">
-        {/* Wrapped, so notes reorder across rows too. */}
         <AttachmentGroup
           wrap
           className="items-center"

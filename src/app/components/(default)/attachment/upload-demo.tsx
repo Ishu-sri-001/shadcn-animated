@@ -40,25 +40,18 @@ type Item = {
   progress: number
   /** Object URL for uploaded images. */
   preview?: string
-  /** Gradient classes standing in for the seeded images. */
   gradient?: string
-  /** Error text. Files over the limit can't be retried. */
   error?: string
   retryable?: boolean
-  /** Simulated failure: the upload stops at this percentage. */
   failAt?: number
-  /** Where the file was dropped, for the fly-in. */
   from?: { x: number; y: number }
-  /** Stagger within the batch it was added in, in seconds. */
   delay: number
 }
 
 const MAX_SIZE = 10 * 1024 * 1024
 const TICK = 200
-// Ticks spent in "processing" after the upload reaches 100%.
 const PROCESSING_TICKS = 5
 const FAIL_CHANCE = 0.3
-// Delay between attachments leaving in turn on "Delete all", in ms.
 const DELETE_STAGGER_MS = 60
 
 const seed: Item[] = [
@@ -106,7 +99,6 @@ const controls = {
   failures: { group: "Demo", type: "checkbox", label: "Simulate failures", value: true },
 } satisfies ControlSchema
 
-/** Truncates a long name to 20 characters, with "…" marking the cut, as image titles do. */
 function truncateName(name: string, limit = 20) {
   return name.length > limit ? `${name.slice(0, limit)}…` : name
 }
@@ -129,14 +121,12 @@ export function UploadDemo() {
 
   const [items, setItems] = React.useState<Item[]>(seed)
   const inputRef = React.useRef<HTMLInputElement>(null)
-  // Counts processing ticks per item id.
   const processing = React.useRef(new Map<string, number>())
   const deleteTimers = React.useRef<number[]>([])
   React.useEffect(() => () => deleteTimers.current.forEach((t) => window.clearTimeout(t)), [])
 
   const busy = items.some((item) => item.state === "uploading" || item.state === "processing")
 
-  // Fake upload: advance progress on a timer while anything is in flight.
   React.useEffect(() => {
     if (!busy) return
     const timer = window.setInterval(() => {
@@ -168,7 +158,6 @@ export function UploadDemo() {
     return () => window.clearInterval(timer)
   }, [busy])
 
-  // Revoke thumbnail URLs when the demo unmounts.
   const itemsRef = React.useRef(items)
   React.useEffect(() => {
     itemsRef.current = items
@@ -208,8 +197,6 @@ export function UploadDemo() {
     processing.current.delete(id)
   }
 
-  // One after another, from the last image back to the first file, so each
-  // plays its own shrink-out instead of all collapsing at once.
   function removeAll() {
     deleteTimers.current.forEach((t) => window.clearTimeout(t))
     const order = [
@@ -345,7 +332,6 @@ export function UploadDemo() {
           </AttachmentContent>
           <AttachmentTrigger aria-label="Add files" onClick={() => inputRef.current?.click()} />
         </Attachment>
-        {/* Text button, as Select all in Checkbox: the underline draws in on hover. */}
         <button
           type="button"
           disabled={items.length === 0}
@@ -396,7 +382,6 @@ export function UploadDemo() {
           hidden
           onChange={(e) => {
             addFiles(Array.from(e.target.files ?? []))
-            // Clear so picking the same file again still fires onChange.
             e.target.value = ""
           }}
         />

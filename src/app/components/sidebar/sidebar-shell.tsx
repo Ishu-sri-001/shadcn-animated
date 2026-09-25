@@ -24,7 +24,6 @@ import {
   SidebarGlideHighlight,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -38,13 +37,11 @@ import {
   SidebarRail,
   SidebarTrigger,
   useGlide,
-  useSidebar,
 } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.2 } as const
 
-// Size of every icon in the sidebar and top bar (matches the menu's [&_svg]:size-5).
 const ICON_SIZE = "1.25rem"
 
 const controls = {
@@ -65,9 +62,9 @@ const controls = {
     label: "Roundness",
     value: 0,
     min: 0,
-    max: 1,
-    step: 0.125,
-    unit: "rem",
+    max: 1.2,
+    step: 0.1,
+    unit: "vw",
   },
   slidingHighlight: {
     group: "Active item",
@@ -87,6 +84,7 @@ const controls = {
     ],
   },
   pressSquish: { group: "Interaction", type: "checkbox", label: "Press squish", value: false },
+  textRoll: { group: "Interaction", type: "checkbox", label: "Text roll on hover", value: false },
   springTooltips: {
     group: "Interaction",
     type: "checkbox",
@@ -95,10 +93,11 @@ const controls = {
   },
   rollingBadge: { group: "Badges", type: "checkbox", label: "Rolling badge", value: true },
   teamSwitcher: { group: "Header", type: "checkbox", label: "Team switcher", value: false },
+  spinTrigger: { group: "Header", type: "checkbox", label: "Spin toggle on hover", value: false },
+  breadcrumb: { group: "Header", type: "checkbox", label: "Breadcrumb bar", value: true },
   scaleContent: { group: "Page", type: "checkbox", label: "Scale with fade", value: true },
 } satisfies ControlSchema
 
-// Unread messages, shared with the page so it can deliver new ones.
 const InboxContext = React.createContext<{ receive: () => void } | null>(null)
 
 export function useInbox() {
@@ -107,7 +106,6 @@ export function useInbox() {
   return inbox
 }
 
-// The item picked in the sidebar, so the page can show its content.
 const ActivePageContext = React.createContext<{
   page: string
   unread: number
@@ -120,11 +118,9 @@ export function useActivePage() {
   return active
 }
 
-// Every AnimateIcons icon exposes the same imperative handle.
 type IconHandle = { startAnimation: () => void; stopAnimation: () => void }
 type AnimatedIcon = React.ComponentType<{ size?: number | string; ref?: React.Ref<IconHandle> }>
 
-/** Plays an animated icon while the element it's spread on is hovered or focused. */
 function useIconTrigger() {
   const icon = React.useRef<IconHandle>(null)
   const play = () => icon.current?.startAnimation()
@@ -132,7 +128,6 @@ function useIconTrigger() {
   return { icon, handlers: { onMouseEnter: play, onMouseLeave: stop, onFocus: play, onBlur: stop } }
 }
 
-/** A menu button whose animated icon plays when the whole button is hovered, not just the icon. */
 function NavButton({
   icon: Icon,
   children,
@@ -147,8 +142,6 @@ function NavButton({
   )
 }
 
-// Each team's logo is an animated icon (AnimateIcons has no leaf or
-// croissant, so the tea room gets droplets and the bakery utensils).
 const teams: { name: string; plan: string; icon: AnimatedIcon }[] = [
   { name: "Bean & Co.", plan: "Roastery", icon: CoffeeIcon },
   { name: "Leaf House", plan: "Tea room", icon: DropletsIcon },
@@ -162,7 +155,6 @@ function TeamLogo({ team, iconRef }: { team: Team; iconRef?: React.Ref<IconHandl
   return <Icon ref={iconRef} size={ICON_SIZE} />
 }
 
-/** A row in the team menu; its logo plays while the row is hovered or focused. */
 function TeamOption({
   team,
   selected,
@@ -174,7 +166,6 @@ function TeamOption({
   index: number
   onSelect: () => void
 }) {
-  const { highlightTone } = useSidebar()
   const { icon, handlers } = useIconTrigger()
   return (
     <motion.button
@@ -182,14 +173,11 @@ function TeamOption({
       data-team-option
       onClick={onSelect}
       {...handlers}
-      // Rows slide in one after another as the menu grows.
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.04 + index * 0.04 }}
       className={cn(
         "flex items-center gap-2 rounded-(--sidebar-item-radius) px-2 py-1.5 text-left text-sm transition-colors duration-300 outline-none",
-        // The menu's gliding background is the hover state.
-        highlightTone === "primary" && "data-glide:text-primary-foreground",
       )}
     >
       <span className="flex size-7 items-center justify-center rounded-md border">
@@ -201,7 +189,6 @@ function TeamOption({
   )
 }
 
-/** Logo and name; switching team spins the logo in and rolls the text. */
 function TeamIdentity({ team, iconRef }: { team: Team; iconRef?: React.Ref<IconHandle> }) {
   return (
     <>
@@ -238,7 +225,11 @@ function TeamIdentity({ team, iconRef }: { team: Team; iconRef?: React.Ref<IconH
   )
 }
 
-/** Brand header: static, or (with the team switcher) a menu that grows out of it. */
+const noFill =
+  "active:bg-transparent active:text-sidebar-foreground data-open:hover:bg-transparent data-open:hover:text-sidebar-foreground"
+const mutedFill =
+  "hover:bg-sidebar-accent active:bg-sidebar-accent active:text-sidebar-foreground data-open:bg-sidebar-accent data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-foreground"
+
 function TeamHeader({ switcher }: { switcher: boolean }) {
   const [team, setTeam] = React.useState<Team>(teams[0])
   const [open, setOpen] = React.useState(false)
@@ -264,8 +255,13 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
 
   if (!switcher) {
     return (
-      // Not clickable, so no hover background (data-no-glide).
-      <SidebarMenuButton size="lg" tooltip={team.name} data-no-glide {...handlers}>
+      <SidebarMenuButton
+        size="lg"
+        tooltip={team.name}
+        data-no-glide
+        className={cn(noFill, "cursor-default")}
+        {...handlers}
+      >
         {content}
       </SidebarMenuButton>
     )
@@ -273,21 +269,21 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={<SidebarMenuButton size="lg" {...handlers} />}>
+      <PopoverTrigger
+        render={<SidebarMenuButton size="lg" data-no-glide className={mutedFill} {...handlers} />}
+      >
         {content}
       </PopoverTrigger>
       <PopoverContent
         align="start"
         side="bottom"
         sideOffset={6}
-        // Above the sidebar, which sits above the page.
         positionerClassName="z-70"
         className="w-(--anchor-width) min-w-56 gap-1 p-1.5 duration-200"
       >
         <span className="px-2 py-1 text-xs text-muted-foreground">Teams</span>
-        {/* Same gliding hover background as the sidebar menus. */}
         <div ref={glideList} className="relative isolate flex flex-col gap-1" {...glideHandlers}>
-          <SidebarGlideHighlight box={glideBox} />
+          <SidebarGlideHighlight box={glideBox} className="bg-muted" />
           {teams.map((t, i) => (
             <TeamOption
               key={t.name}
@@ -306,9 +302,7 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
   )
 }
 
-/** Search icon on the right of the top bar that grows into a field when clicked. */
 function HeaderSearch() {
-  // Open width in px (a number, so it can animate); 0 when closed.
   const [openWidth, setOpenWidth] = React.useState(0)
   const open = openWidth > 0
   const [query, setQuery] = React.useState("")
@@ -342,10 +336,8 @@ function HeaderSearch() {
             input.current?.focus()
             return
           }
-          // 16rem, or 55% of a narrow screen.
           setOpenWidth(Math.min(256, window.innerWidth * 0.55))
           icon.current?.startAnimation()
-          // After the field is rendered focusable.
           requestAnimationFrame(() => input.current?.focus())
         }}
         className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
@@ -368,7 +360,6 @@ function HeaderSearch() {
   )
 }
 
-/** The current page name rolls up when it changes. */
 function Breadcrumb({ page }: { page: string }) {
   return (
     <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
@@ -402,13 +393,10 @@ const nav = [
 
 const projects = ["Saturday roast", "Oat milk supplier", "New cups"]
 
-/**
- * A real app layout: the sidebar runs the full height of the screen, over the
- * site navbar (3.5rem tall, z-50), and the page sits in the main area.
- */
 export function SidebarShell({ children }: { children: React.ReactNode }) {
   const panel = useControls(controls)
-  const { teamSwitcher, activeIndicator, highlightTone, scaleContent, ...options } = panel.values
+  const { teamSwitcher, breadcrumb, activeIndicator, highlightTone, scaleContent, ...options } =
+    panel.values
   const [active, setActive] = React.useState("Home")
   const [unread, setUnread] = React.useState(4)
   const [projectsOpen, setProjectsOpen] = React.useState(true)
@@ -430,7 +418,6 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
             highlightTone={highlightTone as "primary" | "muted"}
             {...options}
           >
-            {/* Full height from the top, layered above the navbar. */}
             <Sidebar collapsible="icon" className="z-60">
               <SidebarHeader>
                 <SidebarMenu>
@@ -441,8 +428,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
               </SidebarHeader>
 
               <SidebarContent>
-                <SidebarGroup>
-                  <SidebarGroupLabel>Platform</SidebarGroupLabel>
+                <SidebarGroup label="Platform">
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {nav.map((item) => (
@@ -456,7 +442,6 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                             <span>{item.title}</span>
                           </NavButton>
                           {item.title === "Inbox" && (
-                            // The badge pops in and out on its own.
                             <AnimatePresence>
                               {unread > 0 && (
                                 <SidebarMenuBadge key="badge">{unread}</SidebarMenuBadge>
@@ -469,8 +454,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                   </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup>
-                  <SidebarGroupLabel>Projects</SidebarGroupLabel>
+                <SidebarGroup label="Projects">
                   <SidebarGroupContent>
                     <SidebarMenu>
                       <SidebarMenuItem>
@@ -525,14 +509,19 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
             </Sidebar>
 
             <SidebarInset>
-              <header className="sticky top-14 z-10 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur">
-                <div className="flex min-w-0 items-center gap-2">
-                  <SidebarTrigger />
-                  <Breadcrumb page={active} />
+              {breadcrumb ? (
+                <header className="sticky top-14 z-10 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <SidebarTrigger />
+                    <Breadcrumb page={active} />
+                  </div>
+                  <HeaderSearch />
+                </header>
+              ) : (
+                <div className="sticky top-14 z-10 h-0">
+                  <SidebarTrigger className="m-3 border bg-background shadow-xs" />
                 </div>
-                <HeaderSearch />
-              </header>
-              {/* The page, centred in the space beside the sidebar. */}
+              )}
               <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-8 max-md:px-4">
                 {children}
               </div>

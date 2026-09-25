@@ -34,46 +34,26 @@ const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
-// Smooth ease-out (fast start, gentle stop, no overshoot) for opening and
-// closing: widths, the page beside the sidebar, labels and badges all share it.
 const SMOOTH_EASE = "cubic-bezier(0.32, 0.72, 0, 1)"
-// A spring (slight overshoot, then settle) as a CSS easing, for springy tooltips.
 const SPRING_EASE =
   "linear(0, 0.034 2.2%, 0.136 4.6%, 0.542 11.5%, 0.787 16.4%, 0.93 21.1%, 1.012 26.4%, 1.042 30.9%, 1.047 35.5%, 1.036 40.9%, 1.005 53.3%, 0.996 64%, 1)"
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.2 } as const
 
-// Drag-to-resize limits, in px. Dragging narrower than COLLAPSE_BELOW collapses to icons.
 const MIN_WIDTH = 192
 const MAX_WIDTH = 400
 const COLLAPSE_BELOW = 150
 
 /** Animation options, set on SidebarProvider. */
 type SidebarOptions = {
-  /** Drag the sidebar's edge to change its width; drag narrow enough to collapse. */
   resizable: boolean
-  /**
-   * The active item's background and indicator (bar or dot) glide from the old
-   * item to the new one. Off, they switch to the new item instantly.
-   */
   slidingHighlight: boolean
-  /**
-   * Marks the active item: "bar" (a thin bar on its left edge; in a sub-menu,
-   * the guide line fills beside it), "dot" (a pulsing dot there instead) or
-   * "none". Either slides to the newly active item.
-   */
   activeIndicator: "bar" | "dot" | "none"
-  /** Menu items shrink slightly while pressed. */
   pressSquish: boolean
-  /** Collapsed-mode tooltips spring out from the icon instead of fading in. */
+  spinTrigger: boolean
+  textRoll: boolean
   springTooltips: boolean
-  /** Numeric badges roll to their new value and pop when it changes. */
   rollingBadge: boolean
-  /**
-   * Hover and active backgrounds: "primary" (solid, with the item's text and
-   * icon switching to the contrasting colour) or "muted" (soft grey).
-   */
   highlightTone: "primary" | "muted"
-  /** Corner rounding of menu items (and their hover and active backgrounds), in rem. 0 is square. */
   itemRadius: number
 }
 
@@ -85,7 +65,6 @@ type SidebarContextProps = SidebarOptions & {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
-  /** Scopes shared layout ids (highlight, bar) to this sidebar. */
   id: string
   setWidth: (width: number | null) => void
   setResizing: (resizing: boolean) => void
@@ -110,6 +89,8 @@ function SidebarProvider({
   slidingHighlight = true,
   activeIndicator = "bar",
   pressSquish = false,
+  spinTrigger = false,
+  textRoll = false,
   springTooltips = false,
   rollingBadge = true,
   highlightTone = "primary",
@@ -127,12 +108,9 @@ function SidebarProvider({
   const isMobile = useIsMobile()
   const id = React.useId()
   const [openMobile, setOpenMobile] = React.useState(false)
-  // Width set by dragging the edge; null uses the default.
   const [width, setWidth] = React.useState<number | null>(null)
   const [resizing, setResizing] = React.useState(false)
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
   const setOpen = React.useCallback(
@@ -144,18 +122,15 @@ function SidebarProvider({
         _setOpen(openState)
       }
 
-      // This sets the cookie to keep the sidebar state.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     },
     [setOpenProp, open]
   )
 
-  // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
-  // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -171,8 +146,6 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
 
   const contextValue = React.useMemo<SidebarContextProps>(
@@ -191,6 +164,8 @@ function SidebarProvider({
       slidingHighlight,
       activeIndicator,
       pressSquish,
+      spinTrigger,
+      textRoll,
       springTooltips,
       rollingBadge,
       highlightTone,
@@ -209,6 +184,8 @@ function SidebarProvider({
       slidingHighlight,
       activeIndicator,
       pressSquish,
+      spinTrigger,
+      textRoll,
       springTooltips,
       rollingBadge,
       highlightTone,
@@ -227,13 +204,12 @@ function SidebarProvider({
               "--sidebar-width": width === null ? SIDEBAR_WIDTH : `${width}px`,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               "--sidebar-ease": SMOOTH_EASE,
-              "--sidebar-item-radius": `${itemRadius}rem`,
+              "--sidebar-item-radius": `${itemRadius}vw`,
               ...style,
             } as React.CSSProperties
           }
           className={cn(
             "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
-            // No transitions while dragging the edge, so the sidebar follows the pointer.
             "data-resizing:cursor-col-resize data-resizing:select-none data-resizing:**:transition-none!",
             className
           )}
@@ -293,11 +269,9 @@ function Sidebar({
       data-side={side}
       data-slot="sidebar"
     >
-      {/* This is what handles the sidebar gap on desktop */}
       <div
         data-slot="sidebar-gap"
         className={cn(
-          // Springs to its new width; the page beside it eases along.
           "relative w-(--sidebar-width) bg-transparent transition-[width] duration-400 ease-(--sidebar-ease)",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
@@ -311,7 +285,6 @@ function Sidebar({
         data-side={side}
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-400 ease-(--sidebar-ease) data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex",
-          // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -331,11 +304,6 @@ function Sidebar({
   )
 }
 
-/**
- * The sidebar on mobile: a panel that springs in from the edge, closes with a
- * swipe back (the backdrop fading as it goes), and opens with a swipe from the
- * screen edge.
- */
 function MobileSidebar({
   side,
   dir,
@@ -349,7 +317,6 @@ function MobileSidebar({
   const reduceMotion = useReducedMotion()
   const panel = React.useRef<HTMLDivElement>(null)
   const sign = side === "left" ? -1 : 1
-  // Panel offset in px; the backdrop fades with it.
   const x = useMotionValue(0)
   const width = React.useRef(288)
   const backdrop = useTransform(x, (v) => 1 - Math.min(Math.abs(v) / width.current, 1))
@@ -369,7 +336,6 @@ function MobileSidebar({
   return (
     <>
       {!openMobile && (
-        // Swipe in from the screen edge to open.
         <motion.div
           aria-hidden
           className={cn(
@@ -411,21 +377,16 @@ function MobileSidebar({
               style={{ width: SIDEBAR_WIDTH_MOBILE, x }}
               initial={{ x: closed }}
               animate={{ x: 0 }}
-              // A quick slide out; a spring's long settle would keep it "closing".
               exit={{ x: closed, transition: { duration: 0.25, ease: [0.32, 0.72, 0, 1] } }}
-              // Slides in on the same smooth curve as the desktop sidebar.
               transition={reduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
               // Swipe it back to close.
               drag="x"
               dragDirectionLock
-              // No coasting after release; it either closes or springs back.
               dragMomentum={false}
               dragConstraints={side === "left" ? { left: -400, right: 0 } : { left: 0, right: 400 }}
               dragElastic={side === "left" ? { left: 0, right: 0.05 } : { left: 0.05, right: 0 }}
               onDragEnd={(_, info) => {
                 const swiped = info.offset.x * sign > width.current * 0.3 || info.velocity.x * sign > 500
-                // Closing animates it out; otherwise spring back. (Not dragSnapToOrigin,
-                // which would pull against the exit animation and stop it finishing.)
                 if (swiped) setOpenMobile(false)
                 else animate(x, 0, { type: "spring", visualDuration: 0.3, bounce: 0.2 })
               }}
@@ -439,14 +400,19 @@ function MobileSidebar({
   )
 }
 
-/** Panel icon that turns into an arrow on hover, pointing the way the sidebar will move. */
 function SidebarTriggerIcon({ hovered }: { hovered: boolean }) {
-  const { state, isMobile, openMobile } = useSidebar()
+  const { state, isMobile, openMobile, spinTrigger } = useSidebar()
   const opening = isMobile ? !openMobile : state === "collapsed"
-  // Three points each, so Motion can morph between them.
-  const d = !hovered ? "M9 3L9 12L9 21" : opening ? "M11 8L15 12L11 16" : "M14 8L10 12L14 16"
+  const arrow = spinTrigger
+    ? opening
+      ? "M13 8L9 12L13 16"
+      : "M10 8L14 12L10 16"
+    : opening
+      ? "M11 8L15 12L11 16"
+      : "M14 8L10 12L14 16"
+  const d = hovered ? arrow : "M9 3L9 12L9 21"
   return (
-    <svg
+    <motion.svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -454,12 +420,14 @@ function SidebarTriggerIcon({ hovered }: { hovered: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
-      // Matches the sidebar's 20px icons (inline, to beat the Button's size-4).
       style={{ width: "1.25rem", height: "1.25rem" }}
+      initial={false}
+      animate={{ rotate: spinTrigger && hovered ? 180 : 0 }}
+      transition={spring}
     >
       <rect width="18" height="18" x="3" y="3" rx="2" />
       <motion.path initial={false} animate={{ d }} transition={spring} />
-    </svg>
+    </motion.svg>
   )
 }
 
@@ -521,7 +489,6 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       aria-label="Toggle Sidebar"
       tabIndex={-1}
       onClick={() => {
-        // With `resizable`, a click (a press without a drag) toggles in onPointerUp.
         if (!resizable) toggleSidebar()
       }}
       onPointerDown={(event) => {
@@ -634,26 +601,66 @@ function SidebarSeparator({
   )
 }
 
-function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarContent({
+  className,
+  children,
+  onPointerOver,
+  onPointerLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: React.ComponentProps<"div">) {
+  const { container, box, handlers } = useGlide<HTMLDivElement>(
+    "[data-sidebar=menu-button], [data-sidebar=menu-sub-button]"
+  )
+
   return (
     <div
+      ref={container}
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "no-scrollbar flex min-h-0 flex-1 flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "no-scrollbar relative isolate flex min-h-0 flex-1 flex-col gap-1 overflow-auto py-2 group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
+      onPointerOver={(event) => {
+        onPointerOver?.(event)
+        handlers.onPointerOver(event)
+      }}
+      onPointerLeave={(event) => {
+        onPointerLeave?.(event)
+        handlers.onPointerLeave()
+      }}
+      onFocus={(event) => {
+        onFocus?.(event)
+        handlers.onFocus(event)
+      }}
+      onBlur={(event) => {
+        onBlur?.(event)
+        handlers.onBlur(event)
+      }}
       {...props}
-    />
+    >
+      <SidebarGlideHighlight box={box} />
+      <SidebarGlideScopeContext.Provider value={true}>{children}</SidebarGlideScopeContext.Provider>
+    </div>
   )
 }
 
-function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarGroup({
+  className,
+  label,
+  ...props
+}: React.ComponentProps<"div"> & {
+  label?: string
+}) {
   return (
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      role={label ? "group" : undefined}
+      aria-label={label}
+      className={cn("relative flex w-full min-w-0 flex-col px-2", className)}
       {...props}
     />
   )
@@ -670,8 +677,6 @@ function SidebarGroupLabel({
       {
         className: cn(
           "flex h-8 shrink-0 origin-left items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-          // Collapsed: shrinks and fades away while the space closes up (and
-          // no longer catches the pointer, as it moves over the item above).
           "[transition:margin_400ms_var(--sidebar-ease),scale_400ms_var(--sidebar-ease),opacity_200ms_ease-out] group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:scale-75 group-data-[collapsible=icon]:opacity-0",
           className
         ),
@@ -724,34 +729,26 @@ function SidebarGroupContent({
   )
 }
 
-// Each item's position in its menu, so labels can appear one after another.
+const SidebarGlideScopeContext = React.createContext(false)
+
 const SidebarMenuIndexContext = React.createContext(0)
 
 type Box = { top: number; left: number; width: number; height: number }
 
-// Background of the hover glider and the active highlight, per tone.
 const highlightBg = { primary: "bg-primary", muted: "bg-sidebar-accent" } as const
-// With the primary tone, an item under the gliding hover background (marked
-// data-glide), pressed or active switches its text and icon to the contrasting
-// colour, easing with the background.
 const primaryTone =
   "data-glide:text-primary-foreground active:bg-primary active:text-primary-foreground data-active:bg-primary data-active:text-primary-foreground"
 
-/**
- * A background that glides to whichever item is hovered or keyboard-focused
- * within a container (like the date picker's hover square), marking that item
- * with data-glide. Items marked data-no-glide are skipped.
- */
 function useGlide<T extends HTMLElement>(
   itemSelector: string,
-  /** Extra check that an item belongs to this container (e.g. not a nested one). */
   owns?: (item: HTMLElement, container: T) => boolean
 ) {
   const container = React.useRef<T>(null)
   const [box, setBox] = React.useState<Box | null>(null)
   const marked = React.useRef<HTMLElement | null>(null)
-  // What placed the background, so losing focus only clears a focus one.
   const source = React.useRef<"pointer" | "focus" | null>(null)
+  const clearTimer = React.useRef<number | undefined>(undefined)
+  React.useEffect(() => () => window.clearTimeout(clearTimer.current), [])
 
   const mark = (item: HTMLElement | null) => {
     if (marked.current === item) return
@@ -763,16 +760,24 @@ function useGlide<T extends HTMLElement>(
   const track = (target: EventTarget, from: "pointer" | "focus") => {
     const root = container.current
     const item = (target as Element).closest<HTMLElement>(itemSelector)
-    if (!root || !item || !root.contains(item) || item.hasAttribute("data-no-glide")) return
-    if (owns && !owns(item, root)) return
+    if (!root || !item || !root.contains(item) || item.hasAttribute("data-no-glide")) return false
+    if (owns && !owns(item, root)) return false
+    window.clearTimeout(clearTimer.current)
     const b = item.getBoundingClientRect()
     const o = root.getBoundingClientRect()
     mark(item)
     source.current = from
-    setBox({ top: b.top - o.top, left: b.left - o.left, width: b.width, height: b.height })
+    setBox({
+      top: b.top - o.top + root.scrollTop,
+      left: b.left - o.left + root.scrollLeft,
+      width: b.width,
+      height: b.height,
+    })
+    return true
   }
 
   const clear = () => {
+    window.clearTimeout(clearTimer.current)
     mark(null)
     source.current = null
     setBox(null)
@@ -780,7 +785,11 @@ function useGlide<T extends HTMLElement>(
 
   const handlers = {
     onPointerOver: (event: React.PointerEvent) => {
-      if (event.pointerType === "mouse") track(event.target, "pointer")
+      if (event.pointerType !== "mouse" || track(event.target, "pointer")) return
+      if (source.current === "pointer") {
+        window.clearTimeout(clearTimer.current)
+        clearTimer.current = window.setTimeout(clear, 120)
+      }
     },
     onPointerLeave: () => clear(),
     onFocus: (event: React.FocusEvent) => {
@@ -794,7 +803,6 @@ function useGlide<T extends HTMLElement>(
   return { container, box, handlers }
 }
 
-/** The gliding background for useGlide; fades in and out as the pointer enters and leaves. */
 function SidebarGlideHighlight({ box, as = "div", className }: { box: Box | null; as?: "div" | "li"; className?: string }) {
   const { highlightTone } = useSidebar()
   const Element = as === "li" ? motion.li : motion.div
@@ -830,11 +838,10 @@ function SidebarMenu({
   ...props
 }: React.ComponentProps<"ul">) {
   const { container, box, handlers } = useGlide<HTMLUListElement>(
-    // data-sidebar survives wrappers that replace data-slot (e.g. a popover trigger).
     "[data-sidebar=menu-button], [data-sidebar=menu-sub-button]",
-    // Only items of this menu, not of a menu nested further in.
     (item, menu) => item.closest("[data-slot=sidebar-menu]") === menu
   )
+  const scoped = React.useContext(SidebarGlideScopeContext)
 
   return (
     <ul
@@ -844,23 +851,23 @@ function SidebarMenu({
       className={cn("relative isolate flex w-full min-w-0 flex-col gap-1", className)}
       onPointerOver={(event) => {
         onPointerOver?.(event)
-        handlers.onPointerOver(event)
+        if (!scoped) handlers.onPointerOver(event)
       }}
       onPointerLeave={(event) => {
         onPointerLeave?.(event)
-        handlers.onPointerLeave()
+        if (!scoped) handlers.onPointerLeave()
       }}
       onFocus={(event) => {
         onFocus?.(event)
-        handlers.onFocus(event)
+        if (!scoped) handlers.onFocus(event)
       }}
       onBlur={(event) => {
         onBlur?.(event)
-        handlers.onBlur(event)
+        if (!scoped) handlers.onBlur(event)
       }}
       {...props}
     >
-      <SidebarGlideHighlight box={box} as="li" />
+      {!scoped && <SidebarGlideHighlight box={box} as="li" />}
       {React.Children.map(children, (child, index) => (
         <SidebarMenuIndexContext.Provider value={index}>{child}</SidebarMenuIndexContext.Provider>
       ))}
@@ -881,28 +888,17 @@ function SidebarMenuItem({ className, style, ...props }: React.ComponentProps<"l
   )
 }
 
-// On expand, labels fade and slide in one after another (by --sidebar-i);
-// on collapse they fade out first and together, so text is never cut mid-slide.
-// Only text spans: icon holders (e.g. a logo box) and effect layers
-// (data-sidebar-fx) stay visible in the icon strip.
 const staggeredLabels =
   "[&>span:not([data-sidebar-fx]):not(:has(svg))]:transition-[opacity,translate] [&>span:not([data-sidebar-fx]):not(:has(svg))]:duration-300 [&>span:not([data-sidebar-fx]):not(:has(svg))]:ease-out [&>span:not([data-sidebar-fx]):not(:has(svg))]:delay-[calc(var(--sidebar-i,0)*40ms+150ms)] group-data-[collapsible=icon]:[&>span:not([data-sidebar-fx]):not(:has(svg))]:-translate-x-2 group-data-[collapsible=icon]:[&>span:not([data-sidebar-fx]):not(:has(svg))]:opacity-0 group-data-[collapsible=icon]:[&>span:not([data-sidebar-fx]):not(:has(svg))]:delay-0 group-data-[collapsible=icon]:[&>span:not([data-sidebar-fx]):not(:has(svg))]:duration-100"
 
-/** A dot with a ring that keeps pulsing outward. */
 function PulsingDot({ className }: { className?: string }) {
   return (
     <span className={cn("pointer-events-none absolute size-1.5 rounded-full bg-sidebar-primary", className)}>
-      {/* CSS, so the pulse keeps running while the dot glides between items. */}
       <span className="absolute inset-0 animate-ping rounded-full bg-inherit opacity-60 [animation-duration:1.6s] motion-reduce:hidden" />
     </span>
   )
 }
 
-/**
- * The active item's background and indicator (bar or pulsing dot), which glide
- * between items via shared layout ids. In a sub-menu the indicator sits on the
- * guide line: the bar fills the line's segment beside the item.
- */
 function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boolean }) {
   const { id, slidingHighlight, activeIndicator, highlightTone } = useSidebar()
   if (!isActive) return null
@@ -930,12 +926,10 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           className={cn(
             "pointer-events-none absolute rounded-full",
             sub
-              ? // Over the guide line (1px, 9px left of the item), covering the item's height.
+              ?
                 "inset-y-0 -left-2.5 w-0.5 bg-foreground"
               : cn(
-                  // Inset from the item's edge; hidden in the icon strip (no room beside the icon).
                   "top-1/2 left-1.5 h-4 w-0.75 -translate-y-1/2 group-data-[collapsible=icon]:hidden",
-                  // Sits on the highlight, so it takes the contrasting colour on primary.
                   highlightTone === "primary" ? "bg-primary-foreground" : "bg-sidebar-primary"
                 )
           )}
@@ -949,15 +943,12 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           transition={spring}
           className={cn(
             "pointer-events-none absolute top-1/2 size-1.5 -translate-y-1/2",
-            // Centred on the guide line, or inset from the item's left edge
-            // (hidden in the icon strip, where there's no room beside the icon).
-            sub ? "-left-3" : "left-1.5 group-data-[collapsible=icon]:hidden"
+            sub ? "-left-3" : "left-2 group-data-[collapsible=icon]:hidden"
           )}
         >
           <PulsingDot
             className={cn(
               "inset-0",
-              // On the guide line, or on the item's highlight (contrasting on primary).
               sub ? "bg-foreground" : highlightTone === "primary" && "bg-primary-foreground"
             )}
           />
@@ -972,7 +963,6 @@ const sidebarMenuButtonVariants = cva(
   {
     variants: {
       variant: {
-        // The hover background is the menu's gliding highlight.
         default: "hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--sidebar-accent)]",
@@ -1004,8 +994,16 @@ function SidebarMenuButton({
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
-  const { isMobile, state, slidingHighlight, pressSquish, springTooltips, highlightTone, activeIndicator } =
-    useSidebar()
+  const {
+    isMobile,
+    state,
+    slidingHighlight,
+    pressSquish,
+    textRoll,
+    springTooltips,
+    highlightTone,
+    activeIndicator,
+  } = useSidebar()
   const comp = useRender({
     defaultTagName: "button",
     props: mergeProps<"button">(
@@ -1014,9 +1012,8 @@ function SidebarMenuButton({
           sidebarMenuButtonVariants({ variant, size }),
           staggeredLabels,
           variant === "default" && highlightTone === "primary" && primaryTone,
-          // Room for the active bar or dot between the item's edge and its icon.
-          activeIndicator !== "none" && "px-3.5",
-          // The sliding highlight replaces the static active background.
+          activeIndicator === "bar" && "px-3.5",
+          activeIndicator === "dot" && "px-5.5",
           slidingHighlight && "data-active:bg-transparent",
           pressSquish && "active:scale-[0.96]",
           className
@@ -1024,7 +1021,7 @@ function SidebarMenuButton({
         children: (
           <>
             <ActiveEffects isActive={isActive} />
-            {children}
+            {textRoll ? rollLabels(children) : children}
           </>
         ),
       },
@@ -1055,11 +1052,8 @@ function SidebarMenuButton({
       <TooltipContent
         side="right"
         align="center"
-        // Collapsed items end 8px inside the sidebar's border; this puts the
-        // tooltip just past the border rather than beside the icon.
         sideOffset={12}
         hidden={state !== "collapsed" || isMobile}
-        // Above the sidebar, which sits above the page (z-60).
         positionerClassName="z-70"
         {...(springTooltips && {
           className: "data-open:zoom-in-75 data-[side=right]:slide-in-from-left-3",
@@ -1068,6 +1062,51 @@ function SidebarMenuButton({
         {...tooltip}
       />
     </Tooltip>
+  )
+}
+
+function rollLabels(children: React.ReactNode) {
+  return React.Children.map(children, (child) => {
+    if (!React.isValidElement<{ className?: string; children?: React.ReactNode }>(child)) return child
+    const text = child.props.children
+    if (child.type !== "span" || (typeof text !== "string" && typeof text !== "number")) return child
+    return <RollLabel className={child.props.className}>{text}</RollLabel>
+  })
+}
+
+const power2Out = (t: number) => 1 - (1 - t) ** 3
+
+function RollLabel({ className, children }: { className?: string; children: React.ReactNode }) {
+  const root = React.useRef<HTMLSpanElement>(null)
+  const reduceMotion = useReducedMotion()
+
+  React.useEffect(() => {
+    const el = root.current
+    const item = el?.closest<HTMLElement>("[data-sidebar=menu-button], [data-sidebar=menu-sub-button]")
+    const [text, copy] = el ? Array.from(el.children) : []
+    if (!item || !text || !copy || reduceMotion) return
+    animate(copy, { y: "100%" }, { duration: 0 })
+    let over = false
+    const sync = () => {
+      const next = item.hasAttribute("data-glide")
+      if (next === over) return
+      over = next
+      const tween = { duration: 0.4, ease: power2Out }
+      animate(text, { y: over ? "-100%" : "0%" }, tween)
+      animate(copy, { y: over ? "0%" : "100%" }, tween)
+    }
+    const observer = new MutationObserver(sync)
+    observer.observe(item, { attributes: true, attributeFilter: ["data-glide"] })
+    return () => observer.disconnect()
+  }, [reduceMotion])
+
+  return (
+    <span ref={root} className={cn("relative block overflow-hidden", className)}>
+      <span className="block truncate">{children}</span>
+      <span aria-hidden className="absolute inset-x-0 top-0 block truncate">
+        {children}
+      </span>
+    </span>
   )
 }
 
@@ -1101,11 +1140,6 @@ function SidebarMenuAction({
   })
 }
 
-/**
- * A count beside a menu item. Pops in and out when mounted or removed (wrap it
- * in AnimatePresence, with a key); with `rollingBadge`, a number rolls to its
- * new value and pops when it changes.
- */
 function SidebarMenuBadge({
   className,
   children,
@@ -1116,7 +1150,6 @@ function SidebarMenuBadge({
   const content = React.useRef<HTMLSpanElement>(null)
   const count = typeof children === "number" ? children : null
 
-  // Pop when the number changes (not on mount).
   const last = React.useRef(count)
   React.useEffect(() => {
     const changed = last.current !== count
@@ -1129,7 +1162,6 @@ function SidebarMenuBadge({
     <motion.div
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
-      // No bounce on the way out: a spring would overshoot past 0 and flip it.
       exit={{ scale: 0, transition: { duration: 0.15, ease: "easeIn" } }}
       transition={spring}
       data-slot="sidebar-menu-badge"
@@ -1156,7 +1188,6 @@ function RollingNumber({ value }: { value: number }) {
     <span>
       <span className="sr-only">{value}</span>
       {digits.map((digit, i) => (
-        // Keyed from the right, so the ones digit keeps rolling when a tens digit appears.
         <RollingDigit key={digits.length - i} digit={Number(digit)} />
       ))}
     </span>
@@ -1165,8 +1196,6 @@ function RollingNumber({ value }: { value: number }) {
 
 function RollingDigit({ digit }: { digit: number }) {
   return (
-    // The hidden digit keeps the baseline and width; clip-path (unlike
-    // overflow) clips the rolling column without moving the baseline.
     <span aria-hidden className="relative inline-block [clip-path:inset(0)]">
       <span className="invisible">{digit}</span>
       <motion.span
@@ -1190,7 +1219,6 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
   const [width] = React.useState(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`
   })
@@ -1221,8 +1249,6 @@ function SidebarMenuSkeleton({
   )
 }
 
-// Opens by growing to its height; the items appear one after another and the
-// guide line beside them draws downward. Closes in reverse.
 const subMenuVariants: Variants = {
   closed: {
     height: 0,
@@ -1233,7 +1259,6 @@ const subMenuVariants: Variants = {
   open: {
     height: "auto",
     opacity: 1,
-    // Clipped only while it grows, so dots and bars on the guide line show in full.
     transitionEnd: { overflow: "visible" },
     transition: { ...spring, staggerChildren: 0.05, delayChildren: 0.05 },
   },
@@ -1255,7 +1280,6 @@ function SidebarMenuSub({
   children,
   ...props
 }: Omit<React.ComponentProps<typeof motion.ul>, "children"> & {
-  /** Shown while true; opening and closing animate. */
   open?: boolean
   children?: React.ReactNode
 }) {
@@ -1271,7 +1295,7 @@ function SidebarMenuSub({
           animate="open"
           exit="closed"
           className={cn(
-            "relative mx-3.5 flex min-w-0 translate-x-px flex-col gap-1.5 px-2.5 py-0.5 group-data-[collapsible=icon]:hidden",
+            "relative mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 px-2.5 py-1 group-data-[collapsible=icon]:hidden",
             className
           )}
           {...props}
@@ -1316,13 +1340,13 @@ function SidebarMenuSubButton({
     size?: "sm" | "md"
     isActive?: boolean
   }) {
-  const { slidingHighlight, pressSquish, highlightTone } = useSidebar()
+  const { slidingHighlight, pressSquish, textRoll, highlightTone } = useSidebar()
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
       {
         className: cn(
-          "relative isolate flex h-7 min-w-0 -translate-x-px items-center gap-2 rounded-(--sidebar-item-radius) px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-[scale,color] duration-300 group-data-[collapsible=icon]:hidden hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
+          "relative isolate flex h-8 min-w-0 -translate-x-px items-center gap-2 rounded-(--sidebar-item-radius) px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-[scale,color] duration-300 group-data-[collapsible=icon]:hidden hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
           highlightTone === "primary" && primaryTone,
           slidingHighlight && "data-active:bg-transparent",
           pressSquish && "active:scale-[0.96]",
@@ -1331,7 +1355,7 @@ function SidebarMenuSubButton({
         children: (
           <>
             <ActiveEffects isActive={isActive} sub />
-            {children}
+            {textRoll ? rollLabels(children) : children}
           </>
         ),
       },

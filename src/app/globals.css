@@ -73,11 +73,11 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: oklch(0.96 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.925 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
@@ -127,15 +127,12 @@
   html {
     @apply font-sans;
   }
-  /* Tailwind v4 gives buttons the default cursor; show the pointer on
-     clickable triggers (accordion, date picker, toast, …) unless disabled. */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [role="option"]:not([aria-disabled="true"]) {
     cursor: pointer;
   }
 }
-/* Toast time-left bar: shrinks to nothing over the toast's timeout. */
 @keyframes toast-timer {
   from {
     transform: scaleX(1);

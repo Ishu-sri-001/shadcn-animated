@@ -96,7 +96,6 @@ function Home() {
           A collapsible side navigation. Press ⌘B (Ctrl+B) or the button in the header to collapse
           it to icons; on mobile it slides in from the left, or swipe in from the edge.
         </Heading>
-        {/* Bumps the Inbox badge in the sidebar. */}
         <ReceiveMessage />
       </div>
       <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
@@ -199,7 +198,6 @@ function Page({ page }: { page: string }) {
   return <Home />
 }
 
-/** The page for the item picked in the sidebar; switching fades (and optionally scales) between them. */
 export function PageContent() {
   const { page, scaleContent } = useActivePage()
   return (
@@ -215,7 +213,6 @@ export function PageContent() {
           transition: { duration: 0.15, ease: "easeIn" },
         }}
         transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-        // Scales from the top, so the heading stays roughly in place.
         style={{ originY: 0 }}
       >
         <Page page={page} />

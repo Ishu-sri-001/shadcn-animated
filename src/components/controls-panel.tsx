@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import { ChevronDownIcon, RotateCcwIcon } from "lucide-react"
-import { motion } from "motion/react"
+import { motion, useDragControls } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -19,7 +19,6 @@ import { Slider } from "@/components/ui/slider"
 
 type BaseControl = {
   label: string
-  /** Controls with the same group are listed under one heading. */
   group?: string
 }
 
@@ -31,7 +30,6 @@ export type SliderControl = BaseControl & {
   min: number
   max: number
   step?: number
-  /** Shown after the number, e.g. "s" or "vw". */
   unit?: string
 }
 
@@ -53,7 +51,6 @@ function defaultsOf<S extends ControlSchema>(schema: S) {
   ) as ControlValues<S>
 }
 
-/** Holds the current value of every control, starting from each control's `value`. */
 export function useControls<S extends ControlSchema>(schema: S) {
   const [values, setValues] = React.useState(() => defaultsOf(schema))
 
@@ -76,7 +73,6 @@ type ControlsPanelProps<S extends ControlSchema> = {
   className?: string
 }
 
-/** Floating panel on the right that renders a checkbox, slider or dropdown per control. */
 export function ControlsPanel<S extends ControlSchema>({
   schema,
   values,
@@ -87,64 +83,81 @@ export function ControlsPanel<S extends ControlSchema>({
 }: ControlsPanelProps<S>) {
   const [open, setOpen] = React.useState(true)
   const entries = Object.entries(schema) as [keyof S & string, Control][]
+  const dragControls = useDragControls()
+  const bounds = React.useRef<HTMLDivElement>(null)
 
   return (
-    <aside
-      className={cn(
-        "fixed top-[10vh] right-[1.5vw] z-40 flex max-h-[80vh] w-[20vw] flex-col overflow-hidden rounded-lg border bg-background/95 text-sm shadow-lg backdrop-blur max-[1025px]:hidden",
-        className
-      )}
-    >
-      <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
-        <span className="font-medium">{title}</span>
-        <div className="flex items-center gap-1">
-          {reset && (
-            <Button variant="ghost" size="icon-xs" aria-label="Reset controls" onClick={reset}>
-              <RotateCcwIcon />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-label={open ? "Collapse controls" : "Expand controls"}
-            aria-expanded={open}
-            onClick={() => setOpen((o) => !o)}
-          >
-            <motion.span
-              className="flex"
-              initial={false}
-              animate={{ rotate: open ? 0 : -90 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+    <>
+      <div ref={bounds} aria-hidden className="pointer-events-none fixed inset-x-0 top-14 bottom-0" />
+      <motion.aside
+        drag
+        dragListener={false}
+        dragControls={dragControls}
+        dragMomentum={false}
+        dragElastic={0}
+        dragConstraints={bounds}
+        className={cn(
+          "fixed top-[10vh] right-[1.5vw] z-40 flex max-h-[80vh] w-[20vw] flex-col overflow-hidden rounded-lg border bg-background/95 text-sm shadow-lg backdrop-blur max-[1025px]:hidden",
+          className
+        )}
+      >
+        <div
+          onPointerDown={(event) => {
+            if ((event.target as Element).closest("button")) return
+            dragControls.start(event)
+          }}
+          className="flex cursor-grab touch-none items-center justify-between gap-2 border-b px-3 py-2 select-none active:cursor-grabbing"
+        >
+          <span className="font-medium">{title}</span>
+          <div className="flex items-center gap-1">
+            {reset && (
+              <Button variant="ghost" size="icon-xs" aria-label="Reset controls" onClick={reset}>
+                <RotateCcwIcon />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              aria-label={open ? "Collapse controls" : "Expand controls"}
+              aria-expanded={open}
+              onClick={() => setOpen((o) => !o)}
             >
-              <ChevronDownIcon />
-            </motion.span>
-          </Button>
+              <motion.span
+                className="flex"
+                initial={false}
+                animate={{ rotate: open ? 0 : -90 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <ChevronDownIcon />
+              </motion.span>
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {open && (
-        <div className="flex flex-col gap-3 overflow-y-auto px-3 py-3">
-          {entries.map(([key, control], i) => {
-            const showGroup = control.group && control.group !== entries[i - 1]?.[1].group
-            return (
-              <React.Fragment key={key}>
-                {showGroup && (
-                  <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase not-first:border-t not-first:py-2">
-                    {control.group}
-                  </span>
-                )}
-                <ControlRow
-                  id={`control-${key}`}
-                  control={control}
-                  value={values[key]}
-                  onChange={(v) => set(key, v as S[typeof key]["value"])}
-                />
-              </React.Fragment>
-            )
-          })}
-        </div>
-      )}
-    </aside>
+        {open && (
+          <div className="flex flex-col gap-3 overflow-y-auto px-3 py-3">
+            {entries.map(([key, control], i) => {
+              const showGroup = control.group && control.group !== entries[i - 1]?.[1].group
+              return (
+                <React.Fragment key={key}>
+                  {showGroup && (
+                    <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase not-first:border-t not-first:py-2">
+                      {control.group}
+                    </span>
+                  )}
+                  <ControlRow
+                    id={`control-${key}`}
+                    control={control}
+                    value={values[key]}
+                    onChange={(v) => set(key, v as S[typeof key]["value"])}
+                  />
+                </React.Fragment>
+              )
+            })}
+          </div>
+        )}
+      </motion.aside>
+    </>
   )
 }
 
@@ -190,7 +203,6 @@ function ControlRow({
           min={control.min}
           max={control.max}
           step={control.step ?? 1}
-          // The shadcn Slider renders one thumb per array entry.
           value={[value as number]}
           onValueChange={(v) => onChange(Array.isArray(v) ? v[0] : v)}
         />

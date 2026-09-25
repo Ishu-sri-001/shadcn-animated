@@ -25,14 +25,12 @@ type MotionPreset = {
   panelClose: Transition
   fillOpen: Transition
   fillClose: Transition
-  /** Sideways squash of the fill while closed; 1 = none. */
   fillClosedScaleX: number
   plus: Transition
   chevron: Transition
   lineDraw: Transition
   lineRetract: Transition
   contentY: Transition
-  /** Wait before the first paragraph animates in, in seconds. */
   delay: number
   /** Gap between paragraphs, in seconds. */
   stagger: number
@@ -75,8 +73,6 @@ function buildPreset({
     }
   }
 
-  // Gooey feel: springs that overshoot a little on the way in and settle.
-  // Closing uses no bounce, so nothing jiggles past zero (e.g. negative height).
   const spring = (b: number, d = duration) =>
     ({ type: "spring", visualDuration: d, bounce: clamp01(b) }) as const
   const settle = spring(0, Math.max(duration - 0.1, 0.1))
@@ -86,7 +82,6 @@ function buildPreset({
     panelClose: settle,
     fillOpen: spring(bounce),
     fillClose: settle,
-    // The slight squash makes the fill read as liquid as it springs open.
     fillClosedScaleX: 0.94,
     plus: icon,
     chevron: icon,
@@ -98,12 +93,10 @@ function buildPreset({
   }
 }
 
-// Set when `openOnHover` is on: items call it with their value as the mouse moves over them.
 const AccordionHoverContext = React.createContext<
   ((value: unknown) => void) | null
 >(null)
 
-// Wait before a hover opens an item, so sweeping across items doesn't open each one.
 const HOVER_INTENT_MS = 100
 
 const AccordionMotionContext = React.createContext<MotionPreset>(
@@ -161,23 +154,12 @@ function Accordion({
   onPointerLeave,
   ...props
 }: AccordionPrimitive.Root.Props & {
-  /** Draws a rounded border around the whole accordion. */
   bordered?: boolean
-  /** Springy, overshooting motion for opening, closing, icons and lines. */
   gooey?: boolean
-  /** Base animation length in seconds (height, fill, icon, line). */
   duration?: number
-  /** Spring overshoot when `gooey` is on, 0–1. */
   bounce?: number
-  /** Wait before the content starts animating in, in seconds. */
   delay?: number
-  /** Gap between each paragraph of content animating in, in seconds. */
   stagger?: number
-  /**
-   * Opens an item when the mouse rests on it (clicking still works) and closes
-   * everything when the mouse leaves. Items need a `value`. Ignored when `value`
-   * is controlled.
-   */
   openOnHover?: boolean
 }) {
   const preset = React.useMemo(
@@ -185,7 +167,6 @@ function Accordion({
     [gooey, duration, bounce, delay, stagger]
   )
 
-  // Open items are kept here (unless controlled) so hover can change them too.
   const [openValue, setOpenValue] = React.useState<unknown[]>(
     defaultValue ?? []
   )
@@ -204,8 +185,6 @@ function Accordion({
   }, [])
 
   return (
-    // "user" skips transform animations (slide, rotate, line draw) when the
-    // OS "reduce motion" setting is on; AccordionContent also makes height instant.
     <AccordionMotionContext.Provider value={preset}>
       <AccordionHoverContext.Provider
         value={hoverEnabled ? openFromHover : null}
@@ -246,11 +225,8 @@ function AccordionItem({
   onPointerMove,
   ...props
 }: AccordionPrimitive.Item.Props & {
-  /** Background class that fills the item from the top while open, e.g. "bg-black". */
   fill?: string
-  /** Tailwind radius class for the fill's corners, e.g. "rounded-xl". */
   rounded?: string
-  /** Draws a foreground-colored line over the divider on hover and while open. */
   line?: boolean
 }) {
   const preset = React.useContext(AccordionMotionContext)
@@ -262,8 +238,6 @@ function AccordionItem({
       data-slot="accordion-item"
       onPointerMove={(event) => {
         onPointerMove?.(event)
-        // Only real mouse movement: items shifting under a still cursor (as
-        // others open and close) must not open the next one.
         if (
           openFromHover &&
           props.value !== undefined &&
@@ -275,7 +249,6 @@ function AccordionItem({
       }}
       className={cn(
         "group/accordion-item relative py-3",
-        // Inset the text from the fill.
         fill && cn("isolate px-4 transition-colors duration-500", rounded),
         className
       )}
@@ -302,8 +275,6 @@ function AccordionItem({
             />
           )}
           {itemProps.children}
-          {/* Straight divider (a border would curve with the rounded fill corners).
-              With a fill, it hides around the open item. */}
           <div
             aria-hidden
             className={cn(
@@ -320,11 +291,6 @@ function AccordionItem({
   )
 }
 
-/**
- * Line over the divider. Draws in from the left while `drawn`, retracts to the
- * right after. Each draw or retract always plays to the end (a quick hover
- * still gets the full draw), then the line catches up with the latest `drawn`.
- */
 function AccordionItemLine({ drawn }: { drawn: boolean }) {
   const preset = React.useContext(AccordionMotionContext)
   const reduceMotion = useReducedMotion()
@@ -333,8 +299,6 @@ function AccordionItemLine({ drawn }: { drawn: boolean }) {
   const running = React.useRef(false)
   const target = React.useRef(drawn)
 
-  // Plays draw/retract until the line matches the latest `drawn`, never
-  // cutting one short.
   const play = React.useEffectEvent(async () => {
     if (running.current) return
     running.current = true
@@ -358,7 +322,6 @@ function AccordionItemLine({ drawn }: { drawn: boolean }) {
   }, [drawn])
 
   return (
-    // Sits on top of the grey divider.
     <motion.div
       ref={scope}
       aria-hidden
@@ -374,7 +337,6 @@ function AccordionTrigger({
   icon = "chevron",
   ...props
 }: AccordionPrimitive.Trigger.Props & {
-  /** "chevron" rotates 90° on open; "plus" turns into a minus. */
   icon?: "chevron" | "plus"
 }) {
   const preset = React.useContext(AccordionMotionContext)
@@ -402,7 +364,6 @@ function AccordionTrigger({
                 className="pointer-events-none shrink-0"
               >
                 <path d="M5 12h14" />
-                {/* Vertical while closed; rotates flat onto the other bar to form a minus. */}
                 <motion.path
                   d="M5 12h14"
                   initial={false}
@@ -442,8 +403,6 @@ function AccordionContent({
       data-slot="accordion-content"
       className="overflow-hidden text-sm "
       keepMounted
-      // Motion animates open/close, so the panel stays mounted and is never
-      // hidden by Base UI; `inert` keeps closed content out of focus and a11y.
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       render={({ hidden, children: _children, ...panelProps }, state) => (
         <motion.div
@@ -468,7 +427,6 @@ function AccordionContent({
               typeof className === "function" ? className(state) : className
             )}
           >
-            {/* Each top-level child (e.g. a paragraph) fades and slides up in turn. */}
             {React.Children.toArray(children).map((child, i) => (
               <motion.div key={i} variants={contentItemVariants(preset)}>
                 {child}

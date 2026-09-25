@@ -1,8 +1,3 @@
-// folder - from AnimateIcons / Lucide (https://animateicons.in)
-// Author: Avijit Dey (@avijit07x)
-// License: MIT. Source: https://github.com/Avijit07x/animateicons
-// Adapted: project code style, no `any` casts, and `size` sets the svg size
-// inline so it wins over `[&_svg]:size-4` rules (shadcn Button, sidebar menu).
 "use client"
 
 import { cn } from "@/lib/utils"
@@ -36,7 +31,6 @@ interface FolderIconProps extends Omit<
   | "onAnimationEnd"
   | "onAnimationIteration"
 > {
-  /** Icon size: a number of px, or any CSS length such as "1.25rem". */
   size?: number | string
   duration?: number
   isAnimated?: boolean
@@ -116,7 +110,6 @@ const FolderIcon = forwardRef<FolderIconHandle, FolderIconProps>(
             xmlns="http://www.w3.org/2000/svg"
             width={size}
             height={size}
-            // Inline size beats `[&_svg]:size-4` rules (shadcn Button, sidebar menu).
             style={{ width: size, height: size }}
             viewBox="0 0 24 24"
             fill="none"

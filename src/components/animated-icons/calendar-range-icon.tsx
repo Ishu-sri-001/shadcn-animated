@@ -1,8 +1,3 @@
-// calendar range - from AnimateIcons / Lucide (https://animateicons.in)
-// Author: Avijit Dey (@avijit07x)
-// License: MIT. Source: https://github.com/Avijit07x/animateicons
-// Adapted: project code style, no `any` casts, and `size` sets the svg size
-// inline so it wins over shadcn Button's `[&_svg]:size-4` rule.
 "use client"
 
 import { cn } from "@/lib/utils"
@@ -38,7 +33,6 @@ interface CalendarRangeIconProps
     | "onAnimationEnd"
     | "onAnimationIteration"
   > {
-  /** Icon size: a number of px, or any CSS length such as "1.25rem". */
   size?: number | string
   duration?: number
   isAnimated?: boolean
@@ -170,7 +164,6 @@ const CalendarRangeIcon = forwardRef<
             xmlns="http://www.w3.org/2000/svg"
             width={size}
             height={size}
-            // Inline size beats shadcn Button's `[&_svg:not([class*='size-'])]:size-4`.
             style={{ width: size, height: size }}
             viewBox="0 0 24 24"
             fill="none"

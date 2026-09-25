@@ -13,7 +13,6 @@ const controls = {
     type: "select",
     label: "Format",
     value: "PPP",
-    // Labels show the pattern; values are date-fns format strings.
     options: [
       { label: "MMMM Do, YYYY", value: "PPP" },
       { label: "MMM D, YYYY", value: "MMM d, yyyy" },

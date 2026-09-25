@@ -4,7 +4,6 @@ export type RegistryItem = {
   description: string
 }
 
-// Add an entry here after creating src/app/components/<slug>/page.tsx.
 export const registry: RegistryItem[] = [
   {
     slug: "accordion",

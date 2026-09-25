@@ -14,7 +14,6 @@ import {
   type ToastRounded,
 } from "@/components/ui/toast"
 
-// Message for each variant (coffee subscription theme, like the accordion).
 const messages = {
   default: {
     title: "Delivery rescheduled",
@@ -43,7 +42,6 @@ const messages = {
   },
 } as const
 
-// Resolves after 2s, for the loading → success variant.
 const roast = () =>
   new Promise<string>((resolve) =>
     setTimeout(() => resolve("Ethiopia Guji"), 2000)
@@ -185,7 +183,6 @@ export default function ToastPage() {
   const showToast = (trigger: HTMLElement) => {
     const common = {
       timeout: values.timeout * 1000,
-      // Where the toast grows out of (with "Grow from button").
       data: { origin: toastOrigin(trigger) },
     }
     const text = (message: { title: string; description: string }) => ({
@@ -194,7 +191,6 @@ export default function ToastPage() {
     })
 
     if (values.variant === "loading") {
-      // Objects, not plain strings: a string only fills the description.
       toast.promise(roast(), {
         loading: {
           ...common,
@@ -229,8 +225,6 @@ export default function ToastPage() {
       ...common,
       type: variant === "default" ? undefined : variant,
       ...text(messages[variant]),
-      // Undo turns the toast into a short confirmation (instead of just
-      // closing it, which would look the same as the ✕).
       actionProps: values.withAction
         ? {
             children: "Undo",

@@ -27,8 +27,6 @@ function Calendar({
 }) {
   const defaultClassNames = getDefaultClassNames()
 
-  // Stable across renders: new component types each render would make React
-  // remount the whole calendar (restarting CSS transitions and animations).
   const calendarComponents = React.useMemo<
     React.ComponentProps<typeof DayPicker>["components"]
   >(

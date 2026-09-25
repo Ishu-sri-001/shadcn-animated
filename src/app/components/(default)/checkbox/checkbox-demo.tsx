@@ -116,7 +116,6 @@ export function CheckboxDemo() {
             variant={variant as CheckboxVariant}
             cardFill={cardFill as CheckboxCardFill}
             appearance={appearance as CheckboxAppearance}
-            // Slider is 0–100%; the prop is 0 (square) to 1 (circle).
             radius={radius / 100}
             value={picks}
             onValueChange={setPicks}

@@ -15,7 +15,6 @@ export function ThemeToggle() {
       aria-label="Toggle theme"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      {/* Icons swap via the `dark` class, so they match before hydration. */}
       <SunIcon className="dark:hidden" />
       <MoonIcon className="hidden dark:block" />
     </Button>

@@ -11,10 +11,6 @@ function subscribe(onChange: () => void) {
   return () => media.removeEventListener("change", onChange)
 }
 
-/**
- * Whether the viewport is narrower than the mobile breakpoint, kept up to
- * date as it resizes. False on the server.
- */
 export function useIsMobile() {
   return React.useSyncExternalStore(
     subscribe,

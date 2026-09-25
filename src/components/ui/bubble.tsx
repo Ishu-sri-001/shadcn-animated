@@ -28,14 +28,8 @@ function assignRef<T>(ref: React.Ref<T> | undefined, node: T | null) {
   else if (ref) (ref as React.RefObject<T | null>).current = node
 }
 
-// True inside a BubbleThread: bubbles and groups ease into place when a new
-// message pushes them up, instead of jumping.
 const BubbleThreadContext = React.createContext(false)
 
-/**
- * Scrolling conversation. Messages sit at the bottom and it follows new ones
- * while the reader is near the bottom.
- */
 function BubbleThread({ className, children, ...props }: React.ComponentProps<"div">) {
   const scroller = React.useRef<HTMLDivElement>(null)
   const content = React.useRef<HTMLDivElement>(null)
@@ -55,8 +49,6 @@ function BubbleThread({ className, children, ...props }: React.ComponentProps<"d
     })
     observer.observe(inner)
 
-    // When the thread itself gets shorter (e.g. the message box below grows),
-    // stay pinned to the latest message instead of letting it slide out of view.
     let atBottom = true
     const onScroll = () => {
       atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 8
@@ -78,13 +70,11 @@ function BubbleThread({ className, children, ...props }: React.ComponentProps<"d
       <BubbleThreadContext.Provider value={true}>
         <motion.div
           ref={scroller}
-          // Lets Motion measure layout correctly inside the scrolling area.
           layoutScroll
           data-slot="bubble-thread"
           className={cn("overflow-y-auto overscroll-contain", className)}
           {...(props as HTMLMotionProps<"div">)}
         >
-          {/* Relative, so leaving suggestions (AnimatePresence mode="popLayout") stay in place while they fade. */}
           <div ref={content} className="relative flex min-h-full flex-col justify-end gap-4">
             {children}
           </div>
@@ -94,7 +84,6 @@ function BubbleThread({ className, children, ...props }: React.ComponentProps<"d
   )
 }
 
-// Flattens the corners where consecutive bubbles from one sender meet.
 const joinedCorners = cn(
   "gap-0.5 [&_[data-slot=bubble-content]]:transition-[border-radius] [&_[data-slot=bubble-content]]:duration-300",
   "[&>[data-align=start]:not(:first-child)>[data-slot=bubble-content]]:rounded-tl-sm",
@@ -108,7 +97,6 @@ function BubbleGroup({
   joined = false,
   ...props
 }: React.ComponentProps<"div"> & {
-  /** Consecutive bubbles get flatter corners where they meet, easing as messages join. */
   joined?: boolean
 }) {
   const inThread = React.useContext(BubbleThreadContext)
@@ -151,7 +139,6 @@ const bubbleVariants = cva(
   }
 )
 
-// Pops up from the corner nearest the sender; `custom` is the delay.
 const enterVariants: Variants = {
   hidden: { opacity: 0, scale: 0.6, y: 12 },
   visible: (delay: number = 0) => ({
@@ -163,9 +150,7 @@ const enterVariants: Variants = {
 }
 
 const DEFAULT_REACTIONS = ["❤️", "😂", "😮", "😢", "🙏", "👍"]
-// Hover (mouse) or press (touch) this long before the reaction picker opens.
 const PICKER_DELAY_MS = 450
-// How far (px) a bubble has to move sideways to count as a swipe to reply.
 const SWIPE_THRESHOLD = 40
 
 function Bubble({
@@ -202,42 +187,22 @@ function Bubble({
 }: React.ComponentProps<"div"> &
   VariantProps<typeof bubbleVariants> & {
     align?: "start" | "end"
-    /** Pops in from the sender's side when mounted. */
     enter?: boolean
-    /** Wait before popping in, in seconds; stagger a batch by passing index × gap. */
     enterDelay?: number
-    /** Rect (e.g. the message input's) the text flies from into the bubble when mounted. */
     enterFrom?: { x: number; y: number; width: number; height: number }
-    /** Shakes sideways when the variant changes to "destructive" (e.g. a failed send). */
     shake?: boolean
-    /** Lifts slightly on hover and squishes when pressed. */
     lift?: boolean
-    /**
-     * A mouse drag that starts on the words selects them; started anywhere else on
-     * the bubble (or by touch) it swipes to reply.
-     */
     selectable?: boolean
-    /** Time the message was sent, e.g. "9:41". */
     time?: string
-    /** Slides `time` out beside the bubble on hover. */
     revealTime?: boolean
-    /** Drag the bubble sideways to reply; calls `onReply`. */
     swipeToReply?: boolean
     onReply?: () => void
-    /** Called with an emoji from a double-click or the reaction picker. */
     onReact?: (emoji: string) => void
-    /** Called with an emoji to take back, e.g. double-clicking a message you've already hearted. */
     onUnreact?: (emoji: string) => void
     /** Emojis you've already reacted with. */
     reacted?: string[]
-    /**
-     * Double-click reacts with ❤️ and bursts hearts from the pointer. Needs `onReact`.
-     * If you've already hearted it (see `reacted`), it takes the heart back via `onUnreact`.
-     */
     doubleClickReact?: boolean
-    /** Hover (or long-press on touch) opens a row of emojis that magnify under the pointer. Needs `onReact`. */
     picker?: boolean
-    /** Picker emojis grow and lift under the pointer, like the macOS Dock. */
     magnify?: boolean
     /** Emojis offered by the picker. */
     reactions?: string[]
@@ -248,7 +213,6 @@ function Bubble({
   const x = useMotionValue(0)
   const [bursts, setBursts] = React.useState<{ id: number; x: number; y: number }[]>([])
   const [pickerOpen, setPickerOpen] = React.useState(false)
-  // Above the bubble, or below it when there's no room above in the thread.
   const [pickerSide, setPickerSide] = React.useState<"top" | "bottom">("top")
   const dragControls = useDragControls()
   const pickerTimer = React.useRef<number | undefined>(undefined)
@@ -263,7 +227,6 @@ function Bubble({
 
   const canSwipe = swipeToReply && onReply !== undefined
 
-  // Room for the picker (about 3.25rem) above the bubble, within the thread?
   const openPicker = () => {
     const el = node.current
     const thread = el?.closest("[data-slot=bubble-thread]")
@@ -276,9 +239,6 @@ function Bubble({
   }
   const canPick = picker && onReact !== undefined
 
-  // Fly in: a copy of the text travels from the input into the bubble. It
-  // re-reads the bubble's position every frame, so it lands correctly even
-  // while the thread scrolls or makes room.
   const flyFrom = React.useRef(enterFrom)
   React.useLayoutEffect(() => {
     const from = flyFrom.current
@@ -297,7 +257,6 @@ function Bubble({
       zIndex: "50",
       pointerEvents: "none",
       transform: "none",
-      // Colours come from the Bubble's selectors, which don't reach the copy.
       backgroundColor: computed.backgroundColor,
       color: computed.color,
       borderColor: computed.borderColor,
@@ -325,7 +284,6 @@ function Bubble({
       flight.stop()
       land()
     }
-    // Plays once, on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -340,7 +298,6 @@ function Bubble({
 
   React.useEffect(() => () => window.clearTimeout(pickerTimer.current), [])
 
-  // Reply arrow stays put while the bubble slides away from it.
   const arrowX = useTransform(x, (v) => -v)
   const arrowProgress = useTransform(x, (v) => Math.min(Math.abs(v) / SWIPE_THRESHOLD, 1))
   const arrowScale = useTransform(arrowProgress, [0, 1], [0.4, 1])
@@ -355,8 +312,6 @@ function Bubble({
       data-align={align}
       className={cn(
         bubbleVariants({ variant }),
-        // Above the next bubble, which the reaction badge overlaps; higher
-        // still while the picker or a heart burst is showing.
         "has-data-[slot=bubble-reactions]:z-10",
         (pickerOpen || bursts.length > 0) && "z-20",
         lift &&
@@ -373,11 +328,9 @@ function Bubble({
       whileHover={lift ? { y: -2 } : undefined}
       whileTap={lift ? { scale: 0.98 } : undefined}
       drag={canSwipe ? "x" : false}
-      // Selectable: the swipe is started by hand below, unless the drag begins on the text.
       dragListener={!selectable}
       dragControls={dragControls}
       dragConstraints={{ left: 0, right: 0 }}
-      // Only toward the middle of the thread.
       dragElastic={align === "end" ? { left: 0.5, right: 0 } : { left: 0, right: 0.5 }}
       dragDirectionLock
       onDragStart={() => {
@@ -389,13 +342,11 @@ function Bubble({
       }}
       onMouseDown={(event) => {
         onMouseDown?.(event)
-        // Stop a double-click from selecting a word.
         if (doubleClickReact && onReact && event.detail > 1) event.preventDefault()
       }}
       onDoubleClick={(event) => {
         onDoubleClick?.(event)
         if (!doubleClickReact || !onReact) return
-        // Toggles: a second double-click takes the heart back, without a burst.
         if (reacted?.includes("❤️") && onUnreact) {
           onUnreact("❤️")
           return
@@ -485,7 +436,6 @@ function Bubble({
   )
 }
 
-/** Whether the pointer is on a line of the message's text (not the bubble's padding or beside short text). */
 function isOverText(event: React.PointerEvent<HTMLElement>) {
   const content = event.currentTarget.querySelector("[data-slot=bubble-content]")
   if (!content) return false
@@ -508,7 +458,6 @@ function isOverText(event: React.PointerEvent<HTMLElement>) {
   return false
 }
 
-/** Row of emojis above a bubble; with `magnify`, they grow under the pointer. */
 function ReactionPicker({
   align,
   side,
@@ -535,7 +484,6 @@ function ReactionPicker({
   return (
     <motion.div
       className={cn(
-        // Padding (not margin) bridges the gap, so the pointer can reach it.
         "absolute z-20 py-2",
         side === "top" ? "bottom-full" : "top-full",
         align === "end" ? "right-0" : "left-0",
@@ -572,7 +520,6 @@ function ReactionPicker({
   )
 }
 
-/** Hearts bursting out from a double-click. */
 function HeartBurst({ x, y, onDone }: { x: number; y: number; onDone: () => void }) {
   const hearts = 7
   return (
@@ -619,23 +566,14 @@ function BubbleContent({
   children,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  /** Shows bouncing dots in place of the message. */
   typing?: boolean
-  /**
-   * The bubble eases to its new size as the content changes: from the typing
-   * dots to the message, and word by word while text streams in. Off, the
-   * finished message pops in at full size in one go.
-   */
   grow?: boolean
-  /** Shared layout id, e.g. to morph a BubbleSuggestion into this message. */
   layoutId?: string
 }) {
   const reduceMotion = useReducedMotion()
   const node = React.useRef<HTMLDivElement>(null)
 
-  // Without `grow`, the message replaces the typing dots by popping in whole.
   const wasTyping = React.useRef(typing)
-  // Before paint, so the full-size message never shows for a frame first.
   React.useLayoutEffect(() => {
     const was = wasTyping.current
     wasTyping.current = typing
@@ -648,7 +586,6 @@ function BubbleContent({
   return useRender({
     defaultTagName: "div",
     ref: node,
-    // A Motion element by default, so size changes can ease (see `grow`).
     render: render ?? (
       <motion.div layout={grow} layoutId={layoutId} transition={{ layout: spring }} />
     ),
@@ -661,7 +598,6 @@ function BubbleContent({
         children: render ? (
           children
         ) : !grow ? (
-          // Swaps straight to the message; the pop above is its entrance.
           typing ? (
             <TypingDots />
           ) : (
@@ -671,7 +607,6 @@ function BubbleContent({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div
               key={typing ? "typing" : "message"}
-              // Keeps the text undistorted while the bubble resizes.
               layout="position"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -706,11 +641,6 @@ function TypingDots() {
   )
 }
 
-/**
- * Message text. By default it all shows at once; with `stream` it comes in
- * word by word and the bubble grows with it. Long text collapses behind
- * "Show more".
- */
 function BubbleText({
   className,
   text,
@@ -724,26 +654,17 @@ function BubbleText({
 }: {
   className?: string
   text: string
-  /** Shown small at the bottom-right of the text, on the last line when it fits (as in WhatsApp). */
   time?: React.ReactNode
-  /** Reveals the text word by word when mounted, growing the bubble as it goes. */
   stream?: boolean
-  /** Gap between streamed words, in ms. */
   wordDelay?: number
-  /** Called once the last word has streamed in. */
   onStreamEnd?: () => void
-  /** Words added after mount (e.g. streamed) fade in. */
   fade?: boolean
-  /** Text over `lines` lines collapses with a fade and a "Show more" button. */
   collapsible?: boolean
   lines?: number
 }) {
-  // Words and the spaces between them.
   const tokens = text.split(/(\s+)/)
-  // Read on mount only, so turning `stream` on later doesn't replay shown messages.
   const [streams] = React.useState(stream)
   const [shown, setShown] = React.useState(streams ? 1 : tokens.length)
-  // Words present on mount show at once; only later ones fade in.
   const [initialWords] = React.useState(shown)
   const endStream = React.useEffectEvent(() => onStreamEnd?.())
   const total = tokens.length
@@ -752,7 +673,6 @@ function BubbleText({
     if (!streams) return
     let count = 1
     const timer = window.setInterval(() => {
-      // The next word and the space before it.
       count = Math.min(count + 2, total)
       setShown(count)
       if (count >= total) {
@@ -786,7 +706,6 @@ function BubbleText({
     <div data-slot="bubble-text" className={cn("flex flex-col gap-1", className)}>
       <motion.div
         initial={false}
-        // Line height is 1.625 (leading-relaxed), so this is `lines` lines.
         animate={{ height: collapsed ? `${lines * 1.625}em` : "auto" }}
         transition={spring}
         className={cn(
@@ -794,7 +713,6 @@ function BubbleText({
           collapsed && "mask-[linear-gradient(to_bottom,black_55%,transparent)]"
         )}
       >
-        {/* pre-wrap keeps line breaks typed with Shift+Enter. */}
         <div ref={inner} className="relative whitespace-pre-wrap">
           {words.map((word, i) =>
             fade && i >= initialWords ? (
@@ -812,7 +730,6 @@ function BubbleText({
           )}
           {time !== undefined && !canCollapse && (
             <>
-              {/* Invisible copy holds room on the last line; the visible one sits in that room. */}
               <span aria-hidden className="invisible inline-block ps-3 text-xs leading-none">
                 {time}
               </span>
@@ -833,14 +750,12 @@ function BubbleText({
             onClick={() => setExpanded((e) => !e)}
             className={cn(
               "relative self-start text-xs font-medium opacity-80 outline-none",
-              // Underline draws in from the left on hover and retracts to the right.
               "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out",
               "hover:after:origin-left hover:after:scale-x-100 focus-visible:after:origin-left focus-visible:after:scale-x-100"
             )}
           >
             {expanded ? "Show less" : "Show more"}
           </button>
-          {/* Collapsed text hides its last line, so the time moves down here. */}
           {time !== undefined && (
             <span data-slot="bubble-time" className="text-xs leading-none whitespace-nowrap opacity-60">
               {time}
@@ -856,8 +771,6 @@ const bubbleReactionsVariants = cva(
   "z-10 flex w-fit shrink-0 items-center justify-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-sm ring-3 ring-card has-[button]:p-0",
   {
     variants: {
-      // Bottom: in the flow, pulled up over the bubble's edge, so it takes room
-      // below the bubble instead of overlapping the next message.
       side: {
         top: "absolute top-0 -translate-y-3/4",
         bottom: "relative -translate-y-1/2",
@@ -892,16 +805,12 @@ function BubbleReactions({
 }: React.ComponentProps<"div"> & {
   align?: "start" | "end"
   side?: "top" | "bottom"
-  /** Springs in from nothing, and the whole pill wiggles each time `count` changes. */
   pop?: boolean
-  /** Total reactions, shown after the emoji. */
   count?: number
-  /** The count rolls digit by digit to its new value. */
   rolling?: boolean
 }) {
   const node = React.useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
-  // The whole pill (background and all) wiggles when the count changes, not on mount.
   const lastCount = React.useRef(count)
   React.useEffect(() => {
     const was = lastCount.current
@@ -930,8 +839,6 @@ function BubbleReactions({
 
   if (side === "top") return pill
 
-  // Below the bubble the pill takes room, so its space eases open and closed
-  // (the bubble's gap included) and the messages below slide instead of jumping.
   return (
     <motion.div
       className="flex flex-col"
@@ -953,7 +860,6 @@ function RollingNumber({ value, rolling }: { value: number; rolling: boolean }) 
     <span className="tabular-nums">
       <span className="sr-only">{text}</span>
       {digits.map((digit, i) => (
-        // Keyed from the right, so the ones digit keeps rolling when a tens digit appears.
         <RollingDigit key={digits.length - i} digit={Number(digit)} />
       ))}
     </span>
@@ -962,9 +868,6 @@ function RollingNumber({ value, rolling }: { value: number; rolling: boolean }) 
 
 function RollingDigit({ digit }: { digit: number }) {
   return (
-    // The hidden digit keeps the baseline and width; clip-path (unlike
-    // overflow) clips the rolling column without moving the baseline, and
-    // paint containment keeps it from stretching the thread's scroll height.
     <span aria-hidden className="relative inline-block contain-paint [clip-path:inset(0)]">
       <span className="invisible">{digit}</span>
       <motion.span
@@ -991,7 +894,6 @@ const statusLabels: Record<BubbleStatusValue, string> = {
   failed: "Not delivered",
 }
 
-/** Delivery status under a message: ✓ sent, ✓✓ delivered, coloured ✓✓ read, or retry. */
 function BubbleStatus({
   className,
   status,
@@ -1000,7 +902,6 @@ function BubbleStatus({
 }: {
   className?: string
   status: BubbleStatusValue
-  /** Ticks draw themselves in; the retry icon spins a full turn before `onRetry` is called. */
   animated?: boolean
   onRetry?: () => void
 }) {
@@ -1009,8 +910,6 @@ function BubbleStatus({
   const [spinning, setSpinning] = React.useState(false)
   const draw = animated ? { pathLength: 0 } : false
 
-  // Spin first, then retry: retrying swaps this line for "Sending…", which
-  // would cut the spin short.
   const retry = async () => {
     if (spinning) return
     if (animated && !reduceMotion && icon.current) {
@@ -1026,9 +925,6 @@ function BubbleStatus({
       data-slot="bubble-status"
       className={cn(
         "flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground group-data-[align=end]/bubble:justify-end",
-        // As wide as the bubble but never widening it (e.g. "Not delivered ·
-        // Retry" under a short message), so the bubble doesn't jump sideways;
-        // longer text spills past the bubble's outer edge.
         "w-0 min-w-full",
         status === "failed" && "text-destructive",
         className
@@ -1090,13 +986,11 @@ function BubbleStatus({
   )
 }
 
-/** Suggested replies that appear one after another. */
 function BubbleSuggestions({
   className,
   stagger = true,
   ...props
 }: React.ComponentProps<"div"> & {
-  /** Suggestions pop in one after another instead of together. */
   stagger?: boolean
 }) {
   return (
@@ -1115,10 +1009,6 @@ function BubbleSuggestions({
   )
 }
 
-/**
- * One suggested reply. Give it a `layoutId` and the same one to the sent
- * message's BubbleContent, and it moves across and turns into that message.
- */
 function BubbleSuggestion({ className, ...props }: HTMLMotionProps<"button">) {
   return (
     <motion.button
