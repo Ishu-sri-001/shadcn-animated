@@ -434,7 +434,7 @@ export function ChatDemo() {
               }}
               placeholder="Message"
               aria-label="Message"
-              className="max-h-24 min-h-8 w-full max-md:flex-1 min-w-0 resize-none rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-base leading-snug transition-colors outline-none field-sizing-content placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+              className="max-h-24 min-h-8 w-full max-md:flex-1 min-w-0 resize-none rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-base leading-snug transition-colors outline-none field-sizing-content placeholder:text-muted-foreground focus-visible:border-primary md:text-sm dark:bg-input/30"
             />
             <Select
               items={variants}

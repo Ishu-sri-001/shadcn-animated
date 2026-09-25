@@ -234,9 +234,20 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 
 const TriggerContext = React.createContext({ animateValue: true })
 
+type PressState = "rest" | "hover" | "press"
+
+const TRIGGER_SCALE: Record<PressState, number> = { rest: 1, hover: 0.98, press: 0.96 }
+
+const PRESS_TIMING: Record<PressState, KeyframeAnimationOptions> = {
+  rest: { duration: 400, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+  hover: { duration: 250, easing: "ease-out" },
+  press: { duration: 120, easing: "ease-out" },
+}
+
 function DropdownMenuTrigger({
   animateValue = true,
   ref,
+  onPointerEnter,
   onPointerDown,
   onPointerUp,
   onPointerLeave,
@@ -248,15 +259,17 @@ function DropdownMenuTrigger({
 }) {
   const { triggerRef, morphPanelRef, pressFeedback } = useDropdownMenu()
   const pressAnimations = React.useRef<Animation[]>([])
-  const pressed = React.useRef(false)
+  const pressState = React.useRef<PressState>("rest")
+  const hovered = React.useRef(false)
 
-  // Runs on every press and release, whether the press opens the menu or closes it.
+  // Hover eases the trigger down a little, a press takes it further, and leaving springs it back.
+  // Runs whether the press opens the menu or closes it.
   // Web Animations rather than a class or inline style: the trigger's CSS `transition-all`
-  // would otherwise smear every frame, and this picks up from wherever the last press left off.
-  const press = (down: boolean) => {
+  // would otherwise smear every frame, and this picks up from wherever the last one left off.
+  const setPress = (state: PressState) => {
     const trigger = triggerRef.current
-    if (!pressFeedback || !trigger || down === pressed.current) return
-    pressed.current = down
+    if (!pressFeedback || !trigger || state === pressState.current) return
+    pressState.current = state
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
     // An open morph has grown the trigger around its items, drawn by the panel on top. Both
@@ -268,16 +281,15 @@ function DropdownMenuTrigger({
       const animation = el.animate(
         [
           { transform: froms[i] === "none" ? "scale(1)" : froms[i] },
-          { transform: down ? "scale(0.96)" : "scale(1)" },
+          { transform: `scale(${TRIGGER_SCALE[state]})` },
         ],
-        down
-          ? { duration: 120, easing: "ease-out", fill: "forwards" }
-          : { duration: 400, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)", fill: "forwards" }
+        { ...PRESS_TIMING[state], fill: "forwards" }
       )
-      if (!down) animation.onfinish = () => animation.cancel()
+      if (state === "rest") animation.onfinish = () => animation.cancel()
       return animation
     })
   }
+  const release = () => setPress(hovered.current ? "hover" : "rest")
 
   return (
     <TriggerContext.Provider value={{ animateValue }}>
@@ -288,21 +300,28 @@ function DropdownMenuTrigger({
           if (typeof ref === "function") ref(node as HTMLButtonElement)
           else if (ref) ref.current = node as HTMLButtonElement
         }}
+        onPointerEnter={(event) => {
+          onPointerEnter?.(event)
+          if (event.pointerType !== "mouse") return
+          hovered.current = true
+          if (pressState.current === "rest") setPress("hover")
+        }}
         onPointerDown={(event) => {
           onPointerDown?.(event)
-          if (event.button === 0) press(true)
+          if (event.button === 0) setPress("press")
         }}
         onPointerUp={(event) => {
           onPointerUp?.(event)
-          press(false)
+          release()
         }}
         onPointerLeave={(event) => {
           onPointerLeave?.(event)
-          press(false)
+          hovered.current = false
+          setPress("rest")
         }}
         onPointerCancel={(event) => {
           onPointerCancel?.(event)
-          press(false)
+          release()
         }}
         {...props}
       />
@@ -731,6 +750,8 @@ function MotionItem({
     <motion.div
       {...(itemProps as HTMLMotionProps<"div">)}
       variants={itemVariants(context)}
+      // Press feedback also plays on hover: the hovered item eases down to the press scale.
+      whileHover={context.pressFeedback ? { scale: ITEM_PRESS_SCALE } : undefined}
       whileTap={context.pressFeedback ? { scale: ITEM_PRESS_SCALE } : undefined}
     >
       {context.highlight === "fill" && (

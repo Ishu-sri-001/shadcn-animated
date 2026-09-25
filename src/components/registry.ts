@@ -20,11 +20,11 @@ export const registry: RegistryItem[] = [
     name: "Toast",
     description: "Brief messages that stack in the corner and can be swiped away.",
   },
-  {
-    slug: "button",
-    name: "Button",
-    description: "Displays a button or a component that looks like a button.",
-  },
+  // {
+  //   slug: "button",
+  //   name: "Button",
+  //   description: "Displays a button or a component that looks like a button.",
+  // },
   {
     slug: "attachment",
     name: "Attachment",
@@ -54,5 +54,10 @@ export const registry: RegistryItem[] = [
     slug: "dropdown-menu",
     name: "Dropdown Menu",
     description: "A menu of actions or options that opens from a button.",
+  },
+  {
+    slug: "table",
+    name: "Table",
+    description: "A responsive table for rows of data, with a header, body and footer.",
   },
 ]
