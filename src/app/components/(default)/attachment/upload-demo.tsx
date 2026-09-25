@@ -80,12 +80,12 @@ const controls = {
   rolling: { group: "Progress", type: "checkbox", label: "Rolling percentage", value: true },
   shimmer: { group: "Progress", type: "checkbox", label: "Title shimmer", value: true },
   borderTrace: { group: "Progress", type: "checkbox", label: "Border trace", value: true },
-  fill: { group: "Progress", type: "checkbox", label: "Card fill (images)", value: false },
+  fill: { group: "Progress", type: "checkbox", label: "Card fill (images)", value: true },
   fillDirection: {
     group: "Progress",
     type: "select",
     label: "Fill direction",
-    value: "left-to-right",
+    value: "bottom-to-top",
     options: [
       { label: "Left to right", value: "left-to-right" },
       { label: "Bottom to top", value: "bottom-to-top" },
