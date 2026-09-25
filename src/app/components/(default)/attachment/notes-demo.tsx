@@ -53,8 +53,13 @@ export function NotesDemo() {
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-muted-foreground">Notes</h2>
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-[2vw] font-semibold">Demo 2 · Notes</h2>
+        <p className="text-sm text-muted-foreground">
+          Write a short note and add it to the board below.
+        </p>
+      </div>
       <form onSubmit={addNote} className="flex items-center gap-2 max-md:flex-wrap">
         <Input
           value={text}

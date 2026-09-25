@@ -102,6 +102,9 @@ function Attachment({
   leave = true,
   borderTrace = true,
   shake = true,
+  fill = false,
+  fillDirection = "left-to-right",
+  progress = 0,
   value,
   ref,
   style,
@@ -123,6 +126,12 @@ function Attachment({
     borderTrace?: boolean
     /** Shakes sideways when the state changes to "error". */
     shake?: boolean
+    /** The card's background fills with muted colour as `progress` rises while uploading. */
+    fill?: boolean
+    /** Direction the upload fill grows in. */
+    fillDirection?: "left-to-right" | "bottom-to-top"
+    /** 0–100. Drives the upload fill. */
+    progress?: number
     /** Identifies the attachment inside an AttachmentGroup with `reorder`. */
     value?: string | number
   }) {
@@ -202,10 +211,13 @@ function Attachment({
   }, [state, shake, reduceMotion, x])
 
   const flying = enterFrom !== undefined
+  const filling = fill && (state === "uploading" || state === "processing")
   const motionProps = {
     ref: setRef,
     "data-slot": "attachment",
     "data-state": state,
+    // Lets the image sit on a solid backing, so the fill stays behind it.
+    "data-filling": filling || undefined,
     "data-size": size,
     "data-orientation": orientation,
     className: cn(
@@ -222,8 +234,31 @@ function Attachment({
     ...(props as MotionDivProps),
   }
 
+  const horizontalFill = fillDirection === "left-to-right"
   const content = (
     <>
+      <AnimatePresence>
+        {filling && (
+          // Behind the content (the card is isolated), fading out once the upload ends.
+          // The wrapper clips to the card's corners; the fill itself is square.
+          <motion.span
+            key="fill"
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]"
+            exit={{ opacity: 0, transition: settle }}
+          >
+            <motion.span
+              className={cn(
+                "absolute inset-0 rounded-none bg-[color-mix(in_oklch,var(--muted),var(--foreground)_8%)]",
+                horizontalFill ? "origin-left" : "origin-bottom"
+              )}
+              initial={horizontalFill ? { scaleX: 0 } : { scaleY: 0 }}
+              animate={horizontalFill ? { scaleX: progress / 100 } : { scaleY: progress / 100 }}
+              transition={settle}
+            />
+          </motion.span>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {borderTrace && (state === "uploading" || state === "processing") && (
           // One key for both states, so the line keeps running from uploading into processing.
@@ -311,7 +346,7 @@ const attachmentMediaVariants = cva(
       variant: {
         icon: "",
         image:
-          "opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover [&_img]:size-full [&_img]:object-cover",
+          "opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:transition-[opacity,scale,filter] *:duration-500 group-data-filling/attachment:bg-card group-data-filling/attachment:opacity-100 [&_img]:transition-opacity [&_img]:duration-500 group-data-filling/attachment:[&_img]:opacity-60 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover [&_img]:size-full [&_img]:object-cover",
       },
     },
     defaultVariants: {
@@ -358,7 +393,7 @@ function AttachmentMedia({
         attachmentMediaVariants({ variant }),
         isImage &&
           zoom &&
-          cn("*:transition-[scale,filter] *:duration-500 group-hover/attachment:*:scale-110", springyEase),
+          cn("*:transition-[opacity,scale,filter] *:duration-500 group-hover/attachment:*:scale-110", springyEase),
         isImage &&
           develop &&
           "transition-opacity duration-700 group-data-[state=processing]/attachment:*:blur-xs group-data-[state=uploading]/attachment:*:blur-sm",
@@ -780,6 +815,31 @@ function AttachmentGroup({
       flip.tween?.progress(1)
     }
   }, [wrap, reduceMotion])
+  // Marks whether the row overflows. The edge fade is scroll-driven, and Chrome
+  // leaves it stuck when the row stops being scrollable (e.g. after removing
+  // everything), so it's switched off while nothing overflows.
+  React.useEffect(() => {
+    const group = scroller.current
+    if (!group) return
+    const measure = () => {
+      group.dataset.overflow = String(group.scrollWidth > group.clientWidth + 1)
+    }
+    const resize = new ResizeObserver(measure)
+    const observeChildren = () => {
+      resize.disconnect()
+      resize.observe(group)
+      for (const child of group.children) resize.observe(child)
+      measure()
+    }
+    const mutations = new MutationObserver(observeChildren)
+    mutations.observe(group, { childList: true })
+    observeChildren()
+    return () => {
+      resize.disconnect()
+      mutations.disconnect()
+    }
+  }, [])
+
   const { scrollX } = useScroll({ container: scroller })
   const speed = useSpring(useVelocity(scrollX), { stiffness: 300, damping: 40 })
   // Full lean from about 1500px/s of scrolling, opposite the scroll direction.
@@ -795,7 +855,7 @@ function AttachmentGroup({
     "data-wrap": String(initialWrap),
     className: cn(
       "relative flex min-w-0 scroll-fade-x snap-x snap-mandatory scroll-px-1 no-scrollbar gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start",
-      "data-[wrap=true]:snap-none data-[wrap=true]:scroll-fade-none data-[wrap=true]:flex-wrap data-[wrap=true]:overflow-visible",
+      "data-[overflow=false]:scroll-fade-none data-[wrap=true]:snap-none data-[wrap=true]:scroll-fade-none data-[wrap=true]:flex-wrap data-[wrap=true]:overflow-visible",
       className
     ),
     style,

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 import {
   FileArchiveIcon,
   FileSpreadsheetIcon,
@@ -57,6 +58,8 @@ const TICK = 200
 // Ticks spent in "processing" after the upload reaches 100%.
 const PROCESSING_TICKS = 5
 const FAIL_CHANCE = 0.3
+// Delay between attachments leaving in turn on "Delete all", in ms.
+const DELETE_STAGGER_MS = 60
 
 const seed: Item[] = [
   { id: "seed-1", name: "Q3-report.pdf", size: 2.4e6, type: "application/pdf", kind: "file", state: "done", progress: 100, delay: 0 },
@@ -77,6 +80,17 @@ const controls = {
   rolling: { group: "Progress", type: "checkbox", label: "Rolling percentage", value: true },
   shimmer: { group: "Progress", type: "checkbox", label: "Title shimmer", value: true },
   borderTrace: { group: "Progress", type: "checkbox", label: "Border trace", value: true },
+  fill: { group: "Progress", type: "checkbox", label: "Card fill (images)", value: false },
+  fillDirection: {
+    group: "Progress",
+    type: "select",
+    label: "Fill direction",
+    value: "left-to-right",
+    options: [
+      { label: "Left to right", value: "left-to-right" },
+      { label: "Bottom to top", value: "bottom-to-top" },
+    ],
+  },
 
   shake: { group: "States", type: "checkbox", label: "Error shake", value: true },
 
@@ -91,6 +105,11 @@ const controls = {
 
   failures: { group: "Demo", type: "checkbox", label: "Simulate failures", value: true },
 } satisfies ControlSchema
+
+/** Truncates a long name to 20 characters, with "…" marking the cut, as image titles do. */
+function truncateName(name: string, limit = 20) {
+  return name.length > limit ? `${name.slice(0, limit)}…` : name
+}
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -112,6 +131,8 @@ export function UploadDemo() {
   const inputRef = React.useRef<HTMLInputElement>(null)
   // Counts processing ticks per item id.
   const processing = React.useRef(new Map<string, number>())
+  const deleteTimers = React.useRef<number[]>([])
+  React.useEffect(() => () => deleteTimers.current.forEach((t) => window.clearTimeout(t)), [])
 
   const busy = items.some((item) => item.state === "uploading" || item.state === "processing")
 
@@ -187,6 +208,19 @@ export function UploadDemo() {
     processing.current.delete(id)
   }
 
+  // One after another, from the last image back to the first file, so each
+  // plays its own shrink-out instead of all collapsing at once.
+  function removeAll() {
+    deleteTimers.current.forEach((t) => window.clearTimeout(t))
+    const order = [
+      ...items.filter((item) => item.kind === "file"),
+      ...items.filter((item) => item.kind === "image"),
+    ].reverse()
+    deleteTimers.current = order.map((item, i) =>
+      window.setTimeout(() => remove(item.id), i * DELETE_STAGGER_MS)
+    )
+  }
+
   function retry(id: string) {
     setItems((current) =>
       current.map((item) =>
@@ -237,6 +271,9 @@ export function UploadDemo() {
         leave={values.leave}
         borderTrace={values.borderTrace}
         shake={values.shake}
+        fill={image && values.fill}
+        fillDirection={values.fillDirection as "left-to-right" | "bottom-to-top"}
+        progress={item.progress}
       >
         {image ? (
           <AttachmentMedia
@@ -258,7 +295,9 @@ export function UploadDemo() {
           </AttachmentMedia>
         )}
         <AttachmentContent>
-          <AttachmentTitle shimmer={values.shimmer}>{item.name}</AttachmentTitle>
+          <AttachmentTitle shimmer={values.shimmer} title={item.name}>
+            {truncateName(item.name)}
+          </AttachmentTitle>
           <AttachmentDescription>{describe(item)}</AttachmentDescription>
         </AttachmentContent>
         <AttachmentActions>
@@ -288,25 +327,43 @@ export function UploadDemo() {
   const images = items.filter((item) => item.kind === "image")
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        Click &ldquo;Add files&rdquo; or drop files here. Drag to reorder, click an image to open it.
-      </h2>
-      <Attachment state="idle" enter={false}>
-        <AttachmentMedia>
-          <PlusIcon />
-        </AttachmentMedia>
-        <AttachmentContent>
-          <AttachmentTitle>Add files</AttachmentTitle>
-          <AttachmentDescription>Up to 10 MB each</AttachmentDescription>
-        </AttachmentContent>
-        <AttachmentTrigger aria-label="Add files" onClick={() => inputRef.current?.click()} />
-      </Attachment>
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-[2vw] font-semibold">Demo 1 · File upload</h2>
+        <p className="text-sm text-muted-foreground">
+          Click &ldquo;Add files&rdquo; or drop files here. Drag to reorder, click an image to open it.
+        </p>
+      </div>
+      <div className="flex items-center justify-between gap-6">
+        <Attachment state="idle" enter={false}>
+          <AttachmentMedia>
+            <PlusIcon />
+          </AttachmentMedia>
+          <AttachmentContent>
+            <AttachmentTitle>Add files</AttachmentTitle>
+            <AttachmentDescription>Up to 10 MB each</AttachmentDescription>
+          </AttachmentContent>
+          <AttachmentTrigger aria-label="Add files" onClick={() => inputRef.current?.click()} />
+        </Attachment>
+        {/* Text button, as Select all in Checkbox: the underline draws in on hover. */}
+        <button
+          type="button"
+          disabled={items.length === 0}
+          onClick={removeAll}
+          className={cn(
+            "relative shrink-0 text-sm font-medium text-muted-foreground transition-[color,opacity] outline-none hover:text-foreground focus-visible:text-foreground disabled:pointer-events-none disabled:opacity-40",
+            "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out",
+            "hover:after:origin-left hover:after:scale-x-100 focus-visible:after:origin-left focus-visible:after:scale-x-100"
+          )}
+        >
+          Delete all
+        </button>
+      </div>
 
       <AttachmentDropzone
         marching={values.marching}
         onFiles={addFiles}
-        className="flex flex-col gap-4 p-6 max-md:p-4"
+        className="flex min-h-76 flex-col gap-4 p-6 max-md:p-4"
       >
         <AttachmentGroup
           reorder={values.reorder}
