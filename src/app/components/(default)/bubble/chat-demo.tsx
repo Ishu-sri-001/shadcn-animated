@@ -18,7 +18,8 @@ import {
   type BubbleStatusValue,
 } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -42,17 +43,19 @@ type Message = {
   from: "me" | "them"
   text: string
   time: string
+  /** When it was sent (ms), for splitting a sender's run after a minute's gap. */
+  at: number
   /** Style of your own messages, chosen when sending. */
   variant?: Variant
   status?: BubbleStatusValue
   reactions: Record<string, number>
+  /** Emojis you've reacted with; each counts once. */
+  mine?: string[]
   typing?: boolean
   /** Text of the message this one replies to. */
   replyTo?: string
   /** Seeded messages don't animate in. */
   seed?: boolean
-  /** Pop-in delay within a batch, in seconds. */
-  delay?: number
   /** Input rect the text flies from. */
   flyFrom?: { x: number; y: number; width: number; height: number }
   /** Shared with the suggestion it was sent from. */
@@ -62,15 +65,16 @@ type Message = {
 }
 
 const seed: Message[] = [
-  { id: "s1", from: "them", text: "Morning! Did the new beans arrive?", time: "9:38", reactions: {}, seed: true },
-  { id: "s2", from: "them", text: "The Ethiopian roast, I mean. I want to try it for Saturday.", time: "9:38", reactions: {}, seed: true },
-  { id: "s3", from: "me", text: "They did, two bags this morning ☕", time: "9:40", reactions: {}, seed: true },
-  { id: "s4", from: "me", text: "Roasted on Monday, so they're at their best this week.", time: "9:40", reactions: { "❤️": 2 }, status: "read", seed: true },
+  { id: "s1", at: 0, from: "them", text: "Morning! Did the new beans arrive?", time: "9:38 AM", reactions: {}, seed: true },
+  { id: "s2", at: 0, from: "them", text: "The Ethiopian roast, I mean. I want to try it for Saturday.", time: "9:38 AM", reactions: {}, seed: true },
+  { id: "s3", at: 120000, from: "me", text: "They did, two bags this morning ☕", time: "9:40 AM", reactions: {}, seed: true },
+  { id: "s4", at: 120000, from: "me", text: "Roasted on Monday, so they're at their best this week.", time: "9:40 AM", reactions: { "❤️": 2 }, status: "read", seed: true },
   {
     id: "s5",
+    at: 240000,
     from: "them",
     text: "Perfect. Here's the plan for Saturday: we open at eight, so I'll come in at seven to dial in the grinder. The Ethiopian goes on filter first, then we'll try it as espresso around ten once the morning rush dies down. If it's too bright as espresso we'll keep it on filter all day and put the house blend back on the machine. I'll write tasting notes for the board, and could you print a few cards for the counter? Oh, and remind me to order more oat milk, we ran out twice last week.",
-    time: "9:42",
+    time: "9:42 AM",
     reactions: {},
     seed: true,
   },
@@ -93,13 +97,10 @@ const suggestionSets = [
 
 const controls = {
   enter: { group: "Arriving", type: "checkbox", label: "Pop in", value: true },
-  stagger: { group: "Arriving", type: "checkbox", label: "Stagger", value: true },
-  staggerDelay: { group: "Arriving", type: "slider", label: "Stagger gap", value: 0.12, min: 0.03, max: 0.4, step: 0.01, unit: "s" },
-  makeRoom: { group: "Arriving", type: "checkbox", label: "Make room", value: true },
   typing: { group: "Arriving", type: "checkbox", label: "Typing indicator", value: true },
   streaming: { group: "Arriving", type: "checkbox", label: "Stream text (bubble grows)", value: false },
 
-  flyIn: { group: "Sending", type: "checkbox", label: "Fly from input", value: true },
+  flyIn: { group: "Sending", type: "checkbox", label: "Fly from input", value: false },
   status: { group: "Sending", type: "checkbox", label: "Delivery status", value: true },
   shake: { group: "Sending", type: "checkbox", label: "Error shake", value: true },
   failures: { group: "Sending", type: "checkbox", label: "Simulate failures", value: true },
@@ -111,7 +112,7 @@ const controls = {
   magnify: { group: "Reactions", type: "checkbox", label: "Magnify emojis", value: false },
 
   lift: { group: "Interaction", type: "checkbox", label: "Hover lift", value: false },
-  time: { group: "Interaction", type: "checkbox", label: "Timestamp reveal", value: false },
+  selectable: { group: "Interaction", type: "checkbox", label: "Selectable text", value: true },
   swipe: { group: "Interaction", type: "checkbox", label: "Swipe to reply", value: true },
   suggestions: { group: "Interaction", type: "checkbox", label: "Suggested replies", value: true },
   readMore: { group: "Interaction", type: "checkbox", label: "Read more", value: true },
@@ -125,13 +126,21 @@ function now() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
 }
 
-// Consecutive messages from the same sender form a group, keyed by its first message.
+// A sender's run starts a new group after this long, leaving a small gap (as in WhatsApp).
+const GROUP_GAP_MS = 60_000
+
+// Consecutive messages from the same sender, less than a minute apart, form a
+// group, keyed by its first message.
 function groupMessages(messages: Message[]) {
   const groups: { id: string; from: Message["from"]; messages: Message[] }[] = []
   for (const message of messages) {
     const last = groups[groups.length - 1]
-    if (last && last.from === message.from) last.messages.push(message)
-    else groups.push({ id: message.id, from: message.from, messages: [message] })
+    const previous = last?.messages[last.messages.length - 1]
+    if (last && previous && last.from === message.from && message.at - previous.at < GROUP_GAP_MS) {
+      last.messages.push(message)
+    } else {
+      groups.push({ id: message.id, from: message.from, messages: [message] })
+    }
   }
   return groups
 }
@@ -145,7 +154,13 @@ export function ChatDemo() {
   const [variant, setVariant] = React.useState<Variant>("default")
   const [replyTo, setReplyTo] = React.useState<Message | null>(null)
   const [suggestions, setSuggestions] = React.useState<{ id: string; texts: string[] } | null>(null)
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  // Off: sent messages get no reply, so you can send several and see the layout.
+  const [autoReply, setAutoReply] = React.useState(true)
+  const autoReplyRef = React.useRef(autoReply)
+  React.useEffect(() => {
+    autoReplyRef.current = autoReply
+  })
   const replyIndex = React.useRef(0)
   // Suggestions waiting for a streamed reply to finish, by message id.
   const pendingSuggestions = React.useRef(new Map<string, () => void>())
@@ -168,11 +183,32 @@ export function ChatDemo() {
     setMessages((current) => current.map((m) => (m.id === id ? { ...m, ...patch } : m)))
   }
 
+  // Takes back one of your reactions (double-clicking a message you've hearted).
+  function unreact(id: string, emoji: string) {
+    setMessages((current) =>
+      current.map((m) => {
+        if (m.id !== id || !m.mine?.includes(emoji)) return m
+        const { [emoji]: count = 0, ...others } = m.reactions
+        return {
+          ...m,
+          reactions: count > 1 ? { ...others, [emoji]: count - 1 } : others,
+          mine: m.mine.filter((e) => e !== emoji),
+        }
+      })
+    )
+  }
+
+  // You can react with each emoji once per message.
   function react(id: string, emoji: string) {
     setMessages((current) =>
-      current.map((m) =>
-        m.id === id ? { ...m, reactions: { ...m.reactions, [emoji]: (m.reactions[emoji] ?? 0) + 1 } } : m
-      )
+      current.map((m) => {
+        if (m.id !== id || m.mine?.includes(emoji)) return m
+        return {
+          ...m,
+          reactions: { ...m.reactions, [emoji]: (m.reactions[emoji] ?? 0) + 1 },
+          mine: [...(m.mine ?? []), emoji],
+        }
+      })
     )
   }
 
@@ -188,7 +224,7 @@ export function ChatDemo() {
 
     setMessages((current) => [
       ...current,
-      { id, from: "them", text, time: now(), reactions: {}, typing: values.typing, stream },
+      { id, from: "them", text, time: now(), at: Date.now(), reactions: {}, typing: values.typing, stream },
     ])
     const reveal = () => {
       update(id, { typing: false })
@@ -209,7 +245,7 @@ export function ChatDemo() {
       later(() => update(id, { status: "delivered" }), 700)
       later(() => {
         update(id, { status: "read" })
-        botReply()
+        if (autoReplyRef.current) botReply()
       }, 1500)
     }, 500)
   }
@@ -224,6 +260,7 @@ export function ChatDemo() {
         from: "me",
         text,
         time: now(),
+        at: Date.now(),
         variant,
         status: "sending",
         reactions: {},
@@ -240,18 +277,18 @@ export function ChatDemo() {
     deliver(id, true)
   }
 
+  // One at a time, as if typed and sent one after another.
   function simulateIncoming() {
-    setMessages((current) => [
-      ...current,
-      ...incoming.map((text, i) => ({
-        id: crypto.randomUUID(),
-        from: "them" as const,
-        text,
-        time: now(),
-        reactions: {},
-        delay: values.stagger ? i * values.staggerDelay : 0,
-      })),
-    ])
+    incoming.forEach((text, i) =>
+      later(
+        () =>
+          setMessages((current) => [
+            ...current,
+            { id: crypto.randomUUID(), from: "them", text, time: now(), at: Date.now(), reactions: {} },
+          ]),
+        i * 700
+      )
+    )
   }
 
   const lastMine = [...messages].reverse().find((m) => m.from === "me")
@@ -267,18 +304,18 @@ export function ChatDemo() {
         align={mine ? "end" : "start"}
         variant={failed ? "destructive" : mine ? (message.variant ?? "default") : "muted"}
         enter={values.enter && !message.seed && !message.layoutId}
-        enterDelay={message.delay}
         enterFrom={message.flyFrom}
         shake={values.shake}
         lift={values.lift}
-        time={message.time}
-        revealTime={values.time}
+        selectable={values.selectable}
         swipeToReply={values.swipe}
         onReply={() => {
           setReplyTo(message)
           inputRef.current?.focus()
         }}
         onReact={(emoji) => react(message.id, emoji)}
+        onUnreact={(emoji) => unreact(message.id, emoji)}
+        reacted={message.mine}
         doubleClickReact={values.doubleClick}
         picker={values.picker}
         magnify={values.magnify}
@@ -291,6 +328,7 @@ export function ChatDemo() {
           )}
           <BubbleText
             text={message.text}
+            time={message.time}
             stream={message.stream}
             onStreamEnd={() => {
               const show = pendingSuggestions.current.get(message.id)
@@ -304,7 +342,8 @@ export function ChatDemo() {
           {total > 0 && (
             <BubbleReactions
               key="reactions"
-              align={mine ? "start" : "end"}
+              // Bottom-right of your messages, bottom-left of theirs.
+              align={mine ? "end" : "start"}
               pop={values.pop}
               rolling={values.rolling}
               count={total}
@@ -331,23 +370,33 @@ export function ChatDemo() {
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 max-md:flex-col max-md:items-start">
         <h2 className="text-sm font-medium text-muted-foreground">
           Send a message, double-click or hover a bubble to react, swipe one to reply.
         </h2>
-        <Button variant="outline" size="sm" onClick={simulateIncoming}>
-          <MessageSquarePlusIcon />
-          Receive messages
-        </Button>
+        <div className="flex shrink-0 items-center gap-4">
+          <Label className="text-sm font-normal text-muted-foreground">
+            <Checkbox checked={autoReply} onCheckedChange={setAutoReply} />
+            Auto reply
+          </Label>
+          <Button variant="outline" size="sm" onClick={simulateIncoming}>
+            <MessageSquarePlusIcon />
+            Receive messages
+          </Button>
+        </div>
       </div>
-      <div className="flex flex-col rounded-lg border">
-        <BubbleThread makeRoom={values.makeRoom} className="h-[60vh] px-6 py-6 max-md:px-4">
+      {/* Fixed height: a growing message box shrinks the thread instead of pushing the page down. */}
+      {/* Mobile: nearly full width (out past the page's side padding), with a 4vw gutter each side. */}
+      <div className="flex h-[75vh] flex-col overflow-hidden rounded-lg border max-md:mx-[calc(50%-46vw)]">
+        <BubbleThread className="min-h-0 flex-1 px-6 py-6 max-md:px-4">
           {groupMessages(messages).map((group) => (
             <BubbleGroup key={group.id} joined={values.joined}>
               {group.messages.map(renderMessage)}
             </BubbleGroup>
           ))}
-          <AnimatePresence>
+          {/* popLayout: leaving suggestions free their space at once, so the sent
+              message takes it in one move instead of the thread jumping when they're removed. */}
+          <AnimatePresence mode="popLayout">
             {suggestions && (
               <BubbleSuggestions key={suggestions.id} stagger={values.suggestions}>
                 {suggestions.texts.map((text, i) => {
@@ -393,20 +442,29 @@ export function ChatDemo() {
               </Button>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <Input
+         
+          <div className="flex items-end gap-2 max-md:flex-wrap">
+            {/* Enter sends; Shift+Enter starts a new line. Grows with the text. */}
+            <textarea
               ref={inputRef}
               value={draft}
+              rows={1}
               onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return
+                event.preventDefault()
+                event.currentTarget.form?.requestSubmit()
+              }}
               placeholder="Message"
               aria-label="Message"
+              className="max-h-24 min-h-8 w-full max-md:flex-1 min-w-0 resize-none rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-base leading-snug transition-colors outline-none field-sizing-content placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
             />
             <Select
               items={variants}
               value={variant}
               onValueChange={(value) => value && setVariant(value as Variant)}
             >
-              <SelectTrigger aria-label="Bubble variant" className="w-32 shrink-0">
+              <SelectTrigger aria-label="Bubble variant" className="w-32 shrink-0 max-md:order-last max-md:w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
