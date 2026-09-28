@@ -85,4 +85,19 @@ export const registry: RegistryItem[] = [
     name: "Input OTP",
     description: "A one-time code entered one character per box.",
   },
+  {
+    slug: "menubar",
+    name: "Menubar",
+    description: "A row of desktop-style menus that glide from one to the next.",
+  },
+  {
+    slug: "skeleton",
+    name: "Skeleton",
+    description: "Placeholders that shimmer while loading, then hand over to the content.",
+  },
+  // {
+  //   slug: "slider",
+  //   name: "Slider",
+  //   description: "Pick a value or a range, with a fill that springs after the thumb.",
+  // },
 ]

@@ -4,7 +4,6 @@ import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { cn } from "cn"
 import gsap from "gsap"
-import { ChevronRightIcon, CheckIcon } from "lucide-react"
 import {
   AnimatePresence,
   motion,
@@ -32,6 +31,7 @@ type Transition = NonNullable<HTMLMotionProps<"div">["transition"]>
 type DropdownMenuAnimation = "collapse" | "scale" | "slide" | "reveal" | "morph"
 type DropdownMenuIndicator = "check" | "dot" | "bar"
 type DropdownMenuHighlight = "slide" | "fill" | "none"
+type DropdownMenuHighlightColor = "primary" | "muted"
 
 type MotionPreset = {
   enter: Transition
@@ -77,6 +77,7 @@ type DropdownMenuContextValue = {
   delay: number
   exitFast: boolean
   highlight: DropdownMenuHighlight
+  highlightColor: DropdownMenuHighlightColor
   indicator: DropdownMenuIndicator
   textRoll: boolean
   delayCloseOnSelect: boolean
@@ -84,7 +85,23 @@ type DropdownMenuContextValue = {
   descriptions: boolean
   bold: boolean
   typeahead: boolean
+  /**
+   * The item the sliding highlight sits on. It moves when another item is highlighted and only
+   * clears when the pointer leaves the panel or the menu closes, so crossing the gap between two
+   * items (or a separator) doesn't drop the pill for a frame and pop it back.
+   */
+  activeItem: string | null
+  setActiveItem: (item: string | null) => void
+  /**
+   * Clears the pill after a short grace period, cancelled if another item takes it first. The
+   * pointer can briefly "leave" a panel without meaning to — Base UI lays an invisible hover
+   * guard over it while a submenu is open — and an instant clear would flicker the pill.
+   */
+  releaseActiveItem: () => void
 }
+
+/** How long the pill waits after the pointer leaves before it goes, in ms. */
+const PILL_RELEASE_MS = 150
 
 const DropdownMenuContext = React.createContext<DropdownMenuContextValue | null>(null)
 
@@ -104,6 +121,7 @@ function DropdownMenu({
   exitFast = false,
   animation = "collapse",
   highlight = "slide",
+  highlightColor = "primary",
   indicator = "check",
   textRoll = false,
   delayCloseOnSelect = false,
@@ -132,6 +150,8 @@ function DropdownMenu({
    * `fill` fills each item with the primary colour from the top down.
    */
   highlight?: DropdownMenuHighlight
+  /** The hovered item's fill: the primary colour, or the quieter muted one. */
+  highlightColor?: DropdownMenuHighlightColor
   /** How the chosen radio item is marked. */
   indicator?: DropdownMenuIndicator
   /** Item titles roll to a copy of themselves when highlighted. */
@@ -149,6 +169,17 @@ function DropdownMenu({
 }) {
   const id = React.useId()
   const [openState, setOpenState] = React.useState(defaultOpen)
+  const [activeItem, setActiveItemState] = React.useState<string | null>(null)
+  const releaseTimer = React.useRef(0)
+  const setActiveItem = React.useCallback((item: string | null) => {
+    window.clearTimeout(releaseTimer.current)
+    setActiveItemState(item)
+  }, [])
+  const releaseActiveItem = React.useCallback(() => {
+    window.clearTimeout(releaseTimer.current)
+    releaseTimer.current = window.setTimeout(() => setActiveItemState(null), PILL_RELEASE_MS)
+  }, [])
+  React.useEffect(() => () => window.clearTimeout(releaseTimer.current), [])
   const open = openProp ?? openState
   const actionsRef = React.useRef<MenuPrimitive.Root.Actions>(null)
   const triggerRef = React.useRef<HTMLElement>(null)
@@ -176,6 +207,7 @@ function DropdownMenu({
       delay,
       exitFast,
       highlight,
+      highlightColor,
       indicator,
       textRoll,
       delayCloseOnSelect,
@@ -183,6 +215,9 @@ function DropdownMenu({
       descriptions,
       bold,
       typeahead,
+      activeItem,
+      setActiveItem,
+      releaseActiveItem,
     }),
     [
       id,
@@ -195,6 +230,7 @@ function DropdownMenu({
       delay,
       exitFast,
       highlight,
+      highlightColor,
       indicator,
       textRoll,
       delayCloseOnSelect,
@@ -202,6 +238,9 @@ function DropdownMenu({
       descriptions,
       bold,
       typeahead,
+      activeItem,
+      setActiveItem,
+      releaseActiveItem,
     ]
   )
 
@@ -213,7 +252,10 @@ function DropdownMenu({
           open={open}
           onOpenChange={(next, details) => {
             // Keep the popup mounted so Motion can play the exit, then unmount in `onExitComplete`.
-            if (!next) details.preventUnmountOnClose()
+            if (!next) {
+              details.preventUnmountOnClose()
+              setActiveItem(null)
+            }
             setOpenState(next)
             onOpenChange?.(next, details)
           }}
@@ -737,6 +779,10 @@ function DropdownMenuContent({
                 initial="closed"
                 animate={context.open ? "open" : "closed"}
                 variants={panelVariants(context, state.side)}
+                onPointerLeave={(event) => {
+                  ;(popupProps as HTMLMotionProps<"div">).onPointerLeave?.(event)
+                  context.releaseActiveItem()
+                }}
                 onAnimationComplete={(definition) => {
                   if (definition === "closed" && !context.open) context.onExitComplete()
                 }}
@@ -789,10 +835,19 @@ function MotionItem({
 }) {
   const context = useDropdownMenu()
   const content = itemProps.children
+  const itemId = React.useId()
+  const { setActiveItem } = context
+  // Highlighting an item (by pointer or keyboard) focuses it, so focus is where the pill moves.
+  const pillHere = context.highlight === "slide" && context.activeItem === itemId
 
   return (
     <motion.div
       {...(itemProps as HTMLMotionProps<"div">)}
+      data-pill={pillHere || undefined}
+      onFocus={(event) => {
+        itemProps.onFocus?.(event)
+        setActiveItem(itemId)
+      }}
       variants={itemVariants(context)}
       // Press feedback also plays on hover: the hovered item eases down to the press scale.
       whileHover={context.pressFeedback ? { scale: ITEM_PRESS_SCALE } : undefined}
@@ -801,22 +856,28 @@ function MotionItem({
       {context.highlight === "fill" && (
         <motion.span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] bg-primary"
+          className={cn(
+            "pointer-events-none absolute inset-0 -z-10 rounded-[inherit]",
+            HIGHLIGHT_FILL[context.highlightColor]
+          )}
           style={{ originY: 0 }}
           initial={false}
           animate={{ scaleY: highlighted ? 1 : 0 }}
           transition={{ duration: 0.3, ease: easeOutCubic }}
         />
       )}
-      {context.highlight === "slide" && highlighted && (
+      {pillHere && (
         <motion.span
           aria-hidden
           layoutId={`${context.id}-highlight`}
           transition={context.preset.glide}
-          className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] bg-primary"
+          className={cn(
+            "pointer-events-none absolute inset-0 -z-10 rounded-[inherit]",
+            HIGHLIGHT_FILL[context.highlightColor]
+          )}
         />
       )}
-      <ItemHighlightContext.Provider value={highlighted}>
+      <ItemHighlightContext.Provider value={highlighted || pillHere}>
         {typeof content === "string" && context.textRoll ? <RollText>{content}</RollText> : content}
       </ItemHighlightContext.Provider>
       {children}
@@ -828,13 +889,38 @@ const itemBase =
   "relative isolate flex cursor-default items-center gap-1.5 rounded-md text-base outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 
 /** The hovered item is always primary; Motion draws the background for `slide` and `fill`. */
-const primaryText =
-  "transition-colors duration-300 focus:text-primary-foreground focus:**:text-primary-foreground"
+const HIGHLIGHT_FILL: Record<DropdownMenuHighlightColor, string> = {
+  primary: "bg-primary",
+  muted: "bg-muted",
+}
 
-const highlightClasses: Record<DropdownMenuHighlight, string> = {
-  slide: cn(primaryText, "focus:bg-transparent"),
-  fill: cn(primaryText, "focus:bg-transparent"),
-  none: cn(primaryText, "focus:bg-primary"),
+/**
+ * The hovered item's text, which has to stay readable on its fill. With `slide` it follows the
+ * pill (`data-pill`) rather than focus, since the pill stays put while the pointer crosses a gap.
+ */
+const HIGHLIGHT_TEXT: Record<"slide" | "other", Record<DropdownMenuHighlightColor, string>> = {
+  slide: {
+    primary:
+      "transition-colors duration-300 data-pill:text-primary-foreground data-pill:**:text-primary-foreground",
+    muted: "transition-colors duration-300 data-pill:text-foreground data-pill:**:text-foreground",
+  },
+  other: {
+    primary:
+      "transition-colors duration-300 focus:text-primary-foreground focus:**:text-primary-foreground",
+    muted: "transition-colors duration-300 focus:text-foreground focus:**:text-foreground",
+  },
+}
+
+/** Motion draws the fill for `slide` and `fill`; `none` is a plain CSS background. */
+function highlightClasses(highlight: DropdownMenuHighlight, color: DropdownMenuHighlightColor) {
+  return cn(
+    HIGHLIGHT_TEXT[highlight === "slide" ? "slide" : "other"][color],
+    highlight === "none"
+      ? color === "primary"
+        ? "focus:bg-primary"
+        : "focus:bg-muted"
+      : "focus:bg-transparent"
+  )
 }
 
 function DropdownMenuItem({
@@ -846,7 +932,7 @@ function DropdownMenuItem({
   inset?: boolean
   variant?: "default" | "destructive"
 }) {
-  const { highlight } = useDropdownMenu()
+  const { highlight, highlightColor } = useDropdownMenu()
 
   return (
     <MenuPrimitive.Item
@@ -855,8 +941,8 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         itemBase,
-        "group/dropdown-menu-item px-1.5 py-1 focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive",
-        highlightClasses[highlight],
+        "group/dropdown-menu-item px-1.5 py-1 data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive",
+        highlightClasses(highlight, highlightColor),
         className
       )}
       render={(itemProps, state) => (
@@ -879,18 +965,33 @@ function DropdownMenuSubTrigger({
 }: MenuPrimitive.SubmenuTrigger.Props & {
   inset?: boolean
 }) {
+  const context = useDropdownMenu()
+
   return (
     <MenuPrimitive.SubmenuTrigger
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-popup-open:bg-accent data-popup-open:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        itemBase,
+        "group/dropdown-menu-item px-1.5 py-1 text-sm data-inset:pl-7",
+        // While its submenu is open and the pill has moved into it, keep a quiet mark here.
+        "data-popup-open:not-data-pill:bg-muted",
+        highlightClasses(context.highlight, context.highlightColor),
         className
+      )}
+      // Drawn by the same item as the rest, so the sliding pill glides onto it too.
+      render={(itemProps, state) => (
+        <MotionItem itemProps={itemProps} highlighted={state.highlighted}>
+          {/* The same chevron as the menu names, turned to point at the submenu. It stays
+              put: the submenu opening beside it is signal enough. */}
+          <span aria-hidden className="ml-auto flex -rotate-90">
+            <MorphChevron open={false} />
+          </span>
+        </MotionItem>
       )}
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
     </MenuPrimitive.SubmenuTrigger>
   )
 }
@@ -929,34 +1030,64 @@ function DropdownMenuSubContent({
   )
 }
 
+/** A tick that draws itself in when checked and fades out when unchecked. */
+function DrawnCheck({ checked }: { checked: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <motion.path
+        d="M4 12.5 L9.5 18 L20 6.5"
+        initial={false}
+        animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+        transition={
+          checked ? { duration: 0.3, ease: smoothEase } : { duration: 0.15, ease: "easeOut" }
+        }
+      />
+    </svg>
+  )
+}
+
 function DropdownMenuCheckboxItem({
   className,
   children,
-  checked,
   inset,
   ...props
 }: MenuPrimitive.CheckboxItem.Props & {
   inset?: boolean
 }) {
+  const context = useDropdownMenu()
+
   return (
     <MenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       data-inset={inset}
+      data-indicator="check"
       className={cn(
-        "relative flex cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-7 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        itemBase,
+        // Room for the tick on the right; see the radio item for why it's keyed on an attribute.
+        "py-1 pl-1.5 data-inset:pl-7 data-[indicator=check]:pr-8",
+        highlightClasses(context.highlight, context.highlightColor),
         className
       )}
-      checked={checked}
+      render={(itemProps, state) => (
+        <MotionItem itemProps={itemProps} highlighted={state.highlighted}>
+          <span
+            aria-hidden
+            data-slot="dropdown-menu-checkbox-item-indicator"
+            className="pointer-events-none absolute right-2 flex size-4 items-center justify-center"
+          >
+            <DrawnCheck checked={state.checked} />
+          </span>
+        </MotionItem>
+      )}
       {...props}
     >
-      <span
-        className="pointer-events-none absolute right-2 flex items-center justify-center"
-        data-slot="dropdown-menu-checkbox-item-indicator"
-      >
-        <MenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon />
-        </MenuPrimitive.CheckboxItemIndicator>
-      </span>
       {children}
     </MenuPrimitive.CheckboxItem>
   )
@@ -1003,25 +1134,7 @@ function RadioIndicator({ checked }: { checked: boolean }) {
           }
         />
       ) : (
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <motion.path
-            d="M4 12.5 L9.5 18 L20 6.5"
-            initial={false}
-            animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
-            transition={
-              checked
-                ? { duration: 0.3, ease: smoothEase }
-                : { duration: 0.15, ease: "easeOut" }
-            }
-          />
-        </svg>
+        <DrawnCheck checked={checked} />
       )}
     </span>
   )
@@ -1042,6 +1155,7 @@ function DropdownMenuRadioItem({
     <MenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       data-inset={inset}
+      data-indicator={context.indicator}
       closeOnClick={!context.delayCloseOnSelect}
       onClick={(event) => {
         onClick?.(event)
@@ -1049,9 +1163,11 @@ function DropdownMenuRadioItem({
       }}
       className={cn(
         itemBase,
-        "py-1 pr-8 pl-1.5 focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-7",
-        context.indicator === "bar" && "px-4",
-        highlightClasses[context.highlight],
+        "py-1 pl-1.5 data-inset:pl-7",
+        // Room for the indicator, keyed on an attribute so it outranks a plain `px-*` passed in
+        // (the menubar sizes its items that way): a bar on the left, a tick or dot on the right.
+        "data-[indicator=bar]:pl-6 not-data-[indicator=bar]:pr-8",
+        highlightClasses(context.highlight, context.highlightColor),
         className
       )}
       render={(itemProps, state) => (
@@ -1153,6 +1269,7 @@ export {
   DropdownMenuTriggerIcon,
   MorphChevron,
   MorphPlus,
+  DrawnCheck,
   DropdownMenuValue,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -1168,4 +1285,15 @@ export {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  // For components built on the menu, like the menubar.
+  useDropdownMenu,
+  panelVariants,
+  itemVariants,
+  unscaledRect,
+}
+export type {
+  DropdownMenuAnimation,
+  DropdownMenuHighlight,
+  DropdownMenuHighlightColor,
+  DropdownMenuIndicator,
 }

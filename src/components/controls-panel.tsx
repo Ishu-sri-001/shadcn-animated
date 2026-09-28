@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
+import { ControlsSlider } from "@/components/controls-slider"
 
 type BaseControl = {
   label: string
@@ -198,7 +198,7 @@ function ControlRow({
             {control.unit}
           </span>
         </div>
-        <Slider
+        <ControlsSlider
           id={id}
           min={control.min}
           max={control.max}

@@ -160,3 +160,70 @@ html.theme-sweeping::view-transition {
     transform: scaleX(0);
   }
 }
+
+/*
+ * Skeleton shimmer: bands of light, locked to the viewport with `background-attachment: fixed`,
+ * sweeping across every placeholder at once and at the same speed.
+ *
+ * The bands repeat across the screen, one per tile, and each cycle moves them exactly one tile
+ * along. So the loop has no seam: as one band leaves, the next arrives, and the end of a cycle
+ * looks identical to its start. Sweeping a single band off-screen and back left long gaps and a
+ * visible restart.
+ */
+@keyframes skeleton-sweep {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60vw 0;
+  }
+}
+
+@keyframes skeleton-sweep-wide {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100vw 0;
+  }
+}
+
+.skeleton-sweep {
+  /* A light sheen on light themes; a gentle lift on dark ones, where white would glare. */
+  --skeleton-highlight: color-mix(in oklch, var(--background) 85%, transparent);
+  background-image: linear-gradient(
+    100deg,
+    transparent 25%,
+    var(--skeleton-highlight) 50%,
+    transparent 75%
+  );
+  background-size: 60vw 100%;
+  background-repeat: repeat-x;
+  background-attachment: fixed;
+  /* The delay staggers each placeholder's cycle; see the skeleton component. */
+  animation: skeleton-sweep var(--skeleton-duration, 1.6s) linear var(--skeleton-delay, 0s)
+    infinite;
+}
+
+.dark .skeleton-sweep {
+  --skeleton-highlight: color-mix(in oklch, var(--foreground) 9%, transparent);
+}
+
+/* Wave: the same sweep with wider, softer bands. */
+.skeleton-sweep[data-animation="wave"] {
+  background-image: linear-gradient(
+    100deg,
+    transparent 10%,
+    var(--skeleton-highlight) 50%,
+    transparent 90%
+  );
+  background-size: 100vw 100%;
+  animation-name: skeleton-sweep-wide;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-sweep {
+    animation: none;
+    background-image: none;
+  }
+}
