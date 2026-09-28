@@ -60,4 +60,29 @@ export const registry: RegistryItem[] = [
     name: "Table",
     description: "Sort, filter, select and reorder rows that glide into place.",
   },
+  {
+    slug: "dialog",
+    name: "Dialog",
+    description: "A window over the page that asks for a decision before you carry on.",
+  },
+  {
+    slug: "drawer",
+    name: "Drawer",
+    description: "A panel that slides in from the edge and can be swiped away.",
+  },
+  {
+    slug: "field",
+    name: "Field",
+    description: "Labels, hints and errors that hold a form's inputs together.",
+  },
+  {
+    slug: "hover-card",
+    name: "Hover Card",
+    description: "A preview that appears when you hover a link.",
+  },
+  {
+    slug: "input-otp",
+    name: "Input OTP",
+    description: "A one-time code entered one character per box.",
+  },
 ]
