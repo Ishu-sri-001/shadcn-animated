@@ -834,7 +834,9 @@ function DataTable({
               <motion.table
                 ref={table}
                 data-slot="table"
-                className="relative w-full caption-bottom text-base"
+                // Fixed layout: columns keep their widths when filtering or paging changes the rows.
+                // On phones it's wider than the screen and scrolls, so cells aren't cut off.
+                className="relative w-full table-fixed caption-bottom text-base max-md:min-w-[150vw]"
                 initial={entrance ? "hidden" : false}
                 animate={reveal}
                 // Re-measured on every move, so the highlight follows rows that have shifted.

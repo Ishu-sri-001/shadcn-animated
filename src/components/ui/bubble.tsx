@@ -641,6 +641,9 @@ function TypingDots() {
   )
 }
 
+
+const CHARS_PER_LINE = 70
+
 function BubbleText({
   className,
   text,
@@ -685,29 +688,44 @@ function BubbleText({
 
   const words = tokens.slice(0, shown)
   const [expanded, setExpanded] = React.useState(false)
-  const [overflowing, setOverflowing] = React.useState(false)
+  const [toggled, setToggled] = React.useState(false)
+  // `null` until measured. Until then the text is capped at `lines`, so a long message
+  // starts out cropped instead of showing in full and then snapping shut.
+  const [overflowing, setOverflowing] = React.useState<boolean | null>(null)
   const inner = React.useRef<HTMLDivElement>(null)
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const el = inner.current
     if (!el || !collapsible) return
-    const observer = new ResizeObserver(() => {
+    const measure = () => {
       const lineHeight = parseFloat(getComputedStyle(el).lineHeight)
       setOverflowing(el.offsetHeight > lineHeight * lines + 1)
-    })
+    }
+    // Measure before the first paint; the observer then catches streaming and resizes.
+    measure()
+    const observer = new ResizeObserver(measure)
     observer.observe(el)
     return () => observer.disconnect()
   }, [collapsible, lines])
 
-  const canCollapse = collapsible && overflowing
+  // Before it can be measured (the server render), guess from the length so a long message
+  // already has its fade and "Show more" and doesn't grow a row when the page hydrates.
+  const likelyLong = text.length > lines * CHARS_PER_LINE
+  const canCollapse = collapsible && (overflowing ?? likelyLong)
   const collapsed = canCollapse && !expanded
+  const clampHeight = `${lines * 1.625}em`
 
   return (
     <div data-slot="bubble-text" className={cn("flex flex-col gap-1", className)}>
       <motion.div
         initial={false}
-        animate={{ height: collapsed ? `${lines * 1.625}em` : "auto" }}
+        animate={{ height: collapsed ? clampHeight : "auto" }}
         transition={spring}
+        // The cap stays on until the first toggle; dropping it as soon as the text is measured
+        // would let the box grow for a frame before the height animation takes over.
+        style={{
+          maxHeight: collapsible && !toggled && overflowing !== false ? clampHeight : undefined,
+        }}
         className={cn(
           "overflow-hidden",
           collapsed && "mask-[linear-gradient(to_bottom,black_55%,transparent)]"
@@ -747,7 +765,10 @@ function BubbleText({
         <div className="flex items-end justify-between gap-3">
           <button
             type="button"
-            onClick={() => setExpanded((e) => !e)}
+            onClick={() => {
+              setToggled(true)
+              setExpanded((e) => !e)
+            }}
             className={cn(
               "relative self-start text-xs font-medium opacity-80 outline-none",
               "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out",

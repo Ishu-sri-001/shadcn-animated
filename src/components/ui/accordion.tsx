@@ -4,6 +4,7 @@ import * as React from "react"
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
 import { cn } from "cn"
 import { ChevronRightIcon } from "lucide-react"
+import { MorphPlus } from "@/components/ui/dropdown-menu"
 import {
   motion,
   MotionConfig,
@@ -14,9 +15,6 @@ import {
 } from "motion/react"
 
 const MotionChevronRightIcon = motion.create(ChevronRightIcon)
-
-/** Plus ↔ minus timing, matching the dropdown trigger icon. */
-const plusTurn = { duration: 0.3, ease: "easeInOut" } as const
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const fillEase = [0.215, 0.61, 0.355, 1] as const
@@ -353,29 +351,12 @@ function AccordionTrigger({
           <button {...triggerProps}>
             {triggerProps.children}
             {icon === "plus" ? (
-              // Same as the dropdown trigger: the whole icon turns 180° while the vertical
-              // line turns 90° to lie flat, into a minus. Closing plays it back.
-              <motion.svg
+              // Shared with the dropdown trigger, so both morph the same way.
+              <MorphPlus
                 data-slot="accordion-trigger-icon"
-                aria-hidden
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                className="pointer-events-none shrink-0"
-                initial={false}
-                animate={{ rotate: state.open ? 180 : 0 }}
-                transition={plusTurn}
-              >
-                <path d="M5 12h14" />
-                <motion.path
-                  d="M5 12h14"
-                  initial={false}
-                  animate={{ rotate: state.open ? 0 : 90 }}
-                  transition={plusTurn}
-                />
-              </motion.svg>
+                open={state.open}
+                className="size-5!"
+              />
             ) : (
               <MotionChevronRightIcon
                 data-slot="accordion-trigger-icon"

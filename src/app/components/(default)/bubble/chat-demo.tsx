@@ -375,10 +375,10 @@ export function ChatDemo() {
             </BubbleGroup>
           ))}
           <AnimatePresence mode="popLayout">
-            {suggestions && (
-              <BubbleSuggestions key={suggestions.id} stagger={values.suggestions}>
+            {values.suggestions && suggestions && (
+              <BubbleSuggestions key={suggestions.id}>
                 {suggestions.texts.map((text, i) => {
-                  const layoutId = values.suggestions ? `${suggestions.id}-${i}` : undefined
+                  const layoutId = `${suggestions.id}-${i}`
                   return (
                     <BubbleSuggestion
                       key={text}

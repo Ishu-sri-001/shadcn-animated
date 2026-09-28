@@ -413,8 +413,8 @@ function CheckboxItem({
             <motion.span
               aria-hidden
               className={cn(
-                "pointer-events-none absolute inset-x-0 top-1/2 h-px origin-left opacity-70",
-                onAccent ? "bg-(--checkbox-on-accent)" : "bg-foreground"
+                "pointer-events-none  absolute inset-x-0 top-1/2 h-0.5! -translate-y-1/2 origin-left rounded-full opacity-70",
+                onAccent ? "bg-(--checkbox-on-accent)" : "bg-black"
               )}
               initial={false}
               animate={{ scaleX: checked ? 1 : 0 }}

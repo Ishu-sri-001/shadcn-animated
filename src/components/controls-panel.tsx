@@ -221,7 +221,7 @@ function ControlRow({
         <SelectTrigger id={id} size="sm" className="w-[55%]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="w-auto min-w-(--anchor-width)">
           {control.options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}

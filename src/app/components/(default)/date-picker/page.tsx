@@ -4,6 +4,21 @@ import * as React from "react"
 
 import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
 import { DatePicker } from "@/components/ui/date-picker"
+import { format } from "date-fns"
+
+// Each format is labelled with this date written in it, e.g. "28/09/2026" rather than "dd/MM/yyyy".
+const SAMPLE_DATE = new Date(2026, 8, 28)
+const DATE_FORMATS = [
+  "PPP",
+  "MMM d, yyyy",
+  "dd/MM/yyyy",
+  "MM/dd/yyyy",
+  "yyyy-MM-dd",
+  "dd MMM yyyy",
+  "EEEE, d MMM",
+  "MMMM yyyy",
+  "yyyy",
+]
 
 const controls = {
   showIcon: { group: "Trigger", type: "checkbox", label: "Icon", value: true },
@@ -13,17 +28,7 @@ const controls = {
     type: "select",
     label: "Format",
     value: "PPP",
-    options: [
-      { label: "MMMM Do, YYYY", value: "PPP" },
-      { label: "MMM D, YYYY", value: "MMM d, yyyy" },
-      { label: "DD/MM/YYYY", value: "dd/MM/yyyy" },
-      { label: "MM/DD/YYYY", value: "MM/dd/yyyy" },
-      { label: "YYYY-MM-DD", value: "yyyy-MM-dd" },
-      { label: "DD MMM YYYY", value: "dd MMM yyyy" },
-      { label: "dddd, D MMM", value: "EEEE, d MMM" },
-      { label: "MMMM YYYY", value: "MMMM yyyy" },
-      { label: "YYYY", value: "yyyy" },
-    ],
+    options: DATE_FORMATS.map((value) => ({ label: format(SAMPLE_DATE, value), value })),
   },
 
   fromBehind: { group: "Popup", type: "checkbox", label: "From behind trigger", value: true },

@@ -250,7 +250,7 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
   const content = (
     <>
       <TeamIdentity team={team} iconRef={icon} />
-      <MorphChevron open={switcher && open} className="size-3.5!" />
+      {switcher && <MorphChevron open={open} className="size-3.5!" />}
     </>
   )
 

@@ -367,6 +367,42 @@ function MorphChevron({
   )
 }
 
+/** Plus ↔ minus: a quick turn, eased in and out. */
+const plusSpin = { duration: 0.3, ease: "easeInOut" } as const
+
+function MorphPlus({
+  open,
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof motion.svg>, "children"> & { open: boolean }) {
+  return (
+    <motion.svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("pointer-events-none size-5 shrink-0", className)}
+      initial={false}
+      animate={{ rotate: open ? 180 : 0 }}
+      transition={plusSpin}
+      {...props}
+    >
+      {/* Into a minus: the whole icon turns 180° while the vertical line turns 90° to lie
+          flat. Closing plays it back. */}
+      <path d="M5 12h14" />
+      <motion.path
+        d="M5 12h14"
+        initial={false}
+        animate={{ rotate: open ? 0 : 90 }}
+        transition={plusSpin}
+      />
+    </motion.svg>
+  )
+}
+
 function DropdownMenuTriggerIcon({
   icon = "plus",
   className,
@@ -375,8 +411,6 @@ function DropdownMenuTriggerIcon({
   className?: string
 }) {
   const { open, preset } = useDropdownMenu()
-  // Plus ↔ minus: a quick turn, eased in and out.
-  const spin = { duration: 0.3, ease: "easeInOut" } as const
 
   if (icon === "chevron") {
     return (
@@ -390,30 +424,11 @@ function DropdownMenuTriggerIcon({
   }
 
   return (
-    <motion.svg
+    <MorphPlus
       data-slot="dropdown-menu-trigger-icon"
-      aria-hidden
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn("pointer-events-none size-5 shrink-0", className)}
-      initial={false}
-      animate={{ rotate: open ? 180 : 0 }}
-      transition={spin}
-    >
-      {/* Into a minus: the whole icon turns 180° while the vertical line turns 90° to lie
-          flat. Closing plays it back. */}
-      <path d="M5 12h14" />
-      <motion.path
-        d="M5 12h14"
-        initial={false}
-        animate={{ rotate: open ? 0 : 90 }}
-        transition={spin}
-      />
-    </motion.svg>
+      open={open}
+      className={cn("size-5", className)}
+    />
   )
 }
 
@@ -1137,6 +1152,7 @@ export {
   DropdownMenuTrigger,
   DropdownMenuTriggerIcon,
   MorphChevron,
+  MorphPlus,
   DropdownMenuValue,
   DropdownMenuContent,
   DropdownMenuGroup,
