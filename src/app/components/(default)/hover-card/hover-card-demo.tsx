@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/hover-card"
 
 const controls = {
-  fromBehind: { group: "Opening", type: "checkbox", label: "From behind link", value: true },
   contentAnimation: {
     group: "Opening",
     type: "select",

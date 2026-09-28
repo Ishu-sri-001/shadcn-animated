@@ -10,20 +10,18 @@ type HoverCardRounded = "none" | "sm" | "md" | "lg" | "xl" | "2xl"
 type HoverCardAnimation = "scale" | "fade"
 
 type HoverCardMotion = {
-  /** Slides out from behind the link instead of just below it. */
-  fromBehind: boolean
   contentAnimation: HoverCardAnimation
-  /** Scale the card grows from, 0–1. Only with `contentAnimation="scale"`. */
+  /** Start scale, 0–1. */
   startScale: number
-  /** Milliseconds of hover before it opens. */
+  /** Hover delay before opening, ms. */
   openDelay: number
-  /** Milliseconds before it closes once the pointer leaves. */
+  /** Delay before closing, ms. */
   closeDelay: number
-  /** The card drifts sideways with the pointer as it moves along the link. */
+  /** Card drifts with the pointer. */
   followCursor: boolean
-  /** The card's content fades in, all together, just after the card appears. */
+  /** Content fades in after the card. */
   contentFade: boolean
-  /** The link's underline draws in on hover. */
+  /** Link underline draws on hover. */
   underline: boolean
   rounded: HoverCardRounded
 }
@@ -37,7 +35,7 @@ const ROUNDED: Record<HoverCardRounded, string> = {
   "2xl": "rounded-2xl",
 }
 
-/** Fades the card's content in together, a beat after the card appears. Nothing moves. */
+/** Fades content in, no movement. */
 function fadeInContent(card: HTMLElement) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
   for (const child of card.querySelectorAll<HTMLElement>(":scope > *")) {
@@ -50,7 +48,7 @@ function fadeInContent(card: HTMLElement) {
   }
 }
 
-/** How far the card drifts for each pixel the pointer is off the link's centre. */
+/** Drift per pixel off centre. */
 const FOLLOW_STRENGTH = 0.35
 
 const HoverCardContext = React.createContext<{
@@ -67,7 +65,6 @@ function useHoverCard() {
 }
 
 function HoverCard({
-  fromBehind = true,
   contentAnimation = "scale",
   startScale = 0.9,
   openDelay = 400,
@@ -82,7 +79,7 @@ function HoverCard({
   ...props
 }: PreviewCardPrimitive.Root.Props & Partial<HoverCardMotion>) {
   const follow = useMotionValue(0)
-  // Held here as well as in Base UI, so a tap on touch screens can open and close it.
+  // Controlled so taps can toggle it.
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const open = openProp ?? uncontrolledOpen
   const context = React.useMemo(
@@ -91,7 +88,6 @@ function HoverCard({
       open,
       setOpen: setUncontrolledOpen,
       motion: {
-        fromBehind,
         contentAnimation,
         startScale,
         openDelay,
@@ -102,7 +98,7 @@ function HoverCard({
         rounded,
       },
     }),
-    [follow, open, fromBehind, contentAnimation, startScale, openDelay, closeDelay, followCursor, contentFade, underline, rounded]
+    [follow, open, contentAnimation, startScale, openDelay, closeDelay, followCursor, contentFade, underline, rounded]
   )
   return (
     <HoverCardContext.Provider value={context}>
@@ -139,8 +135,7 @@ function HoverCardTrigger({
       }}
       onClick={(event) => {
         onClick?.(event)
-        // Touch screens have no hover: a tap opens the card instead of following the link,
-        // and a second tap closes it. Tapping outside closes it too (Base UI handles that).
+        // Touch: tap toggles instead of navigating.
         if (pointerType.current === "mouse") return
         event.preventDefault()
         setOpen(!open)
@@ -154,7 +149,7 @@ function HoverCardTrigger({
       className={(state) =>
         cn(
           options.underline &&
-            "relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out hover:after:origin-left hover:after:scale-x-100 focus-visible:after:origin-left focus-visible:after:scale-x-100 data-popup-open:after:scale-x-100 motion-reduce:after:transition-none",
+            "relative after:absolute after:inset-x-0 after:bottom-[0.08em] after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out hover:after:origin-left hover:after:scale-x-100 focus-visible:after:origin-left focus-visible:after:scale-x-100 data-popup-open:after:scale-x-100",
           typeof className === "function" ? className(state) : className
         )
       }
@@ -182,7 +177,7 @@ function HoverCardContent({
   const attach = React.useCallback(
     (node: HTMLDivElement | null) => {
       if (!node) return
-      // Each new opening starts centred under the link.
+      // Start centred under the link.
       follow.jump(0)
       x.jump(0)
       if (options.contentFade) fadeInContent(node)
@@ -190,8 +185,6 @@ function HoverCardContent({
     [follow, x, options.contentFade]
   )
 
-  // Sliding "from behind" starts further back, tucked under the link.
-  const travel = options.fromBehind ? "0.75rem" : "0.25rem"
   const scale = options.contentAnimation === "scale" ? options.startScale : 1
 
   return (
@@ -202,7 +195,7 @@ function HoverCardContent({
         side={side}
         sideOffset={sideOffset}
         className="isolate z-50"
-        style={{ "--hc-travel": travel, "--hc-scale": scale } as React.CSSProperties}
+        style={{ "--hc-travel": "0.75rem", "--hc-scale": scale } as React.CSSProperties}
       >
         <PreviewCardPrimitive.Popup
           ref={attach}

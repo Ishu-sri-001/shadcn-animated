@@ -8,21 +8,21 @@ import { useTriggerHover } from "@/components/ui/hover-effects"
 import { staggerIn } from "@/lib/stagger-in"
 
 type DrawerMotion = {
-  /** Spring into place (with `bounce`) instead of an eased slide. */
+  /** Spring instead of an eased slide. */
   springy: boolean
   /** Seconds. */
   duration: number
   /** Spring overshoot, 0–0.9. */
   bounce: number
-  /** Gap between the drawer's items fading in, in seconds. 0 turns it off. */
+  /** Gap between text lines fading in. */
   stagger: number
-  /** Tilts a little as it's swiped away. */
+  /** Tilts a little while swiped. */
   swipeTilt: boolean
-  /** The trigger's text rolls up to a copy of itself on hover. */
+  /** Trigger text rolls up on hover. */
   textRoll: boolean
-  /** On hover, the trigger fills from the pointer. */
+  /** Trigger fills from pointer on hover. */
   fillOnHover: boolean
-  /** How it opens and closes: slide in from its edge, or fade in and out in place. */
+  /** Slide in, or fade in place. */
   openAnimation: DrawerOpenAnimation
 }
 
@@ -35,13 +35,9 @@ type DrawerContextProps = DrawerMotion & {
   swipeDirection: NonNullable<DrawerPrimitive.Root.Props["swipeDirection"]>
 }
 
-/**
- * A spring as a CSS `linear()` easing, so Base UI's CSS transitions (and its swipe handling)
- * can overshoot and settle like a Motion spring.
- */
+/** A spring as CSS linear() easing. */
 function springEasing(bounce: number) {
   const zeta = 1 - Math.min(Math.max(bounce, 0), 0.9)
-  // Stiff enough to settle by the end of the transition.
   const omega = 7 / zeta
   const steps = 40
   const points = Array.from({ length: steps + 1 }, (_, i) => {
@@ -58,7 +54,7 @@ function springEasing(bounce: number) {
   return `linear(${points.map((p) => +p.toFixed(4)).join(", ")})`
 }
 
-/** The text that fades up one line after another; the rest of the content just fades in. */
+/** Text lines that stagger in. */
 const STAGGER_ITEMS =
   '[data-slot="drawer-title"], [data-slot="drawer-description"], [data-drawer-text]'
 
@@ -92,8 +88,7 @@ function Drawer({
   Partial<DrawerMotion> & {
     showSwipeHandle?: boolean
   }) {
-  // Base UI only snaps bottom sheets; on other sides the snapped height would push the
-  // content off screen, so snap points are ignored there.
+  // Base UI only snaps bottom sheets.
   const snaps = swipeDirection === "down" ? snapPoints : undefined
   const hasSnapPoints = snaps != null && snaps.length > 0
   const contextValue = React.useMemo(
@@ -231,7 +226,6 @@ function DrawerContent({
   const swipeAxis =
     swipeDirection === "down" || swipeDirection === "up" ? "y" : "x"
   const ease = React.useMemo(
-    // A fade doesn't overshoot, so it always eases.
     () => (springy && !fade ? springEasing(bounce) : "cubic-bezier(0.22,1,0.36,1)"),
     [springy, bounce, fade]
   )
@@ -239,8 +233,7 @@ function DrawerContent({
     (node: HTMLDivElement | null) => {
       if (!node) return
       const delay = duration * 0.3
-      // The content fades in as a whole (Web Animations, so the content's own opacity
-      // transition doesn't smear it), while its text fades up line by line.
+      // Fade content in, stagger its text.
       const content = node.querySelector<HTMLElement>('[data-slot="drawer-content"]')
       if (content && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         content.animate([{ opacity: 0 }, { opacity: 1 }], {
@@ -274,7 +267,7 @@ function DrawerContent({
             {
               "--drawer-duration": `${duration}s`,
               "--drawer-ease": ease,
-              // Fade: the closed position is its open one, so it only fades in and out.
+              // Fade: close in place.
               ...(fade && {
                 "--closed-transform":
                   "translate3d(var(--translate-x,0px),var(--translate-y,0px),0) scale(var(--stack-scale))",
@@ -294,8 +287,7 @@ function DrawerContent({
             "[--bleed:3rem] [--peek:1rem] [--stack-height:var(--drawer-frontmost-height,var(--drawer-height,0px))] [--stack-peek-offset:max(0px,calc((var(--nested-drawers)-var(--stack-progress))*var(--peek)))] [--stack-progress:clamp(0,var(--drawer-swipe-progress),1)] [--stack-scale-base:max(0,calc(1-(var(--nested-drawers)*var(--stack-step))))] [--stack-scale:clamp(0,calc(var(--stack-scale-base)+(var(--stack-step)*var(--stack-progress))),1)] [--stack-shrink:calc(1-var(--stack-scale))] [--stack-step:0.05]",
             // Transitions.
             "data-ending-style:transform-(--closed-transform) data-ending-style:opacity-[0.9999] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-nested-drawer-swiping:duration-0 data-ending-style:data-nested-drawer-swiping:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-starting-style:transform-(--closed-transform) data-swiping:duration-0 data-ending-style:data-swiping:duration-[calc(var(--drawer-swipe-strength)*400ms)]",
-            // Axis: y.
-            // Top and bottom drawers are a centred column, not the full width of the screen.
+            // Top/bottom drawers: centred column.
             "data-[swipe-axis=y]:inset-x-[30vw] data-[swipe-axis=y]:data-nested-drawer-open:h-(--stack-height) max-[1025px]:data-[swipe-axis=y]:inset-x-[15vw] max-md:data-[swipe-axis=y]:inset-x-0",
             "data-[swipe-direction=down]:border-x data-[swipe-direction=up]:border-x max-md:data-[swipe-axis=y]:border-x-0",
             // Axis: x.
@@ -308,8 +300,7 @@ function DrawerContent({
             "data-[swipe-direction=left]:left-0 data-[swipe-direction=left]:origin-left data-[swipe-direction=left]:[--closed-transform:translate3d(calc(-100%-var(--drawer-inset,0px)-2px),0,0)] data-[swipe-direction=left]:[--translate-x:calc(var(--drawer-swipe-movement-x)+var(--stack-peek-offset)+(var(--stack-shrink)*100%))]",
             // Direction: right.
             "data-[swipe-direction=right]:right-0 data-[swipe-direction=right]:origin-right data-[swipe-direction=right]:[--closed-transform:translate3d(calc(100%+var(--drawer-inset,0px)+2px),0,0)] data-[swipe-direction=right]:[--translate-x:calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)-(var(--stack-shrink)*100%))]",
-            // Tilt: turns with the drag (atan2 turns the pixel distance into a small angle), and
-            // eases back to level when released.
+            // Tilt with the drag.
             swipeTilt &&
               "data-[swipe-axis=x]:rotate-[atan2(var(--drawer-swipe-movement-x,0px),3000px)] data-[swipe-axis=y]:rotate-[atan2(var(--drawer-swipe-movement-y,0px),3000px)]",
             fade && "data-ending-style:opacity-0 data-starting-style:opacity-0",
@@ -332,12 +323,12 @@ function DrawerContent({
   )
 }
 
-/** Wrap the page (or the part behind the drawer) in this, with `<DrawerIndent>` inside. */
+/** Wraps the page behind drawers. */
 function DrawerProvider({ ...props }: DrawerPrimitive.Provider.Props) {
   return <DrawerPrimitive.Provider {...props} />
 }
 
-/** Sits behind the indented page, for a colour round its edges as it shrinks. Empty by default. */
+/** Optional colour behind the indented page. */
 function DrawerIndentBackground({
   className,
   ...props
@@ -351,16 +342,13 @@ function DrawerIndentBackground({
   )
 }
 
-/**
- * The page behind a drawer: while any drawer in the provider is open it shrinks and rounds,
- * with no border or fill of its own.
- */
+/** Page behind: shrinks while drawer opens. */
 function DrawerIndent({
   className,
   scale = true,
   ...props
 }: DrawerPrimitive.Indent.Props & {
-  /** Shrink and round the page while a drawer is open. */
+  /** Shrink and round while open. */
   scale?: boolean
 }) {
   return (

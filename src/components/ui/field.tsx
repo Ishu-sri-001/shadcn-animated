@@ -12,20 +12,15 @@ import { Separator } from "@/components/ui/separator"
 type FieldRounded = "none" | "sm" | "md" | "lg" | "xl" | "full"
 type FieldErrorAnimation = "slide" | "fade" | "none"
 
-/**
- * Where an input's label goes:
- * - `floating`: inside the input, rising onto its top border on focus or once filled.
- * - `inside`: inside the input like a placeholder, fading out as you start typing.
- * - `above`: a plain label above the input.
- */
+/** Where the label sits. */
 type FieldLabelStyle = "floating" | "inside" | "above"
 
 type FieldMotion = {
   labelStyle: FieldLabelStyle
   errorAnimation: FieldErrorAnimation
-  /** The input shakes once when its field turns invalid. */
+  /** Shake once when turning invalid. */
   shakeOnError: boolean
-  /** A tick draws itself in when the field is valid. */
+  /** Tick draws in when valid. */
   successTick: boolean
   rounded: FieldRounded
 }
@@ -85,7 +80,7 @@ function FieldLegend({
   )
 }
 
-/** Sets the animation options for every field inside it. */
+/** Animation options for inner fields. */
 function FieldGroup({
   className,
   labelStyle = "floating",
@@ -139,9 +134,9 @@ function Field({
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof fieldVariants> & {
-    /** Marks the field invalid: red label and input, and a shake if `shakeOnError` is on. */
+    /** Red state, plus shake. */
     invalid?: boolean
-    /** Marks the field valid: shows the tick if `successTick` is on. */
+    /** Shows the success tick. */
     valid?: boolean
   }) {
   const state = React.useMemo(() => ({ invalid, valid }), [invalid, valid])
@@ -159,9 +154,8 @@ function Field({
   )
 }
 
-/** Characters that roll to their new value, like a mechanical counter. */
+/** Characters that roll to new values. */
 function RollingText({ text }: { text: string }) {
-  // Rolls up as the count grows and down as it shrinks.
   const [previous, setPrevious] = React.useState(text)
   const [direction, setDirection] = React.useState(1)
   if (previous !== text) {
@@ -196,10 +190,7 @@ function RollingText({ text }: { text: string }) {
   )
 }
 
-/**
- * An input with its label, ready for the group's animations: a floating label, a success
- * tick, a rolling character count and a shake on error.
- */
+/** Input with its animated label. */
 function FieldInput({
   label,
   counter = false,
@@ -213,7 +204,7 @@ function FieldInput({
   ...props
 }: Omit<React.ComponentProps<"input">, "value" | "defaultValue"> & {
   label: React.ReactNode
-  /** Shows how many characters are used, out of `maxLength` when set. */
+  /** Show a character count. */
   counter?: boolean
   value?: string
   defaultValue?: string
@@ -227,7 +218,7 @@ function FieldInput({
   const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? "")
   const text = value ?? uncontrolled
 
-  // Shake once each time the field turns invalid.
+  // Shake once on turning invalid.
   const wasInvalid = React.useRef(invalid)
   React.useEffect(() => {
     const was = wasInvalid.current
@@ -255,7 +246,7 @@ function FieldInput({
         data-slot="field-input"
         className={cn(
           "relative flex items-center gap-2 border border-input bg-transparent px-2.5 transition-colors has-aria-invalid:border-destructive dark:bg-input/30",
-          // A plain border on focus and on error, with no glow round it.
+          // Plain border, no glow.
           "has-focus-visible:border-foreground has-aria-invalid:has-focus-visible:border-destructive",
           options.labelStyle === "above" ? "h-9" : "h-11",
           FIELD_ROUNDED[options.rounded],
@@ -268,8 +259,7 @@ function FieldInput({
           aria-invalid={invalid || undefined}
           value={text}
           maxLength={maxLength}
-          // A label in the input needs a placeholder to tell "empty" apart. A floating label
-          // shows the real one once focused; a label that stays inside stands in for it.
+          // Placeholder lets CSS detect empty.
           placeholder={floating ? (placeholder ?? " ") : inside ? " " : placeholder}
           onChange={(event) => {
             setUncontrolled(event.target.value)
@@ -277,9 +267,7 @@ function FieldInput({
           }}
           className={cn(
             "peer h-full min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground",
-            // Browser autofill paints its own tint behind the text, stopping short of the
-            // box's padding. Holding the background change off indefinitely keeps the input
-            // clear, and the text keeps its usual colour.
+            // Hide the browser's autofill tint.
             "[transition:background-color_600000s_0s] autofill:[-webkit-text-fill-color:var(--color-foreground)]",
             floating &&
               "py-1 placeholder:text-transparent focus:placeholder:text-muted-foreground focus:placeholder:transition-colors focus:placeholder:delay-100",
@@ -292,8 +280,7 @@ function FieldInput({
             htmlFor={id}
             data-slot="field-label"
             className={cn(
-              // Rests inside the input; once focused or filled it rises onto the top border,
-              // with a patch of the page's background behind it that cuts the border line.
+              // Rises onto the border when filled.
               "pointer-events-none absolute top-1/2 left-1.5 origin-left -translate-y-1/2 rounded-sm px-1 text-base leading-none text-muted-foreground transition-[top,scale,color,background-color] duration-200 ease-out motion-reduce:transition-none",
               "peer-focus:top-0 peer-focus:scale-[0.85] peer-focus:bg-background peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:scale-[0.85] peer-not-placeholder-shown:bg-background",
               invalid ? "text-destructive" : "peer-focus:text-foreground"
@@ -307,7 +294,7 @@ function FieldInput({
             htmlFor={id}
             data-slot="field-label"
             className={cn(
-              // Sits where the text will go and fades out once there's any text.
+              // Fades out once there's text.
               "pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-base text-muted-foreground transition-opacity duration-200 ease-out peer-not-placeholder-shown:opacity-0 motion-reduce:transition-none",
               invalid && "text-destructive"
             )}
@@ -496,7 +483,7 @@ function FieldError({
 
   if (errorAnimation === "none" || reduceMotion) return content ? error : null
 
-  // The field's gap is pulled in while the error is closed, so opening it doesn't jump.
+  // Pull in the gap while closed.
   const slide = errorAnimation === "slide"
   return (
     <AnimatePresence initial={false}>

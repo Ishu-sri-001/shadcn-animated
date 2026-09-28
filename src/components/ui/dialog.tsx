@@ -21,29 +21,29 @@ type DialogBackdrop = "none" | "dim" | "blur"
 type DialogExit = "fade" | "drop" | "shrink"
 
 type DialogMotion = {
-  /** Spring open (with `bounce`) instead of an eased tween. */
+  /** Spring instead of an eased tween. */
   springy: boolean
   /** Seconds. */
   duration: number
   /** Spring overshoot, 0–1. */
   bounce: number
-  /** Grow out of the trigger and shrink back into it. Overrides `exit`. */
+  /** Grow from and back into trigger. */
   fromTrigger: boolean
-  /** The content fades in as the dialog grows, instead of arriving with it. */
+  /** Content fades in after the box. */
   contentFade: boolean
-  /** The content also grows from 80% to full size while it fades in. */
+  /** Content grows from 80% while fading. */
   contentScale: boolean
-  /** On close, the content fades out first, then the dialog leaves. */
+  /** Content fades out before closing. */
   contentFadeOut: boolean
-  /** The trigger's text rolls up to a copy of itself on hover. */
+  /** Trigger text rolls up on hover. */
   textRoll: boolean
-  /** On hover, the trigger fills from the pointer, like `DialogButton`. */
+  /** Trigger fills from pointer on hover. */
   fillOnHover: boolean
   backdrop: DialogBackdrop
   exit: DialogExit
   /** Clicking outside closes the dialog. */
   dismissible: boolean
-  /** When clicking outside can't close it, the dialog shakes instead. */
+  /** Shake when outside click is blocked. */
   shakeOnBlock: boolean
   rounded: DialogRounded
 }
@@ -71,11 +71,7 @@ const EXIT: Record<DialogExit, { opacity: number; scale: number; y: string }> = 
   shrink: { opacity: 0, scale: 0.8, y: "0%" },
 }
 
-/**
- * Fades the dialog's content in together once the box has mostly taken shape, growing from
- * `scale` to full size. Every piece scales around the dialog's centre, so the content grows
- * as one block rather than each piece on its own.
- */
+/** Fades content in after the box. */
 function fadeInContent(popup: HTMLElement, scale: number) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
   const centreX = popup.clientWidth / 2
@@ -83,8 +79,6 @@ function fadeInContent(popup: HTMLElement, scale: number) {
   for (const child of popup.querySelectorAll<HTMLElement>(":scope > *")) {
     const origin = `${centreX - child.offsetLeft}px ${centreY - child.offsetTop}px`
     const timing = { duration: 500, delay: 200, fill: "backwards" as const }
-    // Opacity eases in and out, so the text surfaces gradually instead of popping in; the
-    // scale eases out, so it settles gently at full size.
     child.animate([{ opacity: 0 }, { opacity: 1 }], {
       ...timing,
       easing: "cubic-bezier(0.45, 0, 0.55, 1)",
@@ -101,7 +95,7 @@ function fadeInContent(popup: HTMLElement, scale: number) {
   }
 }
 
-/** How long the content takes to fade out before the dialog leaves, in seconds. */
+/** Content fade-out time, in seconds. */
 const CONTENT_OUT = 0.15
 
 function fadeOutContent(popup: HTMLElement) {
@@ -211,7 +205,7 @@ function DialogTrigger({
     <DialogPrimitive.Trigger
       data-slot="dialog-trigger"
       onClick={(event) => {
-        // Remember where the dialog was opened from, so it can grow out of the button.
+        // Remember origin for grow-from-trigger.
         const rect = event.currentTarget.getBoundingClientRect()
         setOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
         onClick?.(event)
@@ -254,7 +248,6 @@ function DialogOverlay({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          // Waits with the dialog while its content fades out.
           exit={{
             opacity: 0,
             transition: {
@@ -290,9 +283,7 @@ function DialogContent({
       ? { type: "spring", visualDuration: options.duration, bounce: options.bounce }
       : { duration: options.duration, ease: [0.22, 1, 0.36, 1] }
 
-  // Grow from the trigger: start at its centre, relative to the centred dialog.
-  // With reduced motion it only fades, in place: MotionConfig would skip the scale and move
-  // but still fade, so the dialog would jump to the trigger and fade out there.
+  // Reduced motion: fade only, in place.
   const fromTrigger = options.fromTrigger && origin !== null && !reduceMotion
   const still = { opacity: 0, scale: 1, x: 0, y: "0%" }
   const closed = reduceMotion
@@ -315,14 +306,13 @@ function DialogContent({
     [options.contentFade, options.contentScale]
   )
 
-  // Closing: fade the content out first. The dialog's own exit waits for it (see `exit`).
+  // Fade content out before exit.
   const fadeOut = options.contentFadeOut
   React.useEffect(() => {
     if (open || !fadeOut || !popup.current) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     fadeOutContent(popup.current)
   }, [open, fadeOut])
-  // The content doesn't fade out separately with reduced motion, so nothing to wait for.
   const exitDelay = fadeOut && !reduceMotion ? CONTENT_OUT : 0
 
   const shake = () => {
@@ -378,7 +368,7 @@ function DialogContent({
                     size="icon-sm"
                     className={cn(
                       "absolute top-5 right-5 text-muted-foreground hover:bg-transparent hover:text-foreground dark:hover:bg-transparent",
-                      // The cross turns a quarter on hover, like the toast's.
+                      // Cross turns a quarter on hover.
                       "[&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-out hover:[&_svg]:rotate-90 focus-visible:[&_svg]:rotate-90 motion-reduce:[&_svg]:transition-none"
                     )}
                   />
@@ -433,7 +423,7 @@ function DialogFooter({
 }
 
 
-/** An outlined button with the hover fill, sized for a dialog's footer. */
+/** Footer-sized button with hover fill. */
 function DialogButton({ className, ...props }: React.ComponentProps<typeof Button>) {
   return <FillButton className={cn("h-auto px-3 py-2", className)} {...props} />
 }

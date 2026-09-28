@@ -14,23 +14,23 @@ import {
 } from "motion/react"
 
 type InputOTPRounded = "none" | "sm" | "md" | "lg" | "xl" | "full"
-/** Box size on Tailwind's spacing scale: "10" is `size-10`. */
+/** Tailwind size step, e.g. "10". */
 type InputOTPSize = "8" | "9" | "10" | "11" | "12" | "14"
 type InputOTPCharAnimation = "pop" | "roll" | "fade" | "none"
 
 type InputOTPMotion = {
-  /** One focus ring glides between boxes instead of jumping. */
+  /** One ring glides between boxes. */
   glide: boolean
   charAnimation: InputOTPCharAnimation
-  /** Gap between boxes filling in when a code is pasted, in seconds. 0 fills them at once. */
+  /** Paste fill gap, in seconds. */
   pasteStagger: number
-  /** The row shakes when it turns invalid. */
+  /** Shake when turning invalid. */
   shakeOnError: boolean
-  /** On success the boxes turn green in a wave, then a tick draws in. */
+  /** Green wave and tick on success. */
   successWave: boolean
   boxSize: InputOTPSize
   rounded: InputOTPRounded
-  /** Boxes in a group share borders as one strip, instead of standing apart as squares. */
+  /** Boxes share borders as a strip. */
   joined: boolean
 }
 
@@ -57,14 +57,14 @@ const ROUNDED: Record<InputOTPRounded, string> = {
 const SIZE: Record<InputOTPSize, string> = {
   "8": "size-8 text-sm",
   "9": "size-9 text-sm",
-  // On phones, larger boxes step down to size-9 so six of them fit across the screen.
+  // Phones: step down to size-9.
   "10": "size-10 text-base max-md:size-9",
   "11": "size-11 text-base max-md:size-9",
   "12": "size-12 text-lg max-md:size-9 max-md:text-base",
   "14": "size-14 text-xl max-md:size-9 max-md:text-base",
 }
 
-/** Delay between boxes in the success wave, in seconds. */
+/** Success wave delay per box, seconds. */
 const WAVE_GAP = 0.06
 
 const CHAR_IN: Record<Exclude<InputOTPCharAnimation, "none">, { from: TargetAndTransition; to: TargetAndTransition }> = {
@@ -79,7 +79,7 @@ const InputOTPMotionContext = React.createContext<
     ringId: string
     invalid: boolean
     success: boolean
-    /** First box of the latest paste, while its boxes are filling in. */
+    /** Where the latest paste starts. */
     pasteFrom: number | null
   }
 >({
@@ -117,9 +117,9 @@ function InputOTP({
 }: React.ComponentProps<typeof OTPInput> &
   Partial<InputOTPMotion> & {
     containerClassName?: string
-    /** The code is wrong: red boxes, and a shake if `shakeOnError` is on. */
+    /** Wrong code: red boxes, shake. */
     invalid?: boolean
-    /** The code is right: the green wave and tick if `successWave` is on. */
+    /** Right code: green wave, tick. */
     success?: boolean
   }) {
   const ringId = React.useId()
@@ -127,7 +127,7 @@ function InputOTP({
   const box = React.useRef<HTMLDivElement>(null)
   const [uncontrolled, setUncontrolled] = React.useState("")
   const value = valueProp ?? uncontrolled
-  // More than one new character at once is a paste or autofill: those boxes fill one by one.
+  // Multi-character change means a paste.
   const [pasteFrom, setPasteFrom] = React.useState<number | null>(null)
   const [seen, setSeen] = React.useState(value)
   if (seen !== value) {
@@ -135,7 +135,7 @@ function InputOTP({
     setPasteFrom(value.length - seen.length > 1 ? seen.length : null)
   }
 
-  // Shake once each time the code turns invalid.
+  // Shake once on turning invalid.
   const wasInvalid = React.useRef(invalid)
   React.useEffect(() => {
     const was = wasInvalid.current
@@ -194,9 +194,7 @@ function InputOTP({
                 strokeWidth={2.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                // Hangs off the row's right edge, outside its width, so the boxes don't shift
-                // when it comes and goes. On phones there's no room beside the row, so it sits
-                // as a badge on the last box's corner instead.
+                // Outside the row, so no shift.
                 className="absolute top-1/2 left-[calc(100%+0.75rem)] size-5 -translate-y-1/2 text-emerald-600 dark:text-emerald-400 max-md:top-0 max-md:left-full max-md:size-5 max-md:-translate-x-3/4 max-md:rounded-full max-md:bg-background max-md:p-0.5 max-md:ring-1 max-md:ring-emerald-500"
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -278,7 +276,7 @@ function InputOTPSlot({
           layoutId={options.ringId}
           aria-hidden
           className={cn(
-            // A single crisp border on the active box, no translucent halo round it.
+            // Crisp border, no halo.
             "pointer-events-none absolute -inset-px z-10 rounded-[inherit] border border-foreground",
             options.invalid && "border-destructive"
           )}
@@ -287,8 +285,7 @@ function InputOTPSlot({
       )}
       <span className={cn("relative grid place-items-center", animation === "roll" && "overflow-hidden")}>
         {animation ? (
-          // A leaving digit fades out where it is, and a new one waits for it rather than
-          // overlapping it. (popLayout would lift the old one out of the box and it would drop.)
+          // Old digit fades before new appears.
           <AnimatePresence initial={false} mode="wait">
             {char && (
               <motion.span
@@ -296,7 +293,6 @@ function InputOTPSlot({
                 className="col-start-1 row-start-1 block"
                 initial={CHAR_IN[animation].from}
                 animate={CHAR_IN[animation].to}
-                // Whatever way a digit comes in, it leaves by fading where it is.
                 exit={{ opacity: 0, transition: { duration: 0.15, ease: "easeOut" } }}
                 transition={
                   animation === "pop"
