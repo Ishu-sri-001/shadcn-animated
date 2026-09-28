@@ -41,59 +41,31 @@ import {
   type DropdownMenuIndicator,
 } from "@/components/ui/dropdown-menu"
 
-
 type MenubarAnimation = "collapse" | "scale" | "slide" | "reveal"
 type MenubarSwitch = "glide" | "replay"
 type MenubarTriggerHighlight = "pill" | "underline" | "none"
 type MenubarRounded = "none" | "sm" | "md" | "lg" | "xl" | "2xl"
 
 type MenubarMotion = {
-  /** How a panel opens and closes. */
   animation: MenubarAnimation
-  /**
-   * What happens when you move to another menu while one is open: `glide` slides one panel
-   * along to the new menu, resizing as it goes; `replay` plays the new menu's full opening, as
-   * if it had been opened from closed.
-   */
   switchAnimation: MenubarSwitch
-  /** Open duration, in seconds. */
   duration: number
-  /** Gap between items appearing, in seconds. */
   stagger: number
-  /** Wait before items start appearing, in seconds. */
   delay: number
-  /** Close in 60% of the open time, without staggering items out. */
   exitFast: boolean
-  /** The marker on the open or hovered menu name, which glides between names. */
   triggerHighlight: MenubarTriggerHighlight
-  /** The fill behind the open or hovered menu name. */
   triggerHighlightColor: DropdownMenuHighlightColor
-  /** How the hovered item is highlighted inside a panel. */
   itemHighlight: DropdownMenuHighlight
-  /** The fill behind the hovered item inside a panel. */
   itemHighlightColor: DropdownMenuHighlightColor
-  /** How the chosen radio item is marked. */
   indicator: DropdownMenuIndicator
-  /** Item titles roll to a copy of themselves when highlighted. */
   textRoll: boolean
-  /** Menu names roll to a copy of themselves when hovered or open. */
   triggerTextRoll: boolean
-  /** Menu names and items scale down while pressed. */
   pressFeedback: boolean
-  /**
-   * How a menu's contents come in when you move over from another menu: `slide` shifts them in
-   * from the side you came from as they fade in, `fade` only fades them in, `none` shows them at once.
-   */
   contentSwitch: MenubarContentSwitch
-  /** How far contents slide: sm = 24px, md = 48px, lg = 75px (default). */
   contentShift: MenubarContentShift
-  /** Show a chevron on each menu name that turns as its menu opens. */
   chevrons: boolean
-  /** Show each item's icon. */
   icons: boolean
-  /** Show each item's `MenubarItemDescription`. */
   descriptions: boolean
-  /** How big the bar and its panels are. */
   size: MenubarSize
   rounded: MenubarRounded
 }
@@ -108,7 +80,6 @@ const CONTENT_SHIFT: Record<MenubarContentShift, number> = {
   lg: 75,
 }
 
-/** No fixed height: the padding alone sets the gap, so it matches on all four sides. */
 const BAR_SIZE: Record<MenubarSize, string> = {
   sm: "gap-0.5 p-1",
   md: "gap-1 p-1.5",
@@ -142,7 +113,6 @@ const BAR_ROUNDED: Record<MenubarRounded, string> = {
   "2xl": "rounded-2xl",
 }
 
-/** Menu names and items sit one step inside the bar and panel, so the corners nest. */
 const INNER_ROUNDED: Record<MenubarRounded, string> = {
   none: "rounded-none",
   sm: "rounded-xs",
@@ -161,35 +131,20 @@ const ITEM_ROUNDED: Record<MenubarRounded, string> = {
   "2xl": "**:data-[slot$=-item]:rounded-xl",
 }
 
-/** A panel's size and where its left edge sits on screen. */
 type PanelBox = { width: number; height: number; left: number; el: HTMLElement }
 
 type MenubarContextValue = {
   id: string
   motion: MenubarMotion
-  /** The open menu, if any. */
   active: string | null
-  /** Which way the last switch went: -1 left, 1 right. */
   direction: number
-  /** The open menu was reached by moving over from another one. */
   switched: boolean
-  /** The menu name the trigger highlight sits on; it stays put (hidden) when nothing is lit. */
   highlightOn: string | null
   highlightVisible: boolean
   setHovered: (menu: string | null) => void
   onMenuOpenChange: (menu: string, open: boolean) => void
-  /**
-   * The direction a menu was reached from, set synchronously as it opens. A panel's first
-   * render happens before `direction` state has landed, so its entrance reads this instead.
-   */
   entryDirection: React.RefObject<Map<string, number>>
-  /**
-   * Measures the current panel where it is right now — mid-glide included — so the next one
-   * starts exactly there. A size recorded when a panel opened would be stale by the time you
-   * sweep on to the next menu, and the box would jump.
-   */
   getPanelBox: () => PanelBox | null
-  /** Registers the panel surface currently showing, or clears it if it is still this one. */
   setPanelSurface: (el: HTMLElement | null, current?: HTMLElement) => void
 }
 
@@ -201,10 +156,9 @@ function useMenubar() {
   return context
 }
 
-/** The id of the menu a part sits in. */
 const MenubarMenuContext = React.createContext("")
 
-/** A close followed this soon by an open counts as moving from one menu to the next. */
+// Close then open this fast = switching
 const SWITCH_WINDOW_MS = 100
 
 function Menubar({
@@ -237,8 +191,10 @@ function Menubar({
   const root = React.useRef<HTMLDivElement>(null)
   const activeRef = React.useRef<string | null>(null)
   const lastClosed = React.useRef<{ menu: string; at: number } | null>(null)
+  // Set synchronously; state lands a render late
   const entryDirection = React.useRef(new Map<string, number>())
   const panelSurface = React.useRef<HTMLElement | null>(null)
+  // Measured live, so mid-glide switches continue
   const getPanelBox = React.useCallback((): PanelBox | null => {
     const el = panelSurface.current
     if (!el?.isConnected) return null
@@ -246,17 +202,15 @@ function Menubar({
     return { width: r.width, height: r.height, left: r.left, el }
   }, [])
   const setPanelSurface = React.useCallback((el: HTMLElement | null, current?: HTMLElement) => {
-    // A closing panel only clears the record if a newer one hasn't already taken it.
     if (el === null && current && panelSurface.current !== current) return
     panelSurface.current = el
   }, [])
   const [open, setOpen] = React.useState({ active: null as string | null, direction: 0, switched: false })
   const [hovered, setHovered] = React.useState<string | null>(null)
 
-  // Where the trigger highlight sits. It stays on the last lit name while hidden, so the next
-  // one glides over from there instead of popping in.
   const lit = open.active ?? hovered
   const [highlightOn, setHighlightOn] = React.useState<string | null>(null)
+  // Highlight stays put while hidden
   if (lit && lit !== highlightOn) setHighlightOn(lit)
 
   const onMenuOpenChange = React.useCallback((menu: string, isOpen: boolean) => {
@@ -269,7 +223,6 @@ function Menubar({
       return
     }
 
-    // Base UI may close the old menu before or after opening the new one.
     const recent = lastClosed.current
     const from =
       activeRef.current ??
@@ -280,7 +233,6 @@ function Menubar({
       (el) => el.getAttribute("data-menubar-menu")
     )
     const direction = from && from !== menu ? Math.sign(menus.indexOf(menu) - menus.indexOf(from)) : 0
-    // Recorded before the state update, so the panel mounting this same tick can read it.
     entryDirection.current.set(menu, direction)
     setOpen({ active: menu, direction, switched: direction !== 0 })
   }, [])
@@ -360,7 +312,6 @@ function Menubar({
         ref={root}
         data-slot="menubar"
         className={cn(
-          // The bar is for desktop; tablets and phones get the hamburger below instead.
           "flex items-center border bg-background max-[1025px]:hidden",
           BAR_SIZE[size],
           BAR_ROUNDED[rounded],
@@ -416,7 +367,6 @@ const TRIGGER_FILL: Record<DropdownMenuHighlightColor, string> = {
   muted: "bg-muted",
 }
 
-/** A menu name that rolls up to a copy of itself while its menu is lit. */
 function TriggerRollText({ lit, children }: { lit: boolean; children: React.ReactNode }) {
   const transition = { duration: 0.4, ease: [0.33, 1, 0.68, 1] as const }
 
@@ -453,7 +403,6 @@ function DesktopMenubarTrigger({
   onBlur,
   ...props
 }: React.ComponentProps<typeof DropdownMenuTrigger> & {
-  /** Show a chevron that turns as the menu opens. Defaults to the bar's `chevrons` setting. */
   chevron?: boolean
 }) {
   const { id, motion: options, active, highlightOn, highlightVisible, setHovered } = useMenubar()
@@ -472,7 +421,6 @@ function DesktopMenubarTrigger({
         "relative isolate flex items-center font-medium transition-colors outline-hidden select-none",
         TRIGGER_SIZE[options.size],
         INNER_ROUNDED[options.rounded],
-        // A primary pill is dark, so the name and its chevron invert while it sits underneath.
         marker === "pill" &&
           options.triggerHighlightColor === "primary" &&
           lit &&
@@ -503,8 +451,6 @@ function DesktopMenubarTrigger({
         children
       )}
       {showChevron && (
-        // The same morphing chevron the dropdown trigger uses: its two halves swing to point
-        // the other way as the menu opens.
         <MorphChevron
           data-slot="menubar-trigger-icon"
           open={open}
@@ -521,9 +467,7 @@ function DesktopMenubarTrigger({
             marker === "pill"
               ? cn("inset-0 rounded-[inherit]", TRIGGER_FILL[options.triggerHighlightColor])
               : cn(
-                  // Hangs a little below the name so the line doesn't crowd the letters.
                   "inset-x-2.5 -bottom-1.5 h-0.5 rounded-full",
-                  // A muted underline would all but vanish, so it takes the muted text colour.
                   options.triggerHighlightColor === "primary"
                     ? "bg-primary"
                     : "bg-muted-foreground"
@@ -541,7 +485,6 @@ function DesktopMenubarTrigger({
   )
 }
 
-/** Drops `transition` from a variant, leaving just its values. */
 function targetOf(variant: Variants[string]) {
   if (typeof variant !== "object") return {}
   const target = { ...(variant as TargetAndTransition) }
@@ -549,38 +492,27 @@ function targetOf(variant: Variants[string]) {
   return target
 }
 
-/**
- * The panel's contents. Its height tweens between menus, so a tall menu shrinking to a short
- * one glides instead of snapping, and the items shift in the direction you moved.
- */
 function MenubarPanelBody({
   surface,
   restLeft,
   children,
 }: {
-  /** The panel's background, ring, shadow and padding, worn by the box that travels. */
   surface: string
-  /** Where the panel's left edge rests on screen. */
   restLeft: () => number
   children: React.ReactNode
 }) {
   const { motion: options, entryDirection } = useMenubar()
   const menu = React.useContext(MenubarMenuContext)
   const reduceMotion = useReducedMotion()
-  // Read once on mount, from the ref rather than state: the panel's first render happens
-  // before the direction state has landed, so the state would still hold the old value.
   const [from] = React.useState(() => entryDirection.current.get(menu) ?? 0)
 
   if (reduceMotion) return <>{children}</>
 
-  // Only contents reached from a neighbouring menu animate; a menu opened from closed plays
-  // the panel's own opening instead.
   const entrance =
     from === 0 || options.switchAnimation !== "glide" || options.contentSwitch === "none"
       ? false
       : options.contentSwitch === "slide"
-        ? // Offset the way you came from, sliding to rest, so the contents read as shifting
-          // across inside one panel.
+        ?
           { opacity: 0, x: from * CONTENT_SHIFT[options.contentShift] }
         : { opacity: 0, x: 0 }
 
@@ -588,14 +520,12 @@ function MenubarPanelBody({
     <motion.div
       initial={entrance}
       animate={{ opacity: 1, x: 0 }}
-      // The same tween as the box and the outgoing contents, so all three move as one.
       transition={GLIDE}
     >
       {children}
     </motion.div>
   )
 
-  // Only a travelling panel gets the moving box; otherwise the popup is the surface.
   if (!surface) return body
 
   return (
@@ -605,12 +535,7 @@ function MenubarPanelBody({
   )
 }
 
-/**
- * The panel surface that travels between menus. Separate menus render separate popups in their
- * own portals, so Motion's shared-layout morph can't reach across them. Instead, a panel reached
- * from a neighbour starts exactly where and how big the last one was, then glides sideways under
- * its own menu name while it resizes, so the two read as one box moving along the bar.
- */
+// One panel gliding between menus
 function MorphBox({
   surface,
   restLeft,
@@ -623,21 +548,15 @@ function MorphBox({
   const { getPanelBox, setPanelSurface, entryDirection, motion: options } = useMenubar()
   const menu = React.useContext(MenubarMenuContext)
   const node = React.useRef<HTMLDivElement>(null)
-  /** Captured once per mount; see the effect. */
   const start = React.useRef<PanelBox | null | undefined>(undefined)
 
   React.useLayoutEffect(() => {
     const el = node.current
     if (!el) return
-    // Captured once per mount: React's development double-run would otherwise measure this
-    // panel itself as the "previous" one. Only a panel reached by moving over from a neighbour
-    // glides; one opened from closed keeps its own entrance.
     if (start.current === undefined) {
       start.current = (entryDirection.current.get(menu) ?? 0) !== 0 ? getPanelBox() : null
     }
     const from = start.current
-    // How big this panel rests, measured before anything moves it. Its left edge comes from its
-    // menu name: when this runs, the popup hasn't been positioned yet and still sits at 0.
     const rest = el.getBoundingClientRect()
     const left = restLeft()
     setPanelSurface(el)
@@ -650,30 +569,22 @@ function MorphBox({
       el.style.height = ""
       el.style.transform = ""
     }
-    // One spring value drives width, height and position together, written straight to the
-    // element on every frame. Handing them to Motion's element animation let it paint its own
-    // first frame over this start, which flashed the box at its destination for a frame.
     const apply = (t: number) => {
       el.style.width = `${from.width + (rest.width - from.width) * t}px`
       el.style.height = `${from.height + (rest.height - from.height) * t}px`
       el.style.transform = `translateX(${dx * (1 - t)}px)`
     }
-    // In place before the first paint, where and as big as the last panel was.
+    // Set start before first paint
     apply(0)
     const ghost = slideOutPrevious(el, from.el, entryDirection.current.get(menu) ?? 0, options)
     const animation = animate(0, 1, { ...GLIDE, onUpdate: apply })
-    // Hand the box back to the layout once it lands, so later content can resize it.
     animation.then(clear)
     return () => {
       animation.stop()
       ghost?.remove()
-      // Back to its natural box, so a re-run (React's development double-run) measures where
-      // the panel really rests rather than the start it was just given.
       clear()
       setPanelSurface(null, el)
     }
-    // Settings are read as the panel mounts, like the rest of the glide; a change applies to the
-    // next switch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getPanelBox, setPanelSurface, entryDirection, menu, restLeft])
 
@@ -683,8 +594,6 @@ function MorphBox({
       data-slot="menubar-surface"
       className={cn("relative max-h-(--available-height) overflow-hidden", surface)}
     >
-      {/* Stretches to the box while it resizes, so right-aligned ticks and shortcuts ride
-          the moving edge instead of bunching up against the text. */}
       <div data-slot="menubar-surface-content" className="w-max min-w-full">
         {children}
       </div>
@@ -692,20 +601,10 @@ function MorphBox({
   )
 }
 
-/**
- * The glide between menus, matched to directional-menu (hyperiux-pro-components): short
- * `power2.out` tweens rather than a spring. The box, the incoming contents and the outgoing
- * contents all share it, so they move as one. `[0.25, 0.46, 0.45, 0.94]` is power2.out
- * (ease-out quad) as a cubic-bezier.
- */
+// power2.out, matching directional-menu
 const GLIDE = { duration: 0.26, ease: [0.25, 0.46, 0.45, 0.94] } as const
 
-/**
- * Copies the outgoing panel's contents into the incoming box and slides them out the opposite
- * way while the new contents slide in, as directional-menu does. It keeps both in one container;
- * here each menu is its own popup, so the old contents are copied across rather than moved.
- * The copy is visual only: hidden from assistive tech, inert, and removed when it finishes.
- */
+// Old contents slide out inside new box
 function slideOutPrevious(
   box: HTMLElement,
   previous: HTMLElement,
@@ -716,7 +615,6 @@ function slideOutPrevious(
   const source = previous.querySelector<HTMLElement>(":scope > [data-slot=menubar-surface-content]")
   if (!source) return null
 
-  // Pinned where the contents sat inside the old box, measured from its padding edge.
   const boxRect = previous.getBoundingClientRect()
   const sourceRect = source.getBoundingClientRect()
   const ghost = source.cloneNode(true) as HTMLElement
@@ -738,18 +636,11 @@ function slideOutPrevious(
   return ghost
 }
 
-/** How far the collapse clip reaches past the panel, so its ring and shadow stay whole. */
 const CLIP_OVERHANG = "16px"
 
-/**
- * Collapse, for a travelling panel. The usual collapse animates the popup's height behind
- * `overflow: hidden`, but here the ring and shadow sit on the surface inside the popup, and a
- * ring draws just outside its element, so that clip would cut it on every side. This keeps the
- * same lift and fade, and reveals the panel with a `clip-path` that overhangs its edges instead.
- */
+// Clip-path collapse keeps ring and shadow
 function clipCollapse(base: Variants, side: string): Variants {
   const o = CLIP_OVERHANG
-  // Written as `calc`s of one shape at both ends, so Motion can interpolate between them.
   const shown = `calc(0% - ${o})`
   const hidden = `calc(100% + ${o})`
   const clip = (top: string, bottom: string) => `inset(${top} -${o} ${bottom} -${o})`
@@ -760,7 +651,6 @@ function clipCollapse(base: Variants, side: string): Variants {
   }
   return {
     open: swap(base.open, clip(shown, shown)),
-    // Closes toward the menu name: up into the bar below it, down into the bar above it.
     closed: swap(base.closed, side === "top" ? clip(hidden, shown) : clip(shown, hidden)),
   }
 }
@@ -780,23 +670,19 @@ function DesktopMenubarContent({
   const { triggerRef } = dropdown
   const options = menubar.motion
 
-  // Position against the trigger's unscaled box, so its press scale doesn't shift the panel.
   const anchor = React.useCallback(() => {
     const trigger = triggerRef.current
     if (!trigger) return null
     return { getBoundingClientRect: () => unscaledRect(trigger), contextElement: trigger }
   }, [triggerRef])
-  // Aligned to the start of its menu name, so that is where the panel's left edge rests.
+  // Popup isn't positioned yet; use trigger
   const restLeft = React.useCallback(() => {
     const trigger = triggerRef.current
     const offset = typeof alignOffset === "number" ? alignOffset : 0
     return trigger ? unscaledRect(trigger).left + offset : 0
   }, [triggerRef, alignOffset])
 
-  // Glide: the box itself travels between menus, and the outgoing panel gets out of the way.
-  // Replay: every menu plays its full opening, as if opened from closed.
   const glide = options.switchAnimation === "glide"
-  // Arrived from a neighbouring menu, or leaving for one.
   const switchedIn = glide && menubar.switched && menubar.active === menu
   const switchedOut =
     glide && menubar.switched && menubar.active !== null && menubar.active !== menu
@@ -812,8 +698,7 @@ function DesktopMenubarContent({
     const panel = options.animation === "collapse" ? clipCollapse(base, panelSide) : base
     return {
       open: panel.open,
-      // Gone at once: the incoming panel starts in this one's place and size, so it reads as
-      // this box moving on rather than two panels crossing.
+      // Outgoing panel hides; its copy slides
       closed: switchedOut ? { opacity: 0, transition: { duration: 0 } } : panel.closed,
     }
   }
@@ -832,15 +717,12 @@ function DesktopMenubarContent({
           data-slot="menubar-content"
           className={cn(
             "z-50 w-max origin-(--transform-origin) outline-none",
-            // Gliding, the surface lives on the box inside; otherwise on the popup itself.
             !glide &&
               cn(
                 "max-h-(--available-height) overflow-x-hidden overflow-y-auto",
                 surface
               ),
-            // A little air between items, so they read as separate rows.
             "**:data-[slot=menubar-group]:flex **:data-[slot=menubar-group]:flex-col **:data-[slot=menubar-group]:gap-0.5",
-            // Travelling, collapse clips with `clip-path` instead (see `clipCollapse`).
             options.animation === "collapse" && !glide && "overflow-hidden",
             ITEM_ROUNDED[options.rounded],
             className
@@ -851,24 +733,17 @@ function DesktopMenubarContent({
             return (
               <motion.div
                 {...rest}
-                // Arriving from a neighbour: start where the panel will rest, shifted back the
-                // way you came, with the items already in place.
-                // Arriving from a neighbour: already open, in the last panel's place; the box
-                // does the moving.
                 initial={switchedIn ? targetOf(variants.open) : "closed"}
                 animate={dropdown.open ? "open" : "closed"}
                 variants={variants}
                 onPointerLeave={(event) => {
                   rest.onPointerLeave?.(event)
-                  // Off the panel: the sliding pill can go.
                   dropdown.releaseActiveItem()
                 }}
                 onAnimationComplete={(definition) => {
                   if (definition === "closed" && !dropdown.open) dropdown.onExitComplete()
                 }}
               >
-                {/* The panel is the container; its contents slide and resize inside it, so
-                    moving between menus reads as one surface rather than two panels. */}
                 <MenubarPanelBody surface={glide ? surface : ""} restLeft={restLeft}>
                   {popupChildren as React.ReactNode}
                 </MenubarPanelBody>
@@ -882,10 +757,6 @@ function DesktopMenubarContent({
   )
 }
 
-/**
- * Lays a panel's groups out side by side, with a gap between the columns. Each child is one
- * column, usually a `MenubarGroup`.
- */
 function MenubarColumns({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -906,16 +777,12 @@ function DesktopMenubarItem({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuItem> & {
-  /** Shown before the title, centred against the whole item. */
   icon?: React.ReactNode
-  /** A second line under the title. */
   description?: React.ReactNode
 }) {
   const { motion: options } = useMenubar()
   const showIcon = options.icons && icon
   const showDescription = options.descriptions && description
-  // Only the heading's words roll on hover; a shortcut beside them and the description below
-  // stay put.
   const heading = React.Children.map(children, (child) =>
     typeof child === "string" && child.trim() ? (
       <DropdownMenuItemTitle>{child.trim()}</DropdownMenuItemTitle>
@@ -935,7 +802,6 @@ function DesktopMenubarItem({
       {...props}
     >
       {showIcon && (
-        // `items-center` on the row centres this against the title and description together.
         <span
           data-slot="menubar-item-icon"
           className="flex shrink-0 items-center justify-center text-muted-foreground group-focus/menubar-item:text-current group-data-pill/menubar-item:text-current [&_svg:not([class*='size-'])]:size-4"
@@ -1063,33 +929,21 @@ function DesktopMenubarSubContent({
   )
 }
 
-/* -------------------------------------------------------------------------------------------
- * Tablet and phone: a hamburger that opens a fixed-height, scrollable panel. Each menu becomes a
- * collapsible section (and each submenu one inside it). The same Menubar markup renders both
- * versions; CSS shows the right one, and every part below picks its touch version when it finds
- * itself inside the panel.
- * -----------------------------------------------------------------------------------------*/
-
-/** Present inside the tablet/phone panel. */
 const MobileMenubarContext = React.createContext<{ close: () => void } | null>(null)
 
-/** The collapsible section (a menu, or a submenu inside one) a part belongs to. */
 const MobileSectionContext = React.createContext<{
   open: boolean
   toggle: () => void
   id: string
 } | null>(null)
 
-/** The radio group a touch radio item belongs to. */
 const MobileRadioContext = React.createContext<{
   value: unknown
   onValueChange?: (value: unknown, details: never) => void
 } | null>(null)
 
-/** Same easing as the desktop glide (power2.out). */
 const MOBILE_EASE = [0.25, 0.46, 0.45, 0.94] as const
 
-/** Three lines that fold into a cross. */
 function HamburgerIcon({ open }: { open: boolean }) {
   const transition = { duration: 0.26, ease: MOBILE_EASE }
   return (
@@ -1165,8 +1019,6 @@ function MobileMenubar({ children }: { children: React.ReactNode }) {
               id={id}
               aria-label="Menu"
               data-slot="menubar-mobile-panel"
-              // Fixed height, scrolling inside; about half the screen wide on a tablet, nearly
-              // all of it on a phone.
               className="absolute top-full left-1/2 z-50 my-2 flex h-[60vh] w-[45vw] -translate-x-1/2 flex-col gap-0.5 overflow-y-auto overscroll-contain rounded-xl bg-popover p-2 text-popover-foreground shadow-md ring-1 ring-foreground/10 max-md:w-[90vw]"
               initial="closed"
               animate="open"
@@ -1189,7 +1041,6 @@ function MobileMenubar({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** A menu, or a submenu, as a collapsible section. */
 function MobileSection({ nested, children }: { nested?: boolean; children?: React.ReactNode }) {
   const [open, setOpen] = React.useState(false)
   const id = React.useId()
@@ -1199,8 +1050,6 @@ function MobileSection({ nested, children }: { nested?: boolean; children?: Reac
   )
   return (
     <MobileSectionContext.Provider value={value}>
-      {/* Menus stagger in as the panel opens. A submenu doesn't: inside a section body there's
-          no panel animation to carry it, so it would be left at its hidden start. */}
       <motion.div
         data-slot="menubar-mobile-section"
         className="flex flex-col"
@@ -1212,7 +1061,6 @@ function MobileSection({ nested, children }: { nested?: boolean; children?: Reac
   )
 }
 
-/** A section's header: tapping it opens or closes the section. */
 function MobileSectionTrigger({ nested, children }: { nested?: boolean; children?: React.ReactNode }) {
   const section = React.useContext(MobileSectionContext)
   const open = section?.open ?? false
@@ -1233,7 +1081,6 @@ function MobileSectionTrigger({ nested, children }: { nested?: boolean; children
   )
 }
 
-/** A section's body, sliding open and closed. */
 function MobileSectionBody({ nested, children }: { nested?: boolean; children?: React.ReactNode }) {
   const section = React.useContext(MobileSectionContext)
   return (
@@ -1280,7 +1127,6 @@ function MobileMenubarItem({
       disabled={disabled}
       onClick={(event) => {
         onClick?.(event)
-        // An action is done once tapped, like on desktop: the panel closes.
         mobile?.close()
       }}
       className={cn(
@@ -1376,7 +1222,7 @@ function MobileMenubarRadioItem({
   )
 }
 
-/** Renders a part's desktop version, or its touch version inside the tablet/phone panel. */
+// Desktop part, or touch part in panel
 function responsive<P extends object>(
   Desktop: React.ComponentType<P>,
   Mobile: React.ComponentType<P>,
@@ -1445,7 +1291,6 @@ const MenubarSeparator = responsive(
   () => <div role="separator" className="my-1 h-px bg-border" />,
   "MenubarSeparator"
 )
-// Keyboard shortcuts mean nothing on a touch screen.
 const MenubarShortcut = responsive(DesktopMenubarShortcut, () => null, "MenubarShortcut")
 const MenubarSub = responsive(
   DesktopMenubarSub,

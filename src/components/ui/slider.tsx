@@ -14,22 +14,12 @@ type SliderTooltip = "none" | "dragging" | "always"
 type SliderSize = "sm" | "md" | "lg"
 
 type SliderMotion = {
-  /**
-   * How the filled part of the track follows the value. `spring` overshoots a little on a jump,
-   * `ease` glides, `none` tracks the pointer exactly (what a plain slider does).
-   */
   trackFill: SliderTrackFill
-  /** Length of the fill animation, in seconds. */
   fillDuration: number
-  /** What the thumb does while you drag it. */
   thumbGrow: SliderThumbGrow
-  /** The track thickens while you drag. */
   trackExpand: boolean
-  /** Marks along the track, one per step. */
   ticks: SliderTicks
-  /** A bubble showing the value. */
   tooltip: SliderTooltip
-  /** Track and thumb size. */
   size: SliderSize
 }
 
@@ -39,7 +29,6 @@ const TRACK_SIZE: Record<SliderSize, string> = {
   lg: "data-horizontal:h-2.5 data-vertical:w-2.5",
 }
 
-/** The track thickens to this while dragging. Written out in full so Tailwind can see them. */
 const TRACK_SIZE_ACTIVE: Record<SliderSize, string> = {
   sm: "data-dragging:data-horizontal:h-1.5 data-dragging:data-vertical:w-1.5",
   md: "data-dragging:data-horizontal:h-2.5 data-dragging:data-vertical:w-2.5",
@@ -60,7 +49,6 @@ function useSliderMotion() {
   return context
 }
 
-/** Evenly spaced marks along the track, one per step. */
 function Ticks({
   min,
   max,
@@ -73,7 +61,7 @@ function Ticks({
   kind: SliderTicks
 }) {
   const count = Math.floor((max - min) / step)
-  // Only worth drawing when the steps are far enough apart to tell apart.
+  // Too few or dense marks aren't useful
   if (kind === "none" || count < 2 || count > 40) return null
 
   return (
@@ -122,13 +110,11 @@ function Slider({
       ? defaultValue.length
       : 1
 
-  // The indicator is positioned by the primitive with inline styles, so it is eased with a CSS
-  // transition rather than Motion, which would fight it for the same properties.
+  // CSS transition; Base UI sets these inline
   const fillTransition =
     options.trackFill === "none" || reduceMotion
       ? undefined
       : {
-          // Base UI sizes and offsets the indicator inline; these are the properties it writes.
           transitionProperty: "width, height, inset-inline-start, inset-block-start",
           transitionDuration: `${options.fillDuration}s`,
           transitionTimingFunction:
