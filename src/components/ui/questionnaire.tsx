@@ -3,29 +3,55 @@
 import * as React from "react"
 import { Questionnaire as QuestionnairePrimitive } from "@shadcn/react/questionnaire"
 import { cn } from "cn"
-import { motion, useReducedMotion, type Transition, type Variants } from "motion/react"
+import { AnimatePresence, motion, useAnimationControls, useReducedMotion, type Transition, type Variants } from "motion/react"
 
 import { buttonVariants, type Button } from "@/components/ui/button"
-import { CheckIcon } from "lucide-react"
 
 /** slide-x / slide-y: the next question travels in the direction you move. fade: it fades in place. scale: it grows in. */
 type QuestionnaireContent = "slide-x" | "slide-y" | "fade" | "scale" | "none"
 type QuestionnaireProgressStyle = "text" | "bar"
+/** card: each choice is a box. inline: just the indicator and label. */
+type QuestionnaireChoiceLayout = "card" | "inline"
+/** fade: background fades in. top: fills from the top. */
+type QuestionnaireChoiceHover = "fade" | "top"
+/** Roundness of the check indicator, as Tailwind radius names. */
+type QuestionnaireIndicatorRounded = "none" | "sm" | "md" | "lg" | "full"
+
+const INDICATOR_ROUNDED: Record<QuestionnaireIndicatorRounded, string> = {
+  none: "rounded-none",
+  sm: "rounded-sm",
+  md: "rounded-md",
+  lg: "rounded-lg",
+  full: "rounded-full",
+}
+
+type QuestionnaireChoiceColor = "muted" | "primary"
+/** check: an empty circle that morphs into a drawn check. radio: a circle with a dot. */
+type QuestionnaireChoiceIndicator = "radio" | "check" | "none"
 
 type QuestionnaireMotion = {
   content: QuestionnaireContent
-  /** How far the question slides, in px. */
+  /** How far the question slides, in vw. */
   distance: number
   /** Seconds. */
   duration: number
   bounce: number
-  /** The form grows and shrinks to fit each question instead of jumping. */
-  smoothHeight: boolean
   /** Choices rise in one after another. */
   staggerChoices: boolean
   /** Seconds between choices. */
   stagger: number
   progressStyle: QuestionnaireProgressStyle
+  /** Shows the question count and bar. */
+  showProgress: boolean
+  /** Lets a question take more than one answer. */
+  multiple: boolean
+  choiceColor: QuestionnaireChoiceColor
+  choiceIndicator: QuestionnaireChoiceIndicator
+  choiceLayout: QuestionnaireChoiceLayout
+  choiceHover: QuestionnaireChoiceHover
+  /** Boxes the check indicator; off shows just the mark. */
+  indicatorBorder: boolean
+  indicatorRounded: QuestionnaireIndicatorRounded
 }
 
 type QuestionnaireContextValue = QuestionnaireMotion & {
@@ -52,31 +78,22 @@ function useSpring(context: QuestionnaireMotion): Transition {
     : { type: "spring", duration: context.duration, bounce: context.bounce }
 }
 
-// Measures the content so the form can grow and shrink to fit it
-function useHeight() {
-  const ref = React.useRef<HTMLDivElement>(null)
-  const [height, setHeight] = React.useState<number | null>(null)
-
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => setHeight(entry.borderBoxSize[0].blockSize))
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return [ref, height] as const
-}
-
 function Questionnaire({
   content = "slide-x",
-  distance = 40,
+  distance = 20,
   duration = 0.4,
   bounce = 0.1,
-  smoothHeight = true,
   staggerChoices = true,
   stagger = 0.05,
   progressStyle = "bar",
+  showProgress = true,
+  multiple = false,
+  choiceColor = "muted",
+  choiceIndicator = "check",
+  choiceLayout = "card",
+  indicatorBorder = false,
+  indicatorRounded = "full",
+  choiceHover = "fade",
   item: itemProp,
   defaultItem,
   onItemChange,
@@ -87,50 +104,74 @@ function Questionnaire({
   const root = React.useRef<HTMLFormElement | null>(null)
   const [own, setOwn] = React.useState<string | null>(defaultItem ?? null)
   const [direction, setDirection] = React.useState(1)
-  const [measure, height] = useHeight()
-  const grow = useSpring({ duration: 0.4, bounce: 0 } as QuestionnaireMotion)
   const item = itemProp ?? own
 
   const context = React.useMemo(
-    () => ({ content, distance, duration, bounce, smoothHeight, staggerChoices, stagger, progressStyle, item, direction }),
-    [content, distance, duration, bounce, smoothHeight, staggerChoices, stagger, progressStyle, item, direction]
+    () => ({
+      content, distance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
+      multiple, choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover, item, direction,
+    }),
+    [
+      content, distance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
+      multiple, choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover, item, direction,
+    ]
   )
 
   return (
     <QuestionnaireContext.Provider value={context}>
-      {/* Padding and matching negative margin keep focus rings from being clipped */}
-      <motion.div
-        initial={false}
-        animate={{ height: smoothHeight && height !== null ? height : "auto" }}
-        transition={grow}
-        className="-m-1 overflow-hidden p-1"
-      >
-        <div ref={measure}>
-          <QuestionnairePrimitive.Root
-            data-slot="questionnaire"
-            ref={(node) => {
-              root.current = node
-              if (typeof ref === "function") ref(node)
-              else if (ref) ref.current = node
-            }}
-            defaultItem={defaultItem}
-            item={itemProp}
-            onItemChange={(next) => {
-              // Which way to travel, from where the two questions sit in the form
-              const names = [...(root.current?.querySelectorAll<HTMLElement>('[data-slot="questionnaire-item"]') ?? [])].map(
-                (el) => el.dataset.name
-              )
-              const from = item ?? names[0]
-              setDirection(names.indexOf(next) >= names.indexOf(from) ? 1 : -1)
-              setOwn(next)
-              onItemChange?.(next)
-            }}
-            className={cn("flex w-full min-w-0 flex-col gap-4", className)}
-            {...props}
-          />
-        </div>
-      </motion.div>
+      <QuestionnairePrimitive.Root
+        data-slot="questionnaire"
+        ref={(node) => {
+          root.current = node
+          if (typeof ref === "function") ref(node)
+          else if (ref) ref.current = node
+        }}
+        defaultItem={defaultItem}
+        item={itemProp}
+        onItemChange={(next) => {
+          // Which way to travel, from where the two questions sit in the form
+          const names = [...(root.current?.querySelectorAll<HTMLElement>('[data-slot="questionnaire-item"]') ?? [])].map(
+            (el) => el.dataset.name
+          )
+          const from = item ?? names[0]
+          setDirection(names.indexOf(next) >= names.indexOf(from) ? 1 : -1)
+          setOwn(next)
+          onItemChange?.(next)
+        }}
+        className={cn("grid w-full min-w-0 grid-cols-1 gap-4", className)}
+        {...props}
+      />
     </QuestionnaireContext.Provider>
+  )
+}
+
+// Only the current number rolls up when it changes
+function ProgressLabel({ children }: { children: React.ReactNode }) {
+  const context = useQuestionnaire()
+  const roll = useSpring(context)
+  const match = typeof children === "string" ? children.match(/^(\D*)(\d+)(.*)$/) : null
+  if (!match) return <>{children}</>
+  const [, before, count, after] = match
+
+  return (
+    <>
+      {before}
+      <span className="relative inline-flex overflow-hidden align-bottom">
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.span
+            key={count}
+            className="block"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={roll}
+          >
+            {count}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+      {after}
+    </>
   )
 }
 
@@ -140,13 +181,24 @@ function QuestionnaireProgress({
 }: React.ComponentProps<typeof QuestionnairePrimitive.Progress>) {
   const context = useQuestionnaire()
   const fill = useSpring(context)
+  if (!context.showProgress) return null
   const text = cn(
-    "min-h-[1lh] w-fit min-w-[14ch] text-xs font-medium text-muted-foreground tabular-nums",
+    "row-start-1 min-h-[1lh] w-fit min-w-[14ch] text-xs font-medium text-muted-foreground tabular-nums",
     className
   )
 
   if (context.progressStyle === "text") {
-    return <QuestionnairePrimitive.Progress data-slot="questionnaire-progress" className={text} {...props} />
+    return (
+      <QuestionnairePrimitive.Progress
+        data-slot="questionnaire-progress"
+        className={text}
+        render={(progressProps) => {
+          const { children, ...rest } = progressProps
+          return <div {...rest}><ProgressLabel>{children as React.ReactNode}</ProgressLabel></div>
+        }}
+        {...props}
+      />
+    )
   }
 
   return (
@@ -155,8 +207,8 @@ function QuestionnaireProgress({
       render={(progressProps, state) => {
         const { children, ...rest } = progressProps
         return (
-          <div {...rest} className="flex flex-col gap-2">
-            <span className={text}>{children as React.ReactNode}</span>
+          <div {...rest} className="row-start-1 flex flex-col gap-2">
+            <span className={text}><ProgressLabel>{children as React.ReactNode}</ProgressLabel></span>
             <div aria-hidden className="h-1 w-full overflow-hidden rounded-full bg-muted">
               <motion.div
                 className="h-full rounded-full bg-primary"
@@ -177,27 +229,66 @@ function QuestionnaireItem({
   className,
   name,
   children,
+  multiple,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Item>) {
+  const [node, setNode] = React.useState<HTMLElement | null>(null)
+  // The primitive marks the active item from its first render
+  const [active, setActive] = React.useState(false)
+
+  React.useLayoutEffect(() => {
+    if (!node) return
+    const read = () => setActive(node.hasAttribute("data-active"))
+    read()
+    const observer = new MutationObserver(read)
+    observer.observe(node, { attributes: true, attributeFilter: ["data-active"] })
+    return () => observer.disconnect()
+  }, [node])
+
   const context = useQuestionnaire()
   const reduceMotion = useReducedMotion()
-  const active = context.item === name
   const still = context.content === "none" || reduceMotion
   const slideX = context.content === "slide-x" && !reduceMotion
   const slideY = context.content === "slide-y" && !reduceMotion
   const spring = useSpring(context)
 
+  const controls = useAnimationControls()
+  const mounted = React.useRef(false)
+  const [wasActive, setWasActive] = React.useState(active)
+  const [leaving, setLeaving] = React.useState(false)
+  if (active !== wasActive) {
+    setWasActive(active)
+    setLeaving(!active)
+  }
+
+  React.useEffect(() => {
+    if (active) {
+      controls.set("enter")
+      controls.start("center")
+    } else if (mounted.current) {
+      controls.start("exit")
+    }
+    mounted.current = true
+  }, [active, controls])
+
+  const offset = (d: number) => ({
+    opacity: still ? 1 : 0,
+    x: slideX ? `${d * context.distance}vw` : "0vw",
+    y: slideY ? `${d * context.distance}vw` : "0vw",
+    scale: context.content === "scale" && !reduceMotion ? 0.94 : 1,
+  })
+
   const variants: Variants = {
-    enter: (d: number) => ({
-      opacity: still ? 1 : 0,
-      x: slideX ? d * context.distance : 0,
-      y: slideY ? d * context.distance : 0,
-      scale: context.content === "scale" && !reduceMotion ? 0.94 : 1,
+    enter: (d: number) => offset(d),
+    // Leaves the opposite way to the one coming in
+    exit: (d: number) => ({
+      ...offset(-d),
+      transition: still ? { duration: 0 } : { duration: context.duration * 0.7, ease: fadeEase },
     }),
     center: {
       opacity: 1,
-      x: 0,
-      y: 0,
+      x: "0vw",
+      y: "0vw",
       scale: 1,
       transition: {
         ...(context.content === "fade" ? { duration: context.duration, ease: fadeEase } : spring),
@@ -209,26 +300,35 @@ function QuestionnaireItem({
 
   return (
     <QuestionnairePrimitive.Item
+      ref={setNode}
       name={name}
+      multiple={multiple ?? context.multiple}
       data-name={name}
       data-slot="questionnaire-item"
+      // All items share one cell, so the form keeps the tallest height
+      hidden={false}
       className={cn(
-        "flex min-w-0 flex-col gap-4 border-0 p-0 outline-none",
+        "col-start-1 row-start-2 min-w-0 border-0 p-0 outline-none not-data-active:invisible",
+        leaving && "visible!",
         className
       )}
       {...props}
     >
-      {/* Remounts when the question becomes active, so it plays its entrance */}
-      <motion.div
-        key={active ? "on" : "off"}
-        custom={context.direction}
-        variants={variants}
-        initial={active ? "enter" : false}
-        animate="center"
-        className="flex min-w-0 flex-col gap-4"
-      >
-        {children}
-      </motion.div>
+      {/* Padding keeps focus rings inside the clip */}
+      <div className="-m-1 overflow-clip p-1">
+        <motion.div
+          custom={context.direction}
+          variants={variants}
+          initial={active ? "enter" : "exit"}
+          animate={controls}
+          onAnimationComplete={(definition) => {
+            if (definition === "exit") setLeaving(false)
+          }}
+          className="flex min-w-0 flex-col gap-4"
+        >
+          {children}
+        </motion.div>
+      </div>
     </QuestionnairePrimitive.Item>
   )
 }
@@ -241,7 +341,7 @@ function QuestionnaireTitle({
     <QuestionnairePrimitive.Title
       data-slot="questionnaire-title"
       className={cn(
-        "font-heading text-base leading-snug font-medium text-pretty [&:not(:has(~[data-slot=questionnaire-description]))]:mb-4",
+        "font-heading text-xl leading-snug font-medium text-pretty [&:not(:has(~[data-slot=questionnaire-description]))]:mb-4",
         className
       )}
       {...props}
@@ -256,7 +356,7 @@ function QuestionnaireDescription({
   return (
     <QuestionnairePrimitive.Description
       data-slot="questionnaire-description"
-      className={cn("text-sm text-pretty text-muted-foreground", className)}
+      className={cn("text-base text-pretty text-muted-foreground", className)}
       {...props}
     />
   )
@@ -266,11 +366,14 @@ function QuestionnaireChoices({
   className,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Choices>) {
+  const { choiceLayout } = useQuestionnaire()
+
   return (
     <QuestionnairePrimitive.Choices
       data-slot="questionnaire-choices"
       className={cn(
-        "group/questionnaire-choices grid min-w-0 gap-2",
+        "group/questionnaire-choices grid min-w-0",
+        choiceLayout === "inline" ? "gap-1" : "gap-2",
         className
       )}
       {...props}
@@ -288,12 +391,75 @@ function QuestionnaireChoice({
   className,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Choice>) {
+  const { choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover } =
+    useQuestionnaire()
+  const card = choiceLayout === "card"
+  const bare = choiceIndicator === "check" && !indicatorBorder
+  const primary = choiceColor === "primary"
+  const solid = card && primary
+  const hover = card ? choiceHover : "none"
+  const layer = cn("pointer-events-none absolute -inset-px -z-10 rounded-[inherit]", primary ? "bg-primary" : "bg-muted")
+
   return (
     <QuestionnairePrimitive.Choice
       data-slot="questionnaire-choice"
-      render={<motion.label variants={choiceVariants} />}
+      render={(choiceProps) => (
+        <motion.label {...(choiceProps as React.ComponentProps<typeof motion.label>)} variants={choiceVariants}>
+          {card && (
+            // The border sits under the fills, so a fill meets it exactly
+            <span
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute -inset-px -z-30 rounded-[inherit] border transition-colors",
+                "border-input",
+                hover === "fade" &&
+                  (primary
+                    ? "group-data-checked/questionnaire-choice:border-primary"
+                    : "group-data-checked/questionnaire-choice:border-transparent"),
+                hover === "fade" &&
+                  (primary
+                    ? "group-hover/questionnaire-choice:border-primary"
+                    : "group-hover/questionnaire-choice:border-transparent"),
+                "group-has-[>input:focus-visible]/questionnaire-choice:border-ring group-data-invalid/questionnaire-choice:border-destructive"
+              )}
+            />
+          )}
+          {card && (
+            // Backgrounds live in a layer, since blended text ignores an element's own
+            <span
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute inset-0 -z-20 rounded-[calc(var(--radius-lg)-1px)] bg-background dark:bg-input/20",
+                // The wipe layer carries the fill, so the base never tints
+                hover !== "top" && "transition-colors",
+                hover === "fade" &&
+                  (primary
+                    ? "group-hover/questionnaire-choice:bg-primary"
+                    : "group-hover/questionnaire-choice:bg-muted"),
+                hover !== "top" &&
+                  (primary
+                    ? "group-data-checked/questionnaire-choice:bg-primary dark:group-data-checked/questionnaire-choice:bg-primary"
+                    : "group-data-checked/questionnaire-choice:bg-muted dark:group-data-checked/questionnaire-choice:bg-muted")
+              )}
+            />
+          )}
+          {hover === "top" && (
+            <span
+              aria-hidden
+              className={cn(
+                layer,
+                "[clip-path:inset(0_0_100%_0)] transition-[clip-path] duration-300 ease-out group-hover/questionnaire-choice:[clip-path:inset(0)] group-data-checked/questionnaire-choice:[clip-path:inset(0)] motion-reduce:transition-none"
+              )}
+            />
+          )}
+          {choiceProps.children as React.ReactNode}
+        </motion.label>
+      )}
       className={cn(
-        "group/questionnaire-choice relative flex min-h-11 cursor-pointer items-start gap-2.5 rounded-lg border border-input bg-transparent px-3 py-2.5 text-start text-sm transition-colors outline-none select-none hover:bg-muted/50 has-[>input:focus-visible]:border-ring has-[>input:focus-visible]:ring-3 has-[>input:focus-visible]:ring-ring/50 data-invalid:border-destructive dark:bg-input/20 data-checked:border-primary/40 data-checked:bg-muted dark:data-checked:bg-muted",
+        "group/questionnaire-choice relative isolate flex cursor-pointer items-start gap-2.5 text-start text-base outline-none select-none",
+        card
+          ? "min-h-14 rounded-lg border border-transparent px-4 py-3"
+          : "min-h-9 rounded-md py-1.5 text-muted-foreground transition-colors hover:text-foreground data-checked:font-medium data-checked:text-foreground",
         "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className
       )}
@@ -306,17 +472,60 @@ function QuestionnaireChoice({
       <span
         aria-hidden="true"
         data-slot="questionnaire-choice-indicator"
-        className="pointer-events-none relative flex size-4 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-[4px] border border-input group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[type=radio]/questionnaire-choice:rounded-full group-data-checked/questionnaire-choice:border-primary group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:bg-input/30 dark:group-data-checked/questionnaire-choice:bg-primary"
+        data-indicator={choiceIndicator}
+        className={cn(
+          "pointer-events-none relative flex size-5 shrink-0 translate-y-[--spacing(0.25)] items-center justify-center rounded-md border border-input bg-background shadow-xs transition-[background-color,border-color,color,border-radius] duration-300 group-hover/questionnaire-choice:border-foreground/40 group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-checked/questionnaire-choice:border-primary dark:bg-input/30",
+          "group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:group-data-checked/questionnaire-choice:bg-primary",
+          choiceIndicator === "radio" && "rounded-full",
+          choiceIndicator === "check" && INDICATOR_ROUNDED[indicatorRounded],
+          choiceIndicator === "none" && "hidden",
+          solid &&
+            "group-data-checked/questionnaire-choice:border-primary-foreground group-data-checked/questionnaire-choice:bg-primary-foreground group-data-checked/questionnaire-choice:text-primary dark:group-data-checked/questionnaire-choice:bg-primary-foreground",
+          bare &&
+            cn(
+              "border-transparent bg-transparent shadow-none group-hover/questionnaire-choice:border-transparent group-data-checked/questionnaire-choice:border-transparent group-data-checked/questionnaire-choice:bg-transparent dark:bg-transparent dark:group-data-checked/questionnaire-choice:bg-transparent",
+              solid ? "group-data-checked/questionnaire-choice:text-primary-foreground" : "group-data-checked/questionnaire-choice:text-primary"
+            )
+        )}
       >
         <span
           data-slot="questionnaire-choice-indicator-dot"
-          className="hidden size-2 rounded-full bg-primary-foreground group-data-[type=checkbox]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block"
+          className={cn(
+            "size-2.5 scale-0 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-data-checked/questionnaire-choice:scale-100 motion-reduce:transition-none",
+            solid ? "bg-primary" : "bg-primary-foreground",
+            choiceIndicator === "check" && "hidden"
+          )}
         />
-        <CheckIcon data-slot="questionnaire-choice-indicator-check" className="hidden size-3.5 group-data-[type=radio]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block" />
+        <svg
+          data-slot="questionnaire-choice-indicator-check"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={cn(
+            "hidden size-3.5",
+            choiceIndicator === "check" && "block"
+          )}
+        >
+          {/* Draws in when the choice is picked */}
+          <path
+            d="M4 12.5 9.5 18 20 6.5"
+            pathLength={1}
+            strokeDasharray={1}
+            className="[stroke-dashoffset:1] transition-[stroke-dashoffset] duration-300 ease-out group-data-checked/questionnaire-choice:[stroke-dashoffset:0] motion-reduce:transition-none"
+          />
+        </svg>
       </span>
       <QuestionnairePrimitive.ChoiceLabel
         data-slot="questionnaire-choice-label"
-        className="flex min-w-0 flex-1 flex-col gap-0.5 leading-snug"
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-0.5 leading-snug",
+          // Text inverts under the fill, so both change at the same point
+          card &&
+            "text-white mix-blend-difference [&_[data-slot=questionnaire-choice-description]]:text-white/60"
+        )}
       >
         {children}
       </QuestionnairePrimitive.ChoiceLabel>
@@ -353,7 +562,7 @@ function QuestionnaireInput({
       <QuestionnairePrimitive.Input
         data-slot="questionnaire-input"
         className={cn(
-          "h-8 min-h-11 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-[color,box-shadow,background-color] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 sm:min-h-0 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+          "h-12 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1 text-base transition-[color,box-shadow,background-color] outline-none focus-visible:border-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
           "selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
           className
         )}
@@ -384,7 +593,7 @@ function QuestionnaireActions({
     <div
       data-slot="questionnaire-actions"
       className={cn(
-        "grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:min-h-8",
+        "row-start-3 grid min-h-12 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2",
         className
       )}
       {...props}
@@ -392,14 +601,70 @@ function QuestionnaireActions({
   )
 }
 
+type ActionVariant = React.ComponentProps<typeof Button>["variant"]
+type ActionPointerHandler = (event: React.PointerEvent<HTMLButtonElement>) => void
+
+// The hover fill grows from where the pointer came in
+function useActionHover(
+  variant: ActionVariant,
+  onPointerEnter?: ActionPointerHandler,
+  onPointerLeave?: ActionPointerHandler
+) {
+  const { duration } = useQuestionnaire()
+  const reduceMotion = useReducedMotion()
+  const [fill, setFill] = React.useState({ x: 0, y: 0, on: false })
+  const solid = variant === "default"
+
+  const place = (event: React.PointerEvent<HTMLButtonElement>, on: boolean) => {
+    const box = event.currentTarget.getBoundingClientRect()
+    setFill({ x: event.clientX - box.left, y: event.clientY - box.top, on })
+  }
+
+  return {
+    className: cn(
+      solid ? "hover:bg-primary" : "hover:bg-background hover:text-foreground dark:hover:bg-input/30",
+      "relative isolate h-11 overflow-hidden px-5 text-base focus-visible:ring-0",
+      "hover:border-primary"
+    ),
+    onPointerEnter: (event: React.PointerEvent<HTMLButtonElement>) => {
+      onPointerEnter?.(event)
+      place(event, true)
+    },
+    onPointerLeave: (event: React.PointerEvent<HTMLButtonElement>) => {
+      onPointerLeave?.(event)
+      place(event, false)
+    },
+    // The label inverts against whatever the fill is passing under it
+    content: (children: React.ReactNode) => (
+      <>
+        <motion.span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute -z-10 aspect-square w-[250%] -translate-x-1/2 -translate-y-1/2 rounded-full",
+            solid ? "bg-background" : "bg-primary"
+          )}
+          style={{ left: fill.x, top: fill.y }}
+          initial={false}
+          animate={{ scale: fill.on ? 1 : 0 }}
+          transition={{ duration: reduceMotion ? 0 : duration, ease: "easeInOut" }}
+        />
+        <span className="relative text-white mix-blend-difference">{children}</span>
+      </>
+    ),
+  }
+}
+
 function QuestionnairePrevious({
   children,
   className,
   size = "default",
   variant = "outline",
+  onPointerEnter,
+  onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Previous> &
   Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Previous
       data-slot="questionnaire-previous"
@@ -407,12 +672,15 @@ function QuestionnairePrevious({
       data-variant={variant}
       className={cn(
         buttonVariants({ size, variant }),
-        "col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0",
+        "col-start-1 row-start-1 justify-self-start",
+        hover.className,
         className
       )}
+      onPointerEnter={hover.onPointerEnter}
+      onPointerLeave={hover.onPointerLeave}
       {...props}
     >
-      {children ?? "Previous"}
+      {hover.content(children ?? "Previous")}
     </QuestionnairePrimitive.Previous>
   )
 }
@@ -422,9 +690,12 @@ function QuestionnaireSkip({
   className,
   size = "default",
   variant = "outline",
+  onPointerEnter,
+  onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Skip> &
   Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Skip
       data-slot="questionnaire-skip"
@@ -432,12 +703,15 @@ function QuestionnaireSkip({
       data-variant={variant}
       className={cn(
         buttonVariants({ size, variant }),
-        "col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0",
+        "col-start-2 row-start-1 justify-self-end",
+        hover.className,
         className
       )}
+      onPointerEnter={hover.onPointerEnter}
+      onPointerLeave={hover.onPointerLeave}
       {...props}
     >
-      {children ?? "Skip"}
+      {hover.content(children ?? "Skip")}
     </QuestionnairePrimitive.Skip>
   )
 }
@@ -447,9 +721,12 @@ function QuestionnaireNext({
   className,
   size = "default",
   variant = "default",
+  onPointerEnter,
+  onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Next> &
   Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Next
       data-slot="questionnaire-next"
@@ -457,12 +734,15 @@ function QuestionnaireNext({
       data-variant={variant}
       className={cn(
         buttonVariants({ size, variant }),
-        "col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0",
+        "col-start-3 row-start-1 justify-self-end",
+        hover.className,
         className
       )}
+      onPointerEnter={hover.onPointerEnter}
+      onPointerLeave={hover.onPointerLeave}
       {...props}
     >
-      {children ?? "Next"}
+      {hover.content(children ?? "Next")}
     </QuestionnairePrimitive.Next>
   )
 }
@@ -472,9 +752,12 @@ function QuestionnaireSubmit({
   className,
   size = "default",
   variant = "default",
+  onPointerEnter,
+  onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Submit> &
   Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Submit
       data-slot="questionnaire-submit"
@@ -482,12 +765,15 @@ function QuestionnaireSubmit({
       data-variant={variant}
       className={cn(
         buttonVariants({ size, variant }),
-        "col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0",
+        "col-start-3 row-start-1 justify-self-end",
+        hover.className,
         className
       )}
+      onPointerEnter={hover.onPointerEnter}
+      onPointerLeave={hover.onPointerLeave}
       {...props}
     >
-      {children ?? "Submit"}
+      {hover.content(children ?? "Submit")}
     </QuestionnairePrimitive.Submit>
   )
 }
@@ -509,4 +795,12 @@ export {
   QuestionnaireSubmit,
   QuestionnaireTitle,
 }
-export type { QuestionnaireContent, QuestionnaireProgressStyle }
+export type {
+  QuestionnaireChoiceHover,
+  QuestionnaireChoiceLayout,
+  QuestionnaireChoiceColor,
+  QuestionnaireChoiceIndicator,
+  QuestionnaireContent,
+  QuestionnaireIndicatorRounded,
+  QuestionnaireProgressStyle,
+}
