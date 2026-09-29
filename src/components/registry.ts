@@ -125,4 +125,9 @@ export const registry: RegistryItem[] = [
     name: "Questionnaire",
     description: "Step through questions one at a time, with the next question sliding or fading in.",
   },
+  {
+    slug: "theme-switch",
+    name: "Theme Switch",
+    description: "A light and dark toggle that swipes, fades or grows the new theme in.",
+  },
 ]
