@@ -95,9 +95,29 @@ export const registry: RegistryItem[] = [
     name: "Skeleton",
     description: "Placeholders that shimmer while loading, then hand over to the content.",
   },
-  // {
-  //   slug: "slider",
-  //   name: "Slider",
-  //   description: "Pick a value or a range, with a fill that springs after the thumb.",
-  // },
+  {
+    slug: "slider",
+    name: "Slider",
+    description: "Pick a value or a range, with a fill that springs after the thumb.",
+  },
+  {
+    slug: "switch",
+    name: "Switch",
+    description: "Turn a setting on or off in one click.",
+  },
+  {
+    slug: "tabs",
+    name: "Tabs",
+    description: "Switch between related panels without leaving the page.",
+  },
+  {
+    slug: "tooltip",
+    name: "Tooltip",
+    description: "A tooltip that trails the cursor, or morphs and slides as you move between controls.",
+  },
+  {
+    slug: "command",
+    name: "Command",
+    description: "Search and run commands from the keyboard, inline or in a palette.",
+  },
 ]

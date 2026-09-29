@@ -6,7 +6,7 @@ export default function SliderPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">Slider</h1>
         <p className="text-sm text-muted-foreground">
-          Pick a value, or a range, with a fill that springs after the thumb.
+          Pick a value, or a range, with a fill that springs after the edge.
         </p>
       </div>
 

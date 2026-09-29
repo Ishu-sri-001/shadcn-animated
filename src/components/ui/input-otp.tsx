@@ -17,6 +17,7 @@ type InputOTPRounded = "none" | "sm" | "md" | "lg" | "xl" | "full"
 /** Tailwind size step, e.g. "10". */
 type InputOTPSize = "8" | "9" | "10" | "11" | "12" | "14"
 type InputOTPCharAnimation = "pop" | "roll" | "fade" | "none"
+type InputOTPAllow = "numbers" | "letters" | "symbols" | "mixed"
 
 type InputOTPMotion = {
   /** One ring glides between boxes. */
@@ -63,6 +64,31 @@ const SIZE: Record<InputOTPSize, string> = {
   "12": "size-12 text-lg max-md:size-9 max-md:text-base",
   "14": "size-14 text-xl max-md:size-9 max-md:text-base",
 }
+
+/** One character each; spaces are never allowed. */
+const ALLOWED: Record<InputOTPAllow, RegExp> = {
+  numbers: /^[0-9]$/u,
+  letters: /^[A-Za-z]$/u,
+  symbols: /^[^A-Za-z0-9\s]$/u,
+  mixed: /^\S$/u,
+}
+
+const RULE: Record<InputOTPAllow, string> = {
+  numbers: "Use numbers only (0–9).",
+  letters: "Use letters only (A–Z).",
+  symbols: "Use special characters only, like ! @ # $.",
+  mixed: "Use letters, numbers or special characters.",
+}
+
+/** Why a character was turned away, in words people can act on. */
+function rejectMessage(char: string, allow: InputOTPAllow, pasted: boolean) {
+  if (/\s/u.test(char)) return pasted ? "The pasted code has a space in it. Spaces aren't allowed." : "Spaces aren't allowed."
+  const what = pasted ? `The pasted code has "${char}", which isn't allowed here.` : `"${char}" isn't allowed here.`
+  return `${what} ${RULE[allow]}`
+}
+
+/** How long rejected boxes stay red, ms. */
+const REJECT_FLASH = 600
 
 /** Success wave delay per box, seconds. */
 const WAVE_GAP = 0.06
@@ -113,10 +139,16 @@ function InputOTP({
   boxSize = "8",
   rounded = "lg",
   joined = false,
+  allow = "mixed",
+  onReject,
   ...props
 }: React.ComponentProps<typeof OTPInput> &
   Partial<InputOTPMotion> & {
     containerClassName?: string
+    /** Which characters the code accepts. Anything else is blocked and reported. */
+    allow?: InputOTPAllow
+    /** Called with a ready-to-show message when a typed or pasted character is blocked. */
+    onReject?: (message: string, char: string) => void
     /** Wrong code: red boxes, shake. */
     invalid?: boolean
     /** Right code: green wave, tick. */
@@ -135,14 +167,30 @@ function InputOTP({
     setPasteFrom(value.length - seen.length > 1 ? seen.length : null)
   }
 
+  const shake = React.useCallback(() => {
+    if (!shakeOnError || reduceMotion || !box.current) return
+    animate(box.current, { x: [0, -8, 8, -5, 5, -2, 0] }, { duration: 0.45, ease: "easeOut" })
+  }, [shakeOnError, reduceMotion])
+
   // Shake once on turning invalid.
   const wasInvalid = React.useRef(invalid)
   React.useEffect(() => {
     const was = wasInvalid.current
     wasInvalid.current = invalid
-    if (!invalid || was || !shakeOnError || reduceMotion || !box.current) return
-    animate(box.current, { x: [0, -8, 8, -5, 5, -2, 0] }, { duration: 0.45, ease: "easeOut" })
-  }, [invalid, shakeOnError, reduceMotion])
+    if (invalid && !was) shake()
+  }, [invalid, shake])
+
+  // A blocked character turns the boxes red briefly and shakes them, every time.
+  const [rejecting, setRejecting] = React.useState(false)
+  const flashTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
+  React.useEffect(() => () => clearTimeout(flashTimer.current), [])
+  const reject = (char: string, pasted: boolean) => {
+    onReject?.(rejectMessage(char, allow, pasted), char)
+    shake()
+    setRejecting(true)
+    clearTimeout(flashTimer.current)
+    flashTimer.current = setTimeout(() => setRejecting(false), REJECT_FLASH)
+  }
 
   const context = React.useMemo(
     () => ({
@@ -155,11 +203,25 @@ function InputOTP({
       rounded,
       joined,
       ringId,
-      invalid,
+      invalid: invalid || rejecting,
       success,
       pasteFrom,
     }),
-    [glide, charAnimation, pasteStagger, shakeOnError, successWave, boxSize, rounded, joined, ringId, invalid, success, pasteFrom]
+    [
+      glide,
+      charAnimation,
+      pasteStagger,
+      shakeOnError,
+      successWave,
+      boxSize,
+      rounded,
+      joined,
+      ringId,
+      invalid,
+      rejecting,
+      success,
+      pasteFrom,
+    ]
   )
 
   return (
@@ -170,7 +232,15 @@ function InputOTP({
             data-slot="input-otp"
             value={value}
             maxLength={maxLength}
+            // Phones show the number pad only when numbers are all that's allowed
+            inputMode={allow === "numbers" ? "numeric" : "text"}
             onChange={(next: string) => {
+              // Keep the old value and say why, instead of silently dropping the key
+              const bad = [...next].find((c) => !ALLOWED[allow].test(c))
+              if (bad !== undefined) {
+                reject(bad, next.length - value.length > 1)
+                return
+              }
               setUncontrolled(next)
               onChange?.(next)
             }}
@@ -331,4 +401,4 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
 }
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
-export type { InputOTPCharAnimation, InputOTPRounded, InputOTPSize }
+export type { InputOTPAllow, InputOTPCharAnimation, InputOTPRounded, InputOTPSize }

@@ -143,7 +143,7 @@ function SkeletonSwap({
 
   return (
     <div className={cn("relative", className)}>
-      // Crossfade: placeholders fade over content
+      {/* Crossfade: placeholders fade over content */}
       <AnimatePresence mode="popLayout" initial={false}>
         {loading ? (
           <motion.div

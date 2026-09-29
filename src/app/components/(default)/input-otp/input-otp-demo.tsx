@@ -10,12 +10,19 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
+  type InputOTPAllow,
   type InputOTPCharAnimation,
   type InputOTPRounded,
   type InputOTPSize,
 } from "@/components/ui/input-otp"
 
-const CODE = "427193"
+/** The right code for each kind of input. */
+const CODES: Record<InputOTPAllow, string> = {
+  numbers: "427193",
+  letters: "KQWMZT",
+  symbols: "!@#$%&",
+  mixed: "A7#k2$",
+}
 
 /** Hover leaves the button's background alone; an underline draws in under its text instead. */
 const LINE_BUTTON = "group/line"
@@ -24,11 +31,24 @@ const LINE_TEXT =
   "relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out group-hover/line:after:origin-left group-hover/line:after:scale-x-100 group-focus-visible/line:after:origin-left group-focus-visible/line:after:scale-x-100 motion-reduce:after:transition-none"
 
 const controls = {
+  allow: {
+    group: "Input",
+    type: "select",
+    label: "Allowed characters",
+    value: "mixed",
+    options: [
+      { label: "Mixed", value: "mixed" },
+      { label: "Numbers", value: "numbers" },
+      { label: "Letters", value: "letters" },
+      { label: "Special characters", value: "symbols" },
+    ],
+  },
+
   glide: { group: "Typing", type: "checkbox", label: "Ring glides between boxes", value: true },
   charAnimation: {
     group: "Typing",
     type: "select",
-    label: "Digit in",
+    label: "Character in",
     value: "pop",
     options: [
       { label: "Pop", value: "pop" },
@@ -85,7 +105,23 @@ const controls = {
 export function InputOTPDemo() {
   const panel = useControls(controls)
   const { values } = panel
+  const allow = values.allow as InputOTPAllow
+  const CODE = CODES[allow]
   const [code, setCode] = React.useState("")
+  const [error, setError] = React.useState<string | null>(null)
+
+  // A new kind of input starts over
+  const [lastAllow, setLastAllow] = React.useState(allow)
+  if (lastAllow !== allow) {
+    setLastAllow(allow)
+    setCode("")
+    setError(null)
+  }
+
+  const change = (next: string) => {
+    setCode(next)
+    setError(null)
+  }
 
   const complete = code.length === CODE.length
   const success = complete && code === CODE
@@ -97,7 +133,9 @@ export function InputOTPDemo() {
         <InputOTP
           maxLength={CODE.length}
           value={code}
-          onChange={setCode}
+          onChange={change}
+          allow={allow}
+          onReject={setError}
           invalid={invalid}
           success={success}
           aria-label="Verification code"
@@ -122,19 +160,27 @@ export function InputOTPDemo() {
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {success
-            ? "Verified. Your delivery is confirmed."
-            : invalid
-              ? "That code isn't right. Check the email and try again."
-              : "Enter the code we emailed you."}
+        <p
+          className={cn(
+            "text-center text-sm text-muted-foreground",
+            (error || invalid) && "text-destructive"
+          )}
+          aria-live="assertive"
+        >
+          {error
+            ? error
+            : success
+              ? "Verified. Your delivery is confirmed."
+              : invalid
+                ? "That code isn't right. Check the email and try again."
+                : "Enter the code we emailed you."}
         </p>
         <div className="flex gap-2">
           <Button
             variant="ghost"
             size="sm"
             className={cn(LINE_BUTTON, "hover:bg-transparent dark:hover:bg-transparent")}
-            onClick={() => setCode(CODE)}
+            onClick={() => change(CODE)}
           >
             <span className={LINE_TEXT}>Paste the right code</span>
           </Button>
@@ -142,14 +188,15 @@ export function InputOTPDemo() {
             variant="ghost"
             size="sm"
             className={cn(LINE_BUTTON, "hover:bg-transparent dark:hover:bg-transparent")}
-            onClick={() => setCode("")}
+            onClick={() => change("")}
           >
             <span className={LINE_TEXT}>Clear</span>
           </Button>
         </div>
       </div>
       <p className="text-sm text-muted-foreground">
-        Tip: the right code is {CODE}. Any other six digits shows the error.
+        Tip: the right code is {CODE}. Any other six characters shows the error, and a character
+        that isn&apos;t allowed is blocked with a message.
       </p>
 
       <ControlsPanel title="Input OTP" {...panel} />

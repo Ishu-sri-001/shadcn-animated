@@ -3,50 +3,173 @@
 import * as React from "react"
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { cn } from "cn"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import {
+  AnimatePresence,
+  animate,
+  MotionConfig,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionStyle,
+  type Transition,
+} from "motion/react"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 
-type SliderTrackFill = "spring" | "ease" | "none"
-type SliderThumbGrow = "none" | "grow" | "shrink"
-type SliderTicks = "none" | "dots" | "lines"
-type SliderTooltip = "none" | "dragging" | "always"
-type SliderSize = "sm" | "md" | "lg"
+// While dragging, glide over step jumps without trailing the pointer
+const DRAG_FOLLOW: Transition = { type: "spring", visualDuration: 0.08, bounce: 0 }
+
+type SliderEdgePress = "none" | "grow" | "shrink"
+type SliderMarks = "none" | "dots" | "lines"
+type SliderEdgeVariant = "bar" | "filled" | "outline"
+type SliderBubble = "none" | "dragging" | "always" | "hover"
+type SliderEdgeSize = "sm" | "md" | "lg"
+type SliderThickness = "0.5" | "1" | "1.5" | "2.5" | "4" | "13"
+type SliderThicken = "none" | "drag" | "hover"
+type SliderLabels = "none" | "rail"
+type SliderRadius = "none" | "sm" | "md" | "lg" | "xl" | "full"
 
 type SliderMotion = {
-  trackFill: SliderTrackFill
-  fillDuration: number
-  thumbGrow: SliderThumbGrow
-  trackExpand: boolean
-  ticks: SliderTicks
-  tooltip: SliderTooltip
-  size: SliderSize
+  duration: number
+  bounce: number
+  edgePress: SliderEdgePress
+  thicken: SliderThicken
+  elastic: boolean
+  /** How far the rail can stretch past an end, as a percent of its width. */
+  stretch: number
+  labels: SliderLabels
+  marks: SliderMarks
+  bubble: SliderBubble
+  edgeVariant: SliderEdgeVariant
+  roll: boolean
+  showEdge: boolean
+  thickness: SliderThickness
+  thickenTo: SliderThickness
+  radius: SliderRadius
+  edgeSize: SliderEdgeSize
+  format?: (value: number) => React.ReactNode
 }
 
-const TRACK_SIZE: Record<SliderSize, string> = {
-  sm: "data-horizontal:h-1 data-vertical:w-1",
-  md: "data-horizontal:h-1.5 data-vertical:w-1.5",
-  lg: "data-horizontal:h-2.5 data-vertical:w-2.5",
+// Full class names so Tailwind can see them; px sizes the bar thumb to fit inside
+const THICKNESS: Record<SliderThickness, { rest: string; drag: string; px: number }> = {
+  "0.5": {
+    rest: "data-horizontal:h-0.5 data-vertical:w-0.5",
+    drag: "data-dragging:data-horizontal:h-0.5 data-dragging:data-vertical:w-0.5",
+    px: 2,
+  },
+  "1": {
+    rest: "data-horizontal:h-1 data-vertical:w-1",
+    drag: "data-dragging:data-horizontal:h-1 data-dragging:data-vertical:w-1",
+    px: 4,
+  },
+  "1.5": {
+    rest: "data-horizontal:h-1.5 data-vertical:w-1.5",
+    drag: "data-dragging:data-horizontal:h-1.5 data-dragging:data-vertical:w-1.5",
+    px: 6,
+  },
+  "2.5": {
+    rest: "data-horizontal:h-2.5 data-vertical:w-2.5",
+    drag: "data-dragging:data-horizontal:h-2.5 data-dragging:data-vertical:w-2.5",
+    px: 10,
+  },
+  "4": {
+    rest: "data-horizontal:h-4 data-vertical:w-4",
+    drag: "data-dragging:data-horizontal:h-4 data-dragging:data-vertical:w-4",
+    px: 16,
+  },
+  "13": {
+    rest: "data-horizontal:h-13 data-vertical:w-13",
+    drag: "data-dragging:data-horizontal:h-13 data-dragging:data-vertical:w-13",
+    px: 52,
+  },
 }
 
-const TRACK_SIZE_ACTIVE: Record<SliderSize, string> = {
-  sm: "data-dragging:data-horizontal:h-1.5 data-dragging:data-vertical:w-1.5",
-  md: "data-dragging:data-horizontal:h-2.5 data-dragging:data-vertical:w-2.5",
-  lg: "data-dragging:data-horizontal:h-3.5 data-dragging:data-vertical:w-3.5",
+const RADIUS: Record<SliderRadius, string> = {
+  none: "rounded-none",
+  sm: "rounded-sm",
+  md: "rounded-md",
+  lg: "rounded-lg",
+  xl: "rounded-xl",
+  full: "rounded-full",
 }
 
-const THUMB_SIZE: Record<SliderSize, string> = {
+const THUMB_SIZE: Record<SliderEdgeSize, string> = {
   sm: "size-3",
   md: "size-4",
   lg: "size-5",
 }
 
-const SliderContext = React.createContext<SliderMotion | null>(null)
+const THUMB_SCALE: Record<SliderEdgePress, number> = { none: 1, grow: 1.25, shrink: 0.8 }
+
+// The bar thumb's resting dot, in px
+const DOT_SIZE: Record<SliderEdgeSize, number> = { sm: 10, md: 14, lg: 18 }
+
+// Nudge per unit of stretch, px; 10% stretch nudges about 3px
+const NUDGE = 33
+
+// How far the fill runs past the bar edge while the rail is grown, px
+const EDGE_EXTEND = 16
+
+// Springy overshoot for the rail growing and shrinking
+const GROW =
+  "transition-[height,width,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
+const RAIL_SPRING: Transition = { type: "spring", visualDuration: 0.3, bounce: 0.2 }
+
+// With reduced motion on, every move lands instantly. Otherwise the transition is unchanged.
+function useMotionOk(transition: Transition): Transition {
+  return useReducedMotion() ? { duration: 0 } : transition
+}
+
+const SliderContext = React.createContext<
+  (SliderMotion & { step: number; followCursor: boolean; expanded: boolean }) | null
+>(null)
 
 function useSliderMotion() {
   const context = React.useContext(SliderContext)
   if (!context) throw new Error("Slider parts must be used inside <Slider>.")
   return context
+}
+
+// Springs a percentage towards the position Base UI computes
+function useSmoothPercent(target: number | undefined, dragging: boolean) {
+  const { duration, bounce } = useSliderMotion()
+  const reduceMotion = useReducedMotion()
+  const percent = useMotionValue(target ?? 0)
+  const placed = React.useRef(false)
+
+  React.useEffect(() => {
+    if (target === undefined || Number.isNaN(target)) return
+    // Land on the first measured position instead of sliding in from 0
+    if (!placed.current || reduceMotion) {
+      placed.current = true
+      percent.jump(target)
+      return
+    }
+    const controls = animate(
+      percent,
+      target,
+      dragging ? DRAG_FOLLOW : { type: "spring", visualDuration: duration, bounce }
+    )
+    return () => controls.stop()
+  }, [target, dragging, duration, bounce, reduceMotion, percent])
+
+  return percent
+}
+
+function toPercent(value: number) {
+  return `${value}%`
+}
+
+function readPercent(style: React.CSSProperties | undefined, name: string) {
+  const raw = (style as Record<string, unknown> | undefined)?.[name]
+  if (raw === undefined || style?.visibility === "hidden") return undefined
+  return parseFloat(String(raw))
+}
+
+function decimalsOf(step: number) {
+  return (String(step).split(".")[1] ?? "").length
 }
 
 function Ticks({
@@ -58,7 +181,7 @@ function Ticks({
   min: number
   max: number
   step: number
-  kind: SliderTicks
+  kind: SliderMarks
 }) {
   const count = Math.floor((max - min) / step)
   // Too few or dense marks aren't useful
@@ -83,26 +206,81 @@ function Ticks({
 }
 
 function Slider({
-  trackFill = "spring",
-  fillDuration = 0.35,
-  thumbGrow = "grow",
-  trackExpand = true,
-  ticks = "none",
-  tooltip = "dragging",
-  size = "md",
+  duration = 0.4,
+  bounce = 0,
+  edgePress = "none",
+  thicken = "hover",
+  elastic = true,
+  stretch = 10,
+  labels = "rail",
+  marks = "none",
+  bubble = "hover",
+  edgeVariant = "bar",
+  roll = true,
+  showEdge = true,
+  thickness = "1.5",
+  thickenTo = "13",
+  radius = "xl",
+  edgeSize = "md",
+  format,
   className,
   defaultValue,
   value,
   min = 0,
   max = 100,
   step = 1,
+  onValueChange,
   ...props
 }: SliderPrimitive.Root.Props & Partial<SliderMotion>) {
-  const options = React.useMemo(
-    () => ({ trackFill, fillDuration, thumbGrow, trackExpand, ticks, tooltip, size }),
-    [trackFill, fillDuration, thumbGrow, trackExpand, ticks, tooltip, size]
-  )
+  const vertical = props.orientation === "vertical"
+  const followCursor = bubble === "hover" && !vertical
   const reduceMotion = useReducedMotion()
+  const railSpring = useMotionOk(RAIL_SPRING)
+
+  const options = React.useMemo(
+    () => ({
+      duration,
+      bounce,
+      edgePress,
+      thicken,
+      elastic,
+      stretch,
+      labels,
+      marks,
+      bubble,
+      edgeVariant,
+      roll,
+      showEdge,
+      thickness,
+      thickenTo,
+      radius,
+      edgeSize,
+      format,
+      step,
+      followCursor,
+    }),
+    [
+      duration,
+      bounce,
+      edgePress,
+      thicken,
+      elastic,
+      stretch,
+      labels,
+      marks,
+      bubble,
+      edgeVariant,
+      roll,
+      showEdge,
+      thickness,
+      thickenTo,
+      radius,
+      edgeSize,
+      format,
+      step,
+      followCursor,
+    ]
+  )
 
   const thumbCount = Array.isArray(value)
     ? value.length
@@ -110,21 +288,156 @@ function Slider({
       ? defaultValue.length
       : 1
 
-  // CSS transition; Base UI sets these inline
-  const fillTransition =
-    options.trackFill === "none" || reduceMotion
-      ? undefined
-      : {
-          transitionProperty: "width, height, inset-inline-start, inset-block-start",
-          transitionDuration: `${options.fillDuration}s`,
-          transitionTimingFunction:
-            options.trackFill === "spring"
-              ? "cubic-bezier(0.34, 1.56, 0.64, 1)"
-              : "cubic-bezier(0.22, 1, 0.36, 1)",
-        }
+  const controlRef = React.useRef<HTMLDivElement>(null)
+  const [hovering, setHovering] = React.useState(false)
+  const [pressed, setPressed] = React.useState(false)
+  // A keyboard user is on a handle: show the same cues a pointer gets
+  const [kbFocus, setKbFocus] = React.useState(false)
+  // Uncontrolled sliders still need their value for the rail labels
+  const [ownValue, setOwnValue] = React.useState(defaultValue ?? min)
+  const current = value ?? ownValue
+  const [hoverValue, setHoverValue] = React.useState(min)
+  // Signed stretch past an end while dragging (fraction of the width), and where the cursor is (%)
+  const pull = useMotionValue(0)
+  const pullSpring = useSpring(pull, { stiffness: 520, damping: 22, mass: 0.6 })
+  const cursor = useMotionValue(0)
+  const stretching = elastic && !vertical && !reduceMotion
+  const disabled = props.disabled
+
+  React.useEffect(() => {
+    const el = controlRef.current
+    if (!el || disabled || vertical) return
+
+    const project = (e: PointerEvent) => {
+      const rect = el.getBoundingClientRect()
+      const fraction = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
+      const stepped = Math.round((fraction * (max - min)) / step) * step + min
+      cursor.jump(fraction * 100)
+      setHoverValue(Math.min(max, Number(stepped.toFixed(decimalsOf(step)))))
+      return rect
+    }
+
+    const onEnter = (e: PointerEvent) => {
+      project(e)
+      setHovering(true)
+    }
+    const onMove = (e: PointerEvent) => project(e)
+    const onLeave = () => setHovering(false)
+
+    const onDown = (e: PointerEvent) => {
+      const drag = (ev: PointerEvent) => {
+        const rect = project(ev)
+        if (!stretching) return
+        const past = ev.clientX > rect.right ? ev.clientX - rect.right : Math.min(0, ev.clientX - rect.left)
+        // Rubber band: the stretch eases towards a limit the further you go
+        pull.set(Math.sign(past) * (stretch / 100) * Math.tanh(Math.abs(past) / 80))
+      }
+      const release = (ev: PointerEvent) => {
+        window.removeEventListener("pointermove", drag)
+        window.removeEventListener("pointerup", release)
+        window.removeEventListener("pointercancel", release)
+        pull.set(0)
+        setPressed(false)
+        const rect = el.getBoundingClientRect()
+        const inside =
+          ev.clientX >= rect.left && ev.clientX <= rect.right &&
+          ev.clientY >= rect.top && ev.clientY <= rect.bottom
+        if (!inside || ev.pointerType !== "mouse") setHovering(false)
+      }
+      window.addEventListener("pointermove", drag)
+      window.addEventListener("pointerup", release)
+      window.addEventListener("pointercancel", release)
+      project(e)
+      setHovering(true)
+      setPressed(true)
+    }
+
+    const isRange = (t: EventTarget | null): t is HTMLInputElement =>
+      t instanceof HTMLInputElement && t.type === "range"
+
+    // Park the value pill above the focused handle and keep it there as keys move it
+    const showFor = (input: HTMLInputElement) => {
+      const value = Number(input.value)
+      const percent = ((value - min) / (max - min)) * 100
+      if (reduceMotion) cursor.jump(percent)
+      else animate(cursor, percent, RAIL_SPRING)
+      setHoverValue(value)
+    }
+    const onFocusIn = (e: FocusEvent) => {
+      if (!isRange(e.target) || !e.target.matches(":focus-visible")) return
+      showFor(e.target)
+      setKbFocus(true)
+    }
+    const onFocusOut = () => setKbFocus(false)
+
+    // Pressing past an end gives the rail a small rubber-band bump instead of doing nothing
+    const onKey = (e: KeyboardEvent) => {
+      if (!stretching || !isRange(e.target)) return
+      const now = Number(e.target.value)
+      const up = ["ArrowRight", "ArrowUp", "PageUp", "End"].includes(e.key)
+      const down = ["ArrowLeft", "ArrowDown", "PageDown", "Home"].includes(e.key)
+      const bump = (now >= max && up) ? 1 : (now <= min && down) ? -1 : 0
+      if (!bump) return
+      pull.set(bump * (stretch / 100) * 0.4)
+      setTimeout(() => pull.set(0), 120)
+    }
+
+    el.addEventListener("focusin", onFocusIn)
+    el.addEventListener("focusout", onFocusOut)
+    el.addEventListener("keydown", onKey)
+    el.addEventListener("pointerenter", onEnter)
+    el.addEventListener("pointermove", onMove)
+    el.addEventListener("pointerleave", onLeave)
+    el.addEventListener("pointerdown", onDown)
+    return () => {
+      el.removeEventListener("focusin", onFocusIn)
+      el.removeEventListener("focusout", onFocusOut)
+      el.removeEventListener("keydown", onKey)
+      el.removeEventListener("pointerenter", onEnter)
+      el.removeEventListener("pointermove", onMove)
+      el.removeEventListener("pointerleave", onLeave)
+      el.removeEventListener("pointerdown", onDown)
+    }
+  }, [disabled, vertical, stretching, stretch, reduceMotion, min, max, step, cursor, pull])
+
+  // Stretch from the far edge, squash to match, and nudge towards the pull
+  // Base UI moves the value in code on key presses (no native input event), so follow the
+  // slider's own value: keep the pill on whichever handle has keyboard focus
+  React.useEffect(() => {
+    const active = document.activeElement
+    if (!kbFocus || !(active instanceof HTMLInputElement) || !controlRef.current?.contains(active)) return
+    const now = Number(active.value)
+    const percent = ((now - min) / (max - min)) * 100
+    if (reduceMotion) cursor.jump(percent)
+    else animate(cursor, percent, RAIL_SPRING)
+    setHoverValue(now)
+  }, [current, kbFocus, min, max, reduceMotion, cursor])
+
+  const stretchX = useTransform(pullSpring, (v) => 1 + Math.abs(v))
+  const squashY = useTransform(pullSpring, (v) => 1 - Math.abs(v))
+  const origin = useTransform(pullSpring, (v) => (v >= 0 ? "0% 50%" : "100% 50%"))
+  const offsetX = useTransform(pullSpring, (v) => v * NUDGE)
+  const cursorLeft = useTransform(cursor, toPercent)
+
+  const restThickness = THICKNESS[options.thickness]
+  const grown = THICKNESS[options.thickenTo]
+  const expanded =
+    options.thicken === "hover"
+      ? hovering || pressed || kbFocus
+      : options.thicken === "drag" && pressed
+  const values = Array.isArray(current) ? current : [current as number]
+  // Shade the stretch between the value and the cursor, so you see where a click will land
+  const valuePercent = ((values[0] - min) / (max - min)) * 100
+  const ghostLeft = useTransform(cursor, (c) => toPercent(Math.min(c, valuePercent)))
+  const ghostWidth = useTransform(cursor, (c) => toPercent(Math.abs(c - valuePercent)))
+  const cursorAhead = useTransform(cursor, (c) => c > valuePercent)
+  const [ahead, setAhead] = React.useState(false)
+  React.useEffect(() => cursorAhead.on("change", setAhead), [cursorAhead])
+  const context = React.useMemo(() => ({ ...options, expanded }), [options, expanded])
 
   return (
-    <SliderContext.Provider value={options}>
+    <SliderContext.Provider value={context}>
+      <MotionConfig reducedMotion="user">
       <SliderPrimitive.Root
         className={cn("data-horizontal:w-full data-vertical:h-full", className)}
         data-slot="slider"
@@ -134,34 +447,166 @@ function Slider({
         max={max}
         step={step}
         thumbAlignment="edge"
+        onValueChange={(next, details) => {
+          setOwnValue(next)
+          onValueChange?.(next, details)
+        }}
         {...props}
       >
-        <SliderPrimitive.Control className="relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col">
+        <SliderPrimitive.Control
+          ref={controlRef}
+          className={cn(
+            "group/control relative flex w-full cursor-pointer touch-none items-center select-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
+            // A tall hit area, so the rail is easy to grab and never shifts the layout as it grows
+            options.thicken !== "none" && "data-horizontal:min-h-20"
+          )}
+        >
           <SliderPrimitive.Track
             data-slot="slider-track"
             className={cn(
-              "relative grow rounded-full bg-muted transition-[height,width] duration-200 ease-out select-none data-horizontal:w-full data-vertical:h-full",
-              TRACK_SIZE[options.size],
-              options.trackExpand && TRACK_SIZE_ACTIVE[options.size]
+              "relative grow overflow-hidden bg-foreground/30 select-none data-horizontal:w-full data-vertical:h-full",
+              GROW,
+              RADIUS[options.radius],
+              "group-has-focus-visible/control:ring-2 group-has-focus-visible/control:ring-ring/60 group-has-focus-visible/control:ring-offset-2 group-has-focus-visible/control:ring-offset-background",
+              expanded ? cn(grown.rest, "opacity-100") : cn(restThickness.rest, "opacity-80"),
+              // Vertical sliders don't track hover, so they thicken on drag only
+              vertical && options.thicken !== "none" && grown.drag
             )}
+            render={
+              stretching
+                ? (trackProps) => (
+                    <motion.div
+                      {...(trackProps as React.ComponentProps<typeof motion.div>)}
+                      style={
+                        {
+                          ...trackProps.style,
+                          x: offsetX,
+                          scaleX: stretchX,
+                          scaleY: squashY,
+                          transformOrigin: origin,
+                        } as MotionStyle
+                      }
+                    />
+                  )
+                : undefined
+            }
           >
-            <Ticks min={min} max={max} step={step} kind={options.ticks} />
+            <Ticks min={min} max={max} step={step} kind={options.marks} />
+            {followCursor && values.length === 1 && (
+              <motion.div
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute inset-y-0",
+                  RADIUS[options.radius],
+                  // Ahead of the fill it previews more fill; behind it, it lightens what you'd drop
+                  ahead ? "bg-foreground/20" : "z-[2] bg-background/25"
+                )}
+                style={{ left: ghostLeft, width: ghostWidth }}
+                initial={false}
+                animate={{ opacity: hovering && !pressed && !disabled ? 1 : 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
+              />
+            )}
             <SliderPrimitive.Indicator
               data-slot="slider-range"
-              className="rounded-full bg-primary select-none data-horizontal:h-full data-vertical:w-full"
-              style={fillTransition}
+              className={cn(
+                "bg-foreground select-none data-horizontal:h-full data-vertical:w-full",
+                RADIUS[options.radius]
+              )}
+              render={(indicatorProps, state) => (
+                <SliderIndicatorElement {...indicatorProps} dragging={state.dragging} />
+              )}
             />
           </SliderPrimitive.Track>
           {Array.from({ length: thumbCount }, (_, index) => (
             <SliderThumb key={index} index={index} />
           ))}
+          {options.labels === "rail" && !vertical && (
+            <>
+              <RailLabel side="start" expanded={expanded}>
+                {values.map((v, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && "–"}
+                    <BubbleLabel value={v} options={context} />
+                  </React.Fragment>
+                ))}
+              </RailLabel>
+              <RailLabel side="end" expanded={expanded}>
+                <BubbleLabel value={max} options={context} />
+              </RailLabel>
+            </>
+          )}
+          <AnimatePresence>
+            {followCursor && (hovering || kbFocus) && !disabled && (
+              <motion.span
+                className="pointer-events-none absolute top-0 z-20 -translate-x-1/2 rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background tabular-nums"
+                style={{ left: cursorLeft }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: -14 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={railSpring}
+              >
+                <BubbleLabel value={hoverValue} options={context} />
+              </motion.span>
+            )}
+          </AnimatePresence>
         </SliderPrimitive.Control>
       </SliderPrimitive.Root>
+      </MotionConfig>
     </SliderContext.Provider>
   )
 }
 
-const THUMB_SCALE: Record<SliderThumbGrow, number> = { none: 1, grow: 1.25, shrink: 0.8 }
+function SliderIndicatorElement({
+  dragging,
+  style,
+  ...props
+}: React.ComponentProps<"div"> & { dragging: boolean }) {
+  const options = useSliderMotion()
+  // Base UI sizes the fill with CSS variables; spring those instead
+  const startTarget = readPercent(style, "--start-position")
+  const sizeTarget = readPercent(style, "--relative-size")
+  const range = sizeTarget !== undefined
+
+  const start = useSmoothPercent(startTarget, dragging)
+  const end = useSmoothPercent(
+    startTarget !== undefined && range ? startTarget + sizeTarget : undefined,
+    dragging
+  )
+  const startCss = useTransform(start, toPercent)
+  const sizeCss = useTransform(() => toPercent(end.get() - start.get()))
+
+  // The bar edge sits inside the grown fill, with some fill beyond it, instead of on its rim
+  const extendTo =
+    options.edgeVariant === "bar" && options.showEdge && options.expanded ? EDGE_EXTEND : 0
+  const extend = useSpring(extendTo, { stiffness: 400, damping: 30 })
+  const reduceMotion = useReducedMotion()
+  React.useEffect(() => {
+    if (reduceMotion) extend.jump(extendTo)
+    else extend.set(extendTo)
+  }, [extend, extendTo, reduceMotion])
+  const extendCss = useTransform(extend, (v) => `${v}px`)
+
+  return (
+    <motion.div
+      {...(props as React.ComponentProps<typeof motion.div>)}
+      style={
+        {
+          ...style,
+          "--start-position": startCss,
+          "--edge-extend": extendCss,
+          ...(range
+            ? {
+                "--relative-size": sizeCss,
+                insetInlineStart: "calc(var(--start-position) - var(--edge-extend))",
+                width: "calc(var(--relative-size) + 2 * var(--edge-extend))",
+              }
+            : { width: "calc(var(--start-position) + var(--edge-extend))" }),
+        } as unknown as MotionStyle
+      }
+    />
+  )
+}
 
 function SliderThumb({ index }: { index: number }) {
   const options = useSliderMotion()
@@ -170,40 +615,207 @@ function SliderThumb({ index }: { index: number }) {
     <SliderPrimitive.Thumb
       data-slot="slider-thumb"
       index={index}
+      // Screen readers announce the formatted value (e.g. "18°C"), not the bare number
+      getAriaValueText={
+        options.format
+          ? (text, v) => {
+              const label = options.format?.(v)
+              return typeof label === "string" || typeof label === "number" ? String(label) : text
+            }
+          : undefined
+      }
       className={cn(
-        "relative block shrink-0 rounded-full border border-ring bg-background ring-ring/50 select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50",
-        THUMB_SIZE[options.size]
+        "group/thumb relative block shrink-0 select-none after:absolute after:-inset-2 disabled:pointer-events-none",
+        THUMB_SIZE[options.edgeSize]
       )}
-      render={(thumbProps, state) => {
-        const value = state.values[index]
-        const show =
-          options.tooltip === "always" || (options.tooltip === "dragging" && state.dragging)
-
-        return (
-          <motion.div
-            {...(thumbProps as React.ComponentProps<typeof motion.div>)}
-            animate={{ scale: state.dragging ? THUMB_SCALE[options.thumbGrow] : 1 }}
-            transition={{ type: "spring", visualDuration: 0.25, bounce: 0.4 }}
-          >
-            <AnimatePresence>
-              {show && (
-                <motion.span
-                  className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground tabular-nums"
-                  initial={{ opacity: 0, y: 4, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.9 }}
-                  transition={{ duration: 0.18, ease: smoothEase }}
-                >
-                  {Math.round(value)}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )
-      }}
+      render={(thumbProps, state) => (
+        <SliderThumbElement
+          {...thumbProps}
+          value={state.values[index]}
+          dragging={state.dragging}
+          options={options}
+        />
+      )}
     />
   )
 }
 
-export { Slider }
-export type { SliderTrackFill, SliderThumbGrow, SliderTicks, SliderTooltip, SliderSize }
+// Each digit is a 0-9 column that slides to the right number, like an odometer
+function RollingNumber({ value }: { value: string }) {
+  const roll = useMotionOk({ type: "spring", visualDuration: 0.3, bounce: 0.15 })
+  const chars = value.split("")
+  return (
+    <span className="inline-flex" aria-label={value}>
+      {chars.map((char, i) => {
+        // Keyed from the right so the ones digit keeps its column as the length changes
+        const key = chars.length - i
+        return /\d/.test(char) ? (
+          <span key={key} aria-hidden className="inline-block h-[1lh] overflow-hidden">
+            <motion.span
+              className="flex flex-col"
+              initial={false}
+              animate={{ y: `${-Number(char) * 10}%` }}
+              transition={roll}
+            >
+              {Array.from({ length: 10 }, (_, d) => (
+                <span key={d} className="h-[1lh]">
+                  {d}
+                </span>
+              ))}
+            </motion.span>
+          </span>
+        ) : (
+          <span key={key} aria-hidden>
+            {char}
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
+function RailLabel({
+  side,
+  expanded,
+  children,
+}: {
+  side: "start" | "end"
+  expanded: boolean
+  children: React.ReactNode
+}) {
+  const out = side === "start" ? -20 : 20
+  const spring = useMotionOk(RAIL_SPRING)
+  return (
+    // The static wrapper centres it; the inner span moves, so the two transforms don't fight
+    <span
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute top-1/2 z-[15] -translate-y-1/2",
+        side === "start" ? "left-3" : "right-3"
+      )}
+    >
+      <motion.span
+        className={cn(
+          "flex rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap text-foreground tabular-nums transition-colors duration-300 motion-reduce:transition-none",
+          expanded ? "bg-background" : "bg-transparent"
+        )}
+        initial={false}
+        animate={
+          expanded
+            ? { x: 0, y: 0, scale: 1, opacity: 1 }
+            : { x: out, y: -20, scale: 0.9, opacity: side === "start" ? 0.8 : 1 }
+        }
+        transition={spring}
+      >
+        {children}
+      </motion.span>
+    </span>
+  )
+}
+
+function BubbleLabel({
+  value,
+  options,
+}: {
+  value: number
+  options: ReturnType<typeof useSliderMotion>
+}) {
+  const label = options.format ? options.format(value) : value.toFixed(decimalsOf(options.step))
+  return options.roll && (typeof label === "string" || typeof label === "number") ? (
+    <RollingNumber value={String(label)} />
+  ) : (
+    label
+  )
+}
+
+function SliderThumbElement({
+  value,
+  dragging,
+  options,
+  style,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  value: number
+  dragging: boolean
+  options: ReturnType<typeof useSliderMotion>
+}) {
+  const railSpring = useMotionOk(RAIL_SPRING)
+  const popSpring = useMotionOk({ type: "spring", visualDuration: 0.25, bounce: 0.4 })
+  const fade = useMotionOk({ duration: 0.18, ease: smoothEase })
+  const position = useSmoothPercent(readPercent(style, "--position"), dragging)
+  const positionCss = useTransform(position, toPercent)
+
+  const [kbFocus, setKbFocus] = React.useState(false)
+  const onThumb = options.bubble === "dragging" || (options.bubble === "hover" && !options.followCursor)
+  const show = options.bubble === "always" || (onThumb && (dragging || kbFocus))
+
+  return (
+    <motion.div
+      {...(props as React.ComponentProps<typeof motion.div>)}
+      style={{ ...style, "--position": positionCss } as MotionStyle}
+      // Focus events bubble up from the hidden range input; only keyboard focus counts
+      onFocus={(e) => setKbFocus((e.target as HTMLElement).matches(":focus-visible"))}
+      onBlur={() => setKbFocus(false)}
+    >
+      {/* Base UI's hidden range input: keyboard, focus and forms */}
+      {children}
+      {options.edgeVariant === "bar" ? (
+        <motion.span
+          aria-hidden
+          className={cn(
+            "absolute top-1/2 left-1/2 rounded-full shadow-sm ring-ring/50 transition-[background-color,box-shadow] duration-300 motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",
+            // A mid tone at rest reads on both the fill and the track; the grown bar goes white on the fill
+            options.expanded
+              ? "bg-background shadow-background"
+              : "bg-black dark:bg-white"
+          )}
+          initial={false}
+          animate={{
+            x: "-50%",
+            y: "-50%",
+            width: options.expanded ? 6 : DOT_SIZE[options.edgeSize],
+            height: options.expanded
+              ? Math.max(DOT_SIZE[options.edgeSize], THICKNESS[options.thickenTo].px - 10)
+              : DOT_SIZE[options.edgeSize],
+            opacity: options.showEdge ? 1 : 0,
+            scale: dragging ? THUMB_SCALE[options.edgePress] : 1,
+          }}
+          transition={railSpring}
+        />
+      ) : (
+      /* Scale a separate knob so Base UI still measures the thumb at rest size */
+      <motion.span
+        aria-hidden
+        className={cn(
+          "absolute inset-0 rounded-full border ring-ring/50 transition-shadow motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",
+          options.edgeVariant === "filled"
+            ? "border-primary bg-primary"
+            : "border-ring bg-background"
+        )}
+        animate={{
+          scale: !options.showEdge ? 0.4 : dragging ? THUMB_SCALE[options.edgePress] : 1,
+          opacity: options.showEdge ? 1 : 0,
+        }}
+        transition={popSpring}
+      />
+      )}
+      <AnimatePresence>
+        {show && (
+          <motion.span
+            className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground tabular-nums"
+            initial={{ opacity: 0, y: 4, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.9 }}
+            transition={fade}
+          >
+            <BubbleLabel value={value} options={options} />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+export { Slider, RollingNumber }
+export type { SliderRadius, SliderLabels, SliderThicken, SliderEdgeVariant, SliderThickness, SliderEdgePress, SliderMarks, SliderBubble, SliderEdgeSize }
