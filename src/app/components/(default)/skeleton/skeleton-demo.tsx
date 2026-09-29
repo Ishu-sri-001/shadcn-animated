@@ -6,7 +6,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
 import { Button } from "@/components/ui/button"
+import { cn } from "cn"
 import {
+  SKELETON_ROUNDED,
   Skeleton,
   SkeletonGroup,
   SkeletonSwap,
@@ -174,7 +176,7 @@ export function SkeletonDemo() {
 
   const content = (
     <div className="flex flex-col gap-4">
-      <div className="h-[18vh] w-full rounded-md bg-linear-to-br from-amber-200 to-orange-300 dark:from-amber-900 dark:to-orange-950" />
+      <div className={cn("h-[18vh] w-full bg-linear-to-br from-amber-200 to-orange-300 dark:from-amber-900 dark:to-orange-950", SKELETON_ROUNDED[values.rounded as SkeletonRounded])} />
       <div className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
           LK

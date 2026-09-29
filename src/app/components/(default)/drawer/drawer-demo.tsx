@@ -42,7 +42,6 @@ const controls = {
       { label: "Right", value: "right" },
     ],
   },
-  snapPoints: { group: "Drawer", type: "checkbox", label: "Snap to half / full (bottom only)", value: false },
   showSwipeHandle: { group: "Drawer", type: "checkbox", label: "Swipe handle", value: true },
 
   openAnimation: {
@@ -70,7 +69,7 @@ const controls = {
   stagger: {
     group: "Motion",
     type: "slider",
-    label: "Content stagger",
+    label: "Item stagger",
     value: 0.04,
     min: 0,
     max: 0.15,
@@ -83,10 +82,8 @@ const controls = {
 
 export function DrawerDemo() {
   const panel = useControls(controls)
-  const { side, snapPoints, scaleBackground, openAnimation, ...options } = panel.values
+  const { side, scaleBackground, openAnimation, ...options } = panel.values
   const direction = SIDES[side as keyof typeof SIDES]
-  // Snap points only apply to bottom sheets.
-  const snaps = snapPoints && side === "bottom" ? [0.5, 1] : undefined
 
   return (
     <DrawerProvider>
@@ -101,10 +98,9 @@ export function DrawerDemo() {
 
           <div className="flex min-h-[40vh] items-center justify-center rounded-lg border">
             <Drawer
-              key={`${side}-${snaps ? "snap" : "free"}`}
+              key={side}
               {...options}
               swipeDirection={direction}
-              snapPoints={snaps}
               openAnimation={openAnimation as DrawerOpenAnimation}
             >
               <DrawerTrigger
@@ -127,14 +123,15 @@ export function DrawerDemo() {
                           // Hover leaves the background alone; the text rolls, like the trigger.
                           <Button
                             variant="outline"
-                            className="group/roll h-auto justify-between py-3 hover:bg-background hover:text-foreground dark:hover:bg-input/30"
+                            data-drawer-item
+                            className="group/roll h-auto justify-between py-3 transition-[color,background-color,border-color] hover:bg-background hover:text-foreground dark:hover:bg-input/30"
                           />
                         }
                       >
-                        <span data-drawer-text className="font-medium">
+                        <span className="font-medium">
                           <RollText>{roast.name}</RollText>
                         </span>
-                        <span data-drawer-text className="text-muted-foreground">
+                        <span className="text-muted-foreground">
                           <RollText>{roast.notes}</RollText>
                         </span>
                       </DrawerClose>
@@ -145,7 +142,8 @@ export function DrawerDemo() {
                       render={
                         <Button
                           variant="ghost"
-                          className="group/line hover:bg-transparent dark:hover:bg-transparent"
+                          data-drawer-item
+                          className="group/line transition-[color,background-color] hover:bg-transparent dark:hover:bg-transparent"
                         />
                       }
                     >

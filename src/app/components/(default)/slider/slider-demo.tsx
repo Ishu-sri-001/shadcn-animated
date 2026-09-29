@@ -38,20 +38,6 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-  thickness: {
-    group: "Track",
-    type: "select",
-    label: "Thickness",
-    value: "1.5",
-    options: [
-      { label: "0.5", value: "0.5" },
-      { label: "1", value: "1" },
-      { label: "1.5", value: "1.5" },
-      { label: "2.5", value: "2.5" },
-      { label: "4", value: "4" },
-      { label: "13", value: "13" },
-    ],
-  },
   showEdge: { group: "Edge", type: "checkbox", label: "Show edge", value: true },
   thicken: {
     group: "Track",
@@ -197,7 +183,6 @@ export function SliderDemo() {
     edgeVariant: values.edgeVariant as SliderEdgeVariant,
     roll: values.roll,
     showEdge: values.showEdge,
-    thickness: values.thickness as SliderThickness,
     radius: values.radius as SliderRadius,
     thickenTo: values.thickenTo as SliderThickness,
     edgeSize: values.edgeSize as SliderEdgeSize,

@@ -108,11 +108,11 @@ function ThemeSwitch({
       .fromTo(
         leaving,
         { rotate: 0, scale: 1, opacity: 1 },
-        { rotate: 90, scale: 0, opacity: 0, duration: 0.17, ease: "power2.in" }
+        { rotate: 180, scale: 0, opacity: 0, duration: 0.17, ease: "power2.in" }
       )
       .fromTo(
         entering,
-        { rotate: -90, scale: 0, opacity: 0 },
+        { rotate: -180, scale: 0, opacity: 0 },
         { rotate: 0, scale: 1, opacity: 1, duration: 0.25, ease: "back.out(1.6)" }
       )
   }, [resolvedTheme, orbiting])

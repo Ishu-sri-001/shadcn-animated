@@ -45,7 +45,6 @@ type SliderMotion = {
   edgeVariant: SliderEdgeVariant
   roll: boolean
   showEdge: boolean
-  thickness: SliderThickness
   thickenTo: SliderThickness
   radius: SliderRadius
   edgeSize: SliderEdgeSize
@@ -218,7 +217,6 @@ function Slider({
   edgeVariant = "bar",
   roll = true,
   showEdge = true,
-  thickness = "1.5",
   thickenTo = "13",
   radius = "xl",
   edgeSize = "md",
@@ -251,7 +249,6 @@ function Slider({
       edgeVariant,
       roll,
       showEdge,
-      thickness,
       thickenTo,
       radius,
       edgeSize,
@@ -272,7 +269,6 @@ function Slider({
       edgeVariant,
       roll,
       showEdge,
-      thickness,
       thickenTo,
       radius,
       edgeSize,
@@ -419,7 +415,7 @@ function Slider({
   const offsetX = useTransform(pullSpring, (v) => v * NUDGE)
   const cursorLeft = useTransform(cursor, toPercent)
 
-  const restThickness = THICKNESS[options.thickness]
+  const restThickness = THICKNESS["1"]
   const grown = THICKNESS[options.thickenTo]
   const expanded =
     options.thicken === "hover"
@@ -762,6 +758,7 @@ function SliderThumbElement({
       {children}
       {options.edgeVariant === "bar" ? (
         <motion.span
+          key="bar"
           aria-hidden
           className={cn(
             "absolute top-1/2 left-1/2 rounded-full shadow-sm ring-ring/50 transition-[background-color,box-shadow] duration-300 motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",
@@ -784,8 +781,9 @@ function SliderThumbElement({
           transition={railSpring}
         />
       ) : (
-      /* Scale a separate knob so Base UI still measures the thumb at rest size */
+      /* Scale a separate knob so Base UI still measures the thumb at rest size; keys stop the bar's sizing leaking in */
       <motion.span
+        key="knob"
         aria-hidden
         className={cn(
           "absolute inset-0 rounded-full border ring-ring/50 transition-shadow motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",

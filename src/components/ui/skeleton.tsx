@@ -123,11 +123,19 @@ function SkeletonSwap({
   const enter = React.useCallback(
     (node: HTMLDivElement | null) => {
       if (!node || reduced || swap === "none" || stagger <= 0) return
-      return staggerIn(node, ":scope > *", {
+      // Wrapper divs with one child would stagger as a single item
+      let row: Element = node
+      while (row.children.length === 1) row = row.children[0]
+      row.setAttribute("data-skeleton-row", "")
+      const stop = staggerIn(node, "[data-skeleton-row] > *", {
         gap: stagger,
         delay: 0,
         distance: swap === "rise" ? 8 : 0,
       })?.stop
+      return () => {
+        row.removeAttribute("data-skeleton-row")
+        stop?.()
+      }
     },
     [reduced, swap, stagger]
   )
@@ -191,7 +199,7 @@ function SkeletonText({
   )
 }
 
-export { Skeleton, SkeletonGroup, SkeletonSwap, SkeletonText }
+export { ROUNDED as SKELETON_ROUNDED, Skeleton, SkeletonGroup, SkeletonSwap, SkeletonText }
 export type {
   SkeletonAnimation,
   SkeletonRounded,

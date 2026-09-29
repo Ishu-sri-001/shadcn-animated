@@ -45,14 +45,23 @@ const BOX_ROUNDED: Record<InputOTPRounded, string> = {
   full: "rounded-full",
 }
 
-/** Outer corners of a joined strip. */
-const ROUNDED: Record<InputOTPRounded, string> = {
-  none: "first:rounded-l-none last:rounded-r-none",
-  sm: "first:rounded-l-sm last:rounded-r-sm",
-  md: "first:rounded-l-md last:rounded-r-md",
-  lg: "first:rounded-l-lg last:rounded-r-lg",
-  xl: "first:rounded-l-xl last:rounded-r-xl",
-  full: "first:rounded-l-full last:rounded-r-full",
+/** Outer corners of a joined strip: left end, right end. */
+const ROUNDED_START: Record<InputOTPRounded, string> = {
+  none: "rounded-l-none",
+  sm: "rounded-l-sm",
+  md: "rounded-l-md",
+  lg: "rounded-l-lg",
+  xl: "rounded-l-xl",
+  full: "rounded-l-full",
+}
+
+const ROUNDED_END: Record<InputOTPRounded, string> = {
+  none: "rounded-r-none",
+  sm: "rounded-r-sm",
+  md: "rounded-r-md",
+  lg: "rounded-r-lg",
+  xl: "rounded-r-xl",
+  full: "rounded-r-full",
 }
 
 const SIZE: Record<InputOTPSize, string> = {
@@ -312,6 +321,7 @@ function InputOTPSlot({
   const inputOTPContext = React.useContext(OTPInputContext)
   const options = React.useContext(InputOTPMotionContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
+  const total = inputOTPContext?.slots.length ?? 0
   const waved = options.successWave && options.success
   const pasteDelay =
     options.pasteFrom !== null && index >= options.pasteFrom
@@ -330,13 +340,18 @@ function InputOTPSlot({
       style={{ transitionDelay: waved ? `${index * WAVE_GAP}s` : "0s" }}
       className={cn(
         "relative flex items-center justify-center border-input transition-[color,background-color,border-color,box-shadow] duration-300 outline-none aria-invalid:border-destructive dark:bg-input/30",
-        options.joined ? "border-y border-r first:border-l" : "border",
+        options.joined ? cn("border-y border-r rounded-none", index === 0 && "border-l") : "border",
         !options.glide &&
           "data-[active=true]:z-10 data-[active=true]:border-foreground data-[active=true]:aria-invalid:border-destructive",
         waved &&
           "border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-500/60 dark:bg-emerald-500/10 dark:text-emerald-300",
         SIZE[options.boxSize],
-        options.joined ? ROUNDED[options.rounded] : BOX_ROUNDED[options.rounded],
+        options.joined
+          ? cn(
+              index === 0 && ROUNDED_START[options.rounded],
+              index === total - 1 && ROUNDED_END[options.rounded]
+            )
+          : BOX_ROUNDED[options.rounded],
         className
       )}
       {...(props as React.ComponentProps<typeof motion.div>)}
@@ -388,6 +403,9 @@ function InputOTPSlot({
 }
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
+  const { joined } = React.useContext(InputOTPMotionContext)
+  // A joined strip runs unbroken, so the dash goes
+  if (joined) return null
   return (
     <div
       data-slot="input-otp-separator"

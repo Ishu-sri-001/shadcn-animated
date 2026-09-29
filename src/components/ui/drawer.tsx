@@ -14,7 +14,7 @@ type DrawerMotion = {
   duration: number
   /** Spring overshoot, 0–0.9. */
   bounce: number
-  /** Gap between text lines fading in. */
+  /** Gap between items fading in. */
   stagger: number
   /** Tilts a little while swiped. */
   swipeTilt: boolean
@@ -54,9 +54,9 @@ function springEasing(bounce: number) {
   return `linear(${points.map((p) => +p.toFixed(4)).join(", ")})`
 }
 
-/** Text lines that stagger in. */
+/** Titles and any element marked data-drawer-item stagger in, boxes included. */
 const STAGGER_ITEMS =
-  '[data-slot="drawer-title"], [data-slot="drawer-description"], [data-drawer-text]'
+  '[data-slot="drawer-title"], [data-slot="drawer-description"], [data-drawer-item]'
 
 const DrawerContext = React.createContext<DrawerContextProps | null>(null)
 
@@ -233,7 +233,7 @@ function DrawerContent({
     (node: HTMLDivElement | null) => {
       if (!node) return
       const delay = duration * 0.3
-      // Fade content in, stagger its text.
+      // Fade content in, stagger its items.
       const content = node.querySelector<HTMLElement>('[data-slot="drawer-content"]')
       if (content && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         content.animate([{ opacity: 0 }, { opacity: 1 }], {

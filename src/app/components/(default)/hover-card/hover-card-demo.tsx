@@ -116,7 +116,7 @@ export function HoverCardDemo() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border px-6 text-sm">
-        <p className="max-w-[80%] text-center leading-relaxed">
+        <p className="max-w-[70%] text-lg text-center leading-relaxed">
           This week&apos;s filter is {link(roasts[0])}, and on espresso we&apos;re pulling{" "}
           {link(roasts[1])} until Saturday.
         </p>
