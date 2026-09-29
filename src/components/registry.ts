@@ -20,11 +20,6 @@ export const registry: RegistryItem[] = [
     name: "Toast",
     description: "Brief messages that stack in the corner and can be swiped away.",
   },
-  // {
-  //   slug: "button",
-  //   name: "Button",
-  //   description: "Displays a button or a component that looks like a button.",
-  // },
   {
     slug: "attachment",
     name: "Attachment",
@@ -113,11 +108,21 @@ export const registry: RegistryItem[] = [
   {
     slug: "tooltip",
     name: "Tooltip",
-    description: "A tooltip that trails the cursor, or morphs and slides as you move between controls.",
+    description: "A short label that appears when you hover or focus a control.",
   },
   {
     slug: "command",
     name: "Command",
     description: "Search and run commands from the keyboard, inline or in a palette.",
+  },
+  {
+    slug: "button",
+    name: "Button",
+    description: "Displays a button or a component that looks like a button.",
+  },
+  {
+    slug: "questionnaire",
+    name: "Questionnaire",
+    description: "Step through questions one at a time, with the next question sliding or fading in.",
   },
 ]
