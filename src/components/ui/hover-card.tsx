@@ -202,7 +202,7 @@ function HoverCardContent({
           data-hpx-slot="hover-card-content"
           render={<motion.div style={{ x: options.followCursor && !reduceMotion ? x : 0 }} />}
           className={cn(
-            "z-50 w-72 origin-(--transform-origin) bg-popover px-5 py-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+            "z-50 w-72 origin-(--transform-origin) bg-muted px-5 py-4 text-sm text-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
             "transition-[opacity,scale,translate] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-ending-style:duration-150 data-ending-style:ease-in motion-reduce:transition-opacity",
             "data-starting-style:scale-(--hc-scale) data-starting-style:opacity-0 data-ending-style:scale-(--hc-scale) data-ending-style:opacity-0",
             "data-[side=bottom]:data-starting-style:-translate-y-(--hc-travel) data-[side=top]:data-starting-style:translate-y-(--hc-travel) data-[side=left]:data-starting-style:translate-x-(--hc-travel) data-[side=right]:data-starting-style:-translate-x-(--hc-travel)",

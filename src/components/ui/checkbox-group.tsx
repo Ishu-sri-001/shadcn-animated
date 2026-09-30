@@ -386,7 +386,6 @@ function CheckboxItem({
   const showControl = options.showIcon
   const filled = options.appearance === "filled"
   const cornerRadius = BOX_RADIUS[options.radius]
-  const roundness = cornerRadius / BOX_RADIUS.full
   const marked = checked || mixed
   const markOnAccent = filled !== onFill
 
@@ -535,8 +534,8 @@ function CheckboxItem({
           <motion.span
             className={cn("absolute inset-0", onFill ? "bg-(--checkbox-on-accent)" : "bg-(--checkbox-accent)")}
             initial={false}
-            animate={{ scale: marked && filled ? 1 : 0, borderRadius: `${roundness * 50}%` }}
-            transition={{ scale: options.fill ? snappy : { duration: 0 }, borderRadius: spring }}
+            animate={{ scale: marked && filled ? 1 : 0 }}
+            transition={{ scale: options.fill ? snappy : { duration: 0 } }}
           />
           <svg
             viewBox="0 0 24 24"

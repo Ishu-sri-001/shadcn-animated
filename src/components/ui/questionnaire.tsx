@@ -535,9 +535,9 @@ function QuestionnaireChoice({
         data-hpx-slot="questionnaire-choice-label"
         className={cn(
           "flex min-w-0 flex-1 flex-col gap-0.5 leading-snug",
-          // Text inverts under the fill, so both change at the same point
-          card &&
-            "text-white mix-blend-difference [&_[data-hpx-slot=questionnaire-choice-description]]:text-white/60"
+          // Text switches to the fill's foreground while it is picked or hovered
+          card && primary && "group-hpx-checked/questionnaire-choice:text-primary-foreground group-hpx-checked/questionnaire-choice:[&_[data-hpx-slot=questionnaire-choice-description]]:text-primary-foreground/70",
+          card && primary && "group-hover/questionnaire-choice:text-primary-foreground group-hover/questionnaire-choice:[&_[data-hpx-slot=questionnaire-choice-description]]:text-primary-foreground/70"
         )}
       >
         {children}
@@ -635,7 +635,7 @@ function useActionHover(
 
   return {
     className: cn(
-      solid ? "hover:bg-primary" : "hover:bg-background hover:text-foreground dark:hover:bg-input/30",
+      solid ? "hover:bg-primary hover:text-foreground" : "hover:bg-background hover:text-primary-foreground dark:hover:bg-input/30",
       "relative isolate h-11 overflow-hidden px-5 text-base focus-visible:ring-0",
       "hover:border-primary"
     ),
@@ -647,7 +647,6 @@ function useActionHover(
       onPointerLeave?.(event)
       place(event, false)
     },
-    // The label inverts against whatever the fill is passing under it
     content: (children: React.ReactNode) => (
       <>
         <motion.span
@@ -661,7 +660,7 @@ function useActionHover(
           animate={{ scale: fill.on ? 1 : 0 }}
           transition={{ duration: reduceMotion ? 0 : duration, ease: "easeInOut" }}
         />
-        <span className="relative text-white mix-blend-difference">{children}</span>
+        <span className="relative">{children}</span>
       </>
     ),
   }

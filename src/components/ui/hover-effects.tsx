@@ -49,11 +49,7 @@ function useHoverFill() {
       transition={{ duration: 0.5, ease: "easeInOut" }}
     />
   )
-  // The label inverts against whatever is under it: dark on the button, light on the fill,
-  // letter by letter as the circle passes, instead of fading its colour ahead of the fill.
-  const label = (children: React.ReactNode) => (
-    <span className="relative text-white mix-blend-difference">{children}</span>
-  )
+  const label = (children: React.ReactNode) => <span className="relative">{children}</span>
   return { place, circle, label }
 }
 

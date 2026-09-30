@@ -30,6 +30,8 @@ import {
 
 const variants = [
   { label: "Default", value: "default" },
+  { label: "Secondary", value: "secondary" },
+  { label: "Muted", value: "muted" },
   { label: "Tinted", value: "tinted" },
   { label: "Outline", value: "outline" },
   { label: "Ghost", value: "ghost" },

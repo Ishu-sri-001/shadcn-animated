@@ -4,7 +4,7 @@ import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import { cn, hpxSlot } from "@/lib/utils"
 import {
   animate,
   AnimatePresence,
@@ -690,6 +690,7 @@ function SidebarGroupLabel({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
+        ...hpxSlot("sidebar-group-label"),
         className: cn(
           "flex h-8 shrink-0 origin-left items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
           "[transition:margin_400ms_var(--sidebar-ease),scale_400ms_var(--sidebar-ease),opacity_200ms_ease-out] group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:scale-75 group-data-[collapsible=icon]:opacity-0",
@@ -700,7 +701,6 @@ function SidebarGroupLabel({
     ),
     render,
     state: {
-      slot: "sidebar-group-label",
       sidebar: "group-label",
     },
   })
@@ -715,6 +715,7 @@ function SidebarGroupAction({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
+        ...hpxSlot("sidebar-group-action"),
         className: cn(
           "absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0",
           className
@@ -724,7 +725,6 @@ function SidebarGroupAction({
     ),
     render,
     state: {
-      slot: "sidebar-group-action",
       sidebar: "group-action",
     },
   })
@@ -1023,6 +1023,7 @@ function SidebarMenuButton({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
+        ...hpxSlot("sidebar-menu-button"),
         className: cn(
           sidebarMenuButtonVariants({ variant, size }),
           staggeredLabels,
@@ -1044,7 +1045,6 @@ function SidebarMenuButton({
     ),
     render: !tooltip ? render : <HpxTooltipTrigger render={render} />,
     state: {
-      slot: "sidebar-menu-button",
       sidebar: "menu-button",
       size,
       active: isActive,
@@ -1138,6 +1138,7 @@ function SidebarMenuAction({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
+        ...hpxSlot("sidebar-menu-action"),
         className: cn(
           "absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-transform group-data-[collapsible=icon]:hidden peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 after:absolute after:-inset-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0",
           showOnHover &&
@@ -1149,7 +1150,6 @@ function SidebarMenuAction({
     ),
     render,
     state: {
-      slot: "sidebar-menu-action",
       sidebar: "menu-action",
     },
   })
@@ -1360,6 +1360,7 @@ function SidebarMenuSubButton({
     defaultTagName: "a",
     props: mergeProps<"a">(
       {
+        ...hpxSlot("sidebar-menu-sub-button"),
         className: cn(
           "relative isolate flex h-8 min-w-0 -translate-x-px items-center gap-2 rounded-(--sidebar-item-radius) px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-[scale,color] duration-300 group-data-[collapsible=icon]:hidden hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs hpx-active:bg-sidebar-accent hpx-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
           highlightTone === "primary" && primaryTone,
@@ -1378,7 +1379,6 @@ function SidebarMenuSubButton({
     ),
     render,
     state: {
-      slot: "sidebar-menu-sub-button",
       sidebar: "menu-sub-button",
       size,
       active: isActive,

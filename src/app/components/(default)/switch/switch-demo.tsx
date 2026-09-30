@@ -38,8 +38,9 @@ const controls = {
     group: "Style",
     type: "select",
     label: "On colour",
-    value: "foreground",
+    value: "primary",
     options: [
+      { label: "Primary", value: "primary" },
       { label: "Foreground", value: "foreground" },
       { label: "Green", value: "green" },
       { label: "Blue", value: "blue" },

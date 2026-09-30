@@ -6,7 +6,7 @@ import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { useGSAP } from "@gsap/react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import { cn, hpxSlot } from "@/lib/utils"
 import gsap from "gsap"
 import { Flip } from "gsap/Flip"
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin"
@@ -684,15 +684,13 @@ function AttachmentTrigger({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
+        ...hpxSlot("attachment-trigger"),
         type: render ? type : (type ?? "button"),
         className: cn("absolute inset-0 z-10 outline-none", className),
       },
       props
     ),
     render,
-    state: {
-      slot: "attachment-trigger",
-    },
   })
 }
 

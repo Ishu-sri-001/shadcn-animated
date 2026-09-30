@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { HpxNavbar } from "@/components/navbar";
 import { HpxThemeProvider } from "@/components/theme-provider";
+import { hpxApplyTheme } from "@/components/theme-colors";
 import "./globals.css";
+
+const paletteScript = `(${hpxApplyTheme.toString()})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: paletteScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <HpxThemeProvider
           attribute="class"

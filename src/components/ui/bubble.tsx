@@ -4,7 +4,7 @@ import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import { cn, hpxSlot } from "@/lib/utils"
 import { ClockIcon, ReplyIcon, RotateCwIcon } from "lucide-react"
 import {
   animate,
@@ -591,6 +591,7 @@ function BubbleContent({
     ),
     props: mergeProps<"div">(
       {
+        ...hpxSlot("bubble-content"),
         className: cn(
           "relative w-fit max-w-full min-w-0 origin-bottom-left overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:origin-bottom-right group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50",
           className
@@ -620,9 +621,6 @@ function BubbleContent({
       },
       props
     ),
-    state: {
-      slot: "bubble-content",
-    },
   })
 }
 

@@ -352,7 +352,7 @@ function DialogContent({
               />
             }
             className={cn(
-              "fixed top-1/2 left-1/2 z-50 grid w-full max-w-md -translate-x-1/2 -translate-y-1/2 gap-6 bg-popover p-8 max-md:p-6 text-base text-popover-foreground ring-1 ring-foreground/10 outline-none max-md:max-w-[calc(100%-2rem)]",
+              "fixed top-1/2 left-1/2 z-50 grid w-full max-w-md -translate-x-1/2 -translate-y-1/2 gap-6 bg-muted p-8 max-md:p-6 text-base text-foreground ring-1 ring-foreground/10 outline-none max-md:max-w-[calc(100%-2rem)]",
               ROUNDED[options.rounded],
               className
             )}

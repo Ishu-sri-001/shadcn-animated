@@ -17,14 +17,14 @@ import {
 /** elastic: the handle squashes when pressed and stretches as it travels. apple: a glass capsule that turns see-through when pressed, and can be dragged. */
 type SwitchVariant = "elastic" | "apple"
 type SwitchSize = "md" | "lg" | "xl"
-type SwitchColor = "foreground" | "green" | "blue" | "orange" | "rose"
+type SwitchColor = "primary" | "foreground" | "green" | "blue" | "orange" | "rose"
 type SwitchRounded = "sm" | "md" | "lg" | "xl" | "full"
 type SwitchLabelSide = "top" | "right" | "bottom" | "left"
 
 type SwitchMotion = {
   variant: SwitchVariant
   size: SwitchSize
-  /** Track colour when on. "foreground" is the theme foreground. */
+  /** Track colour when on. "primary" follows the theme. */
   color: SwitchColor
   /** With "foreground" colour, use the system green on the apple switch. */
   green: boolean
@@ -77,6 +77,7 @@ const HANDLE_ROUNDED: Record<SwitchRounded, string> = {
 const FOREGROUND = "bg-foreground dark:bg-secondary"
 
 const ON_COLOR: Record<SwitchColor, string> = {
+  primary: "bg-primary",
   foreground: FOREGROUND,
   green: "bg-success",
   blue: "bg-info",
@@ -96,7 +97,7 @@ const SNAP: Transition = { type: "spring", duration: 0.4, bounce: 0.5 }
 function Switch({
   variant = "elastic",
   size = "xl",
-  color = "foreground",
+  color = "primary",
   green = false,
   rounded = "full",
   squeeze = 0.18,
@@ -302,7 +303,8 @@ function Switch({
           <motion.span
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-y-0 flex items-center justify-center font-semibold text-background",
+              "pointer-events-none absolute inset-y-0 flex items-center justify-center font-semibold",
+              color === "primary" ? "text-primary-foreground" : "text-background",
               spec.mark
             )}
             style={{ left: spec.gap, width: travel, opacity: fillOpacity }}

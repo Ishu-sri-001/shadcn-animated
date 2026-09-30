@@ -756,7 +756,7 @@ function DropdownMenuContent({
         <MenuPrimitive.Popup
           data-hpx-slot="dropdown-menu-content"
           className={cn(
-            "z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
+            "z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-background p-1 text-foreground shadow-md ring-1 ring-foreground/10 outline-none",
             clipsHeight && "overflow-hidden",
             // Morph: the trigger is the container, so the popup is a bare see-through overlay.
             morph
@@ -1020,7 +1020,7 @@ function DropdownMenuSubContent({
         <MenuPrimitive.Popup
           data-hpx-slot="dropdown-menu-sub-content"
           className={cn(
-            "z-50 max-h-(--available-height) w-auto min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 hpx-open:animate-in hpx-open:fade-in-0 hpx-open:zoom-in-95 hpx-closed:animate-out hpx-closed:fade-out-0 hpx-closed:zoom-out-95",
+            "z-50 max-h-(--available-height) w-auto min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-background p-1 text-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 hpx-open:animate-in hpx-open:fade-in-0 hpx-open:zoom-in-95 hpx-closed:animate-out hpx-closed:fade-out-0 hpx-closed:zoom-out-95",
             className
           )}
           {...props}

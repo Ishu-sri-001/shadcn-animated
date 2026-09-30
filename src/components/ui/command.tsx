@@ -127,7 +127,7 @@ function Command({
       <CommandPrimitive
         data-hpx-slot="command"
         className={cn(
-          "flex size-full flex-col overflow-hidden bg-popover p-1 text-popover-foreground",
+          "flex size-full flex-col overflow-hidden bg-muted p-1 text-foreground",
           ROUNDED[motionProps.rounded],
           className
         )}
@@ -209,7 +209,7 @@ function CommandDialog({
                     />
                   }
                   className={cn(
-                    "fixed top-1/4 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 overflow-hidden bg-popover text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none max-md:max-w-[calc(100%-2rem)]",
+                    "fixed top-1/4 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 overflow-hidden bg-muted text-foreground shadow-2xl ring-1 ring-foreground/10 outline-none max-md:max-w-[calc(100%-2rem)]",
                     ROUNDED[options.rounded],
                     className
                   )}
@@ -384,7 +384,7 @@ function CommandSeparator({
 }
 
 const HOVER_BG: Record<CommandHoverColor, string> = {
-  muted: "bg-muted",
+  muted: "bg-foreground/10",
   primary: "bg-primary",
 }
 
@@ -417,7 +417,7 @@ function CommandItem({
         "group/command-item relative isolate flex cursor-default items-center gap-2 px-2 py-2 text-base outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         ROUNDED[rounded],
         itemHover !== "none" && "transition-colors duration-200 motion-reduce:transition-none",
-        itemHover === "none" ? "hpx-selected:bg-muted hpx-selected:text-foreground" : HOVER_TEXT[hoverColor],
+        itemHover === "none" ? "hpx-selected:bg-foreground/10 hpx-selected:text-foreground" : HOVER_TEXT[hoverColor],
         itemHover === "none" && hoverColor === "primary" && "hpx-selected:bg-primary hpx-selected:text-primary-foreground",
         className
       )}
@@ -570,7 +570,7 @@ function CommandSearch({
           className={cn("relative w-full", className)}
         >
           <CommandPrimitive
-            className="flex flex-col text-popover-foreground"
+            className="flex flex-col text-foreground"
             onKeyDown={(event) => {
               // Enter picks the item, then closes the list
               if (event.key === "Enter") setOpen(false)
@@ -588,7 +588,7 @@ function CommandSearch({
                     : { type: "spring", visualDuration: options.duration, bounce: 0 }
                 }
                 className={cn(
-                  "absolute top-0 left-1/2 z-20 w-full max-w-[calc(100vw-2rem)] -translate-x-1/2 overflow-hidden border bg-popover",
+                  "absolute top-0 left-1/2 z-20 w-full max-w-[calc(100vw-2rem)] -translate-x-1/2 overflow-hidden border bg-muted",
                   ROUNDED[options.rounded]
                 )}
               >
@@ -680,7 +680,7 @@ function CommandSearch({
                     transition: { duration: 0.15, ease: "easeIn" },
                   }}
                   className={cn(
-                    "absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 border bg-popover p-1 shadow-lg",
+                    "absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 border bg-muted p-1 shadow-lg",
                     ROUNDED[options.rounded]
                   )}
                 >

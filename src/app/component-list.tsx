@@ -62,7 +62,7 @@ function Divider({ className }: { className: string }) {
   return (
     <motion.span
       aria-hidden
-      className={`pointer-events-none absolute inset-x-0 h-px origin-left bg-border ${className}`}
+      className={`pointer-events-none absolute inset-x-2 h-px origin-left bg-border ${className}`}
       variants={draw}
     />
   )
@@ -85,19 +85,20 @@ function Row({
         href={`/components/${item.slug}`}
         onPointerEnter={onActivate}
         onFocus={onActivate}
-        className="relative isolate flex items-center gap-[2vw] rounded-lg px-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 max-md:gap-4 max-md:px-3"
+        data-active={active}
+        className="group/row relative isolate flex items-center transition-colors duration-300 data-[active=true]:text-primary-foreground gap-[2vw] rounded-lg px-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 max-md:gap-4 max-md:px-3"
       >
         {active && (
           <motion.span
             layoutId="component-list-highlight"
             aria-hidden
-            className="absolute inset-0 -z-10 rounded-lg bg-muted"
+            className="absolute inset-0 -z-10 rounded-lg bg-primary"
             transition={glide}
           />
         )}
 
         <Clip>
-          <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          <span className="font-mono text-xs text-muted-foreground tabular-nums transition-colors duration-300 group-data-[active=true]/row:text-primary-foreground/70">
             {String(index + 1).padStart(2, "0")}
           </span>
         </Clip>
@@ -109,7 +110,7 @@ function Row({
             </RollText>
           </Clip>
           <Clip>
-            <span className="block text-sm text-muted-foreground">{item.description}</span>
+            <span className="block text-sm text-muted-foreground transition-colors duration-300 group-data-[active=true]/row:text-primary-foreground/70">{item.description}</span>
           </Clip>
         </span>
 
@@ -181,7 +182,7 @@ function SwapArrow({ active }: { active: boolean }) {
       </motion.span>
       <motion.span
         aria-hidden
-        className="absolute inset-0 flex text-foreground"
+        className="absolute inset-0 flex text-primary-foreground"
         initial={false}
         animate={active ? { x: "0%", y: "0%" } : { x: "-100%", y: "100%" }}
         transition={transition}

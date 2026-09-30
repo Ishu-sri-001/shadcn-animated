@@ -208,8 +208,8 @@ function HoverSquare({
       className={cn(
         "pointer-events-none absolute top-0 left-0 rounded-md",
         variant === "filled"
-          ? "bg-foreground"
-          : "border-2 border-foreground bg-transparent"
+          ? "bg-primary"
+          : "border-2 border-primary bg-transparent"
       )}
     />
   )
@@ -233,9 +233,6 @@ function AnimatedDropdown({
     },
     hoverStyle
   )
-  // Filled paints each option itself so its fill and text colour change together; only the
-  // outline, which leaves the text alone, glides between options.
-  const glide = hoverStyle.variant === "outline"
   const selectedIndex = Math.max(
     options.findIndex((option) => String(option.value) === current),
     0
@@ -286,12 +283,12 @@ function AnimatedDropdown({
             "--hover-duration": `${hoverStyle.duration}s`,
           } as React.CSSProperties
         }
-        onPointerOver={glide ? hover.onPointerOver : undefined}
-        onPointerLeave={glide ? hover.onPointerLeave : undefined}
+        onPointerOver={hover.onPointerOver}
+        onPointerLeave={hover.onPointerLeave}
         alignItemWithTrigger={false}
         className="max-h-64 w-auto min-w-20 p-1.5 duration-200 ease-out hpx-open:zoom-in-100 hpx-closed:zoom-out-100 data-[side=bottom]:slide-in-from-top-2 hpx-closed:data-[side=bottom]:slide-out-to-top-2 hpx-closed:duration-150 motion-reduce:animate-none!"
       >
-        {glide && <HoverSquare ref={hoverSquare} variant={hoverStyle.variant} />}
+        <HoverSquare ref={hoverSquare} variant={hoverStyle.variant} />
         {options.map((option, index) => (
           <HpxSelectItem
             key={option.value}
@@ -305,7 +302,7 @@ function AnimatedDropdown({
               "transition-colors duration-(--hover-duration) **:transition-colors **:duration-(--hover-duration) motion-reduce:transition-none motion-reduce:**:transition-none",
               "cursor-pointer focus:bg-transparent focus-visible:bg-accent",
               hoverStyle.variant === "filled" &&
-                "hover:bg-foreground! hover:text-background! hover:**:text-background!"
+                "hover:text-primary-foreground! hover:**:text-primary-foreground!"
             )}
           >
             {option.label}
@@ -393,9 +390,6 @@ function DatePicker({
     { item: "button[data-day]", keepIn: ".rdp-weeks" },
     hoverStyle
   )
-  // Filled paints the hovered day itself, so its fill and text colour change together; only
-  // the outline, which leaves the text alone, glides between days.
-  const glide = hoverVariant === "outline"
   const label = value ? format(value, dateFormat) : placeholder
 
   const [month, setMonth] = React.useState(() => value ?? new Date())
@@ -516,10 +510,10 @@ function DatePicker({
             style={
               { "--hover-duration": `${hoverDuration}s` } as React.CSSProperties
             }
-            onPointerOver={glide ? dateHover.onPointerOver : undefined}
-            onPointerLeave={glide ? dateHover.onPointerLeave : undefined}
+            onPointerOver={dateHover.onPointerOver}
+            onPointerLeave={dateHover.onPointerLeave}
           >
-            {glide && <HoverSquare ref={dateHoverSquare} variant={hoverVariant} />}
+            <HoverSquare ref={dateHoverSquare} variant={hoverVariant} />
             <HpxCalendar
               mode="single"
               selected={value}
@@ -555,12 +549,12 @@ function DatePicker({
                 !highlightToday && "[&_.rdp-today]:bg-transparent",
               highlightToday && "[&_.rdp-today]:hover:bg-transparent",
                 "[&_button[data-day]]:ring-0! [&_button[data-day]:focus-visible]:ring-[3px]!",
-                glide
-                  ? "[&_button[data-day]]:hover:bg-transparent dark:[&_button[data-day]]:hover:bg-transparent"
-                  : "[&_button[data-day]]:hover:bg-foreground [&_button[data-day]]:hover:text-background dark:[&_button[data-day]]:hover:bg-foreground dark:[&_button[data-day]]:hover:text-background",
+                "[&_button[data-day]]:hover:bg-transparent dark:[&_button[data-day]]:hover:bg-transparent",
+                hoverVariant === "filled" &&
+                  "[&_button[data-day]]:hover:text-primary-foreground dark:[&_button[data-day]]:hover:text-primary-foreground",
                 "[&_button[data-day]]:transition-colors [&_button[data-day]]:duration-(--hover-duration) [&_button[data-day]]:ease-out motion-reduce:[&_button[data-day]]:transition-none",
                 hoverVariant === "outline" &&
-                  "[&_button[data-selected-single=true]]:bg-transparent! [&_button[data-selected-single=true]]:text-foreground! [&_button[data-selected-single=true]]:shadow-[inset_0_0_0_2px_var(--foreground)]"
+                  "[&_button[data-selected-single=true]]:bg-transparent! [&_button[data-selected-single=true]]:text-primary! [&_button[data-selected-single=true]]:shadow-[inset_0_0_0_2px_var(--primary)]"
               )}
             />
           </div>

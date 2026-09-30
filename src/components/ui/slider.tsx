@@ -520,7 +520,7 @@ function Slider({
                   "pointer-events-none absolute inset-y-0",
                   RADIUS[options.radius],
                   // Ahead of the fill it previews more fill; behind it, it lightens what you'd drop
-                  ahead ? "rounded-l-none bg-foreground/20" : "z-[2] bg-background/25"
+                  ahead ? "rounded-l-none bg-primary/20" : "z-[2] bg-primary-foreground/25"
                 )}
                 style={
                   {
@@ -543,7 +543,7 @@ function Slider({
               data-hpx-slot="slider-range"
               className={cn(
                 // Percent height ignores the track min size, so repeat it
-                "bg-foreground select-none hpx-horizontal:h-full hpx-horizontal:min-h-px hpx-vertical:w-full hpx-vertical:min-w-px",
+                "bg-primary select-none hpx-horizontal:h-full hpx-horizontal:min-h-px hpx-vertical:w-full hpx-vertical:min-w-px",
                 RADIUS[options.radius]
               )}
               render={(indicatorProps, state) => (
@@ -572,7 +572,7 @@ function Slider({
           <AnimatePresence>
             {followCursor && (hovering || kbFocus) && !disabled && (
               <motion.span
-                className="pointer-events-none absolute top-0 z-20 -translate-x-1/2 rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background tabular-nums"
+                className="pointer-events-none absolute top-0 z-20 -translate-x-1/2 rounded-md bg-primary px-2 py-1 text-xs font-medium whitespace-nowrap text-primary-foreground tabular-nums"
                 style={{ left: cursorLeft }}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: -14 }}
@@ -832,7 +832,7 @@ function SliderThumbElement({
             "absolute top-1/2 left-1/2 rounded-full shadow-sm ring-ring/50 transition-[background-color,box-shadow] duration-300 motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",
             // A mid tone at rest reads on both the fill and the track; the grown bar goes white on the fill
             options.expanded
-              ? "bg-background shadow-background"
+              ? "bg-primary-foreground shadow-primary-foreground"
               : "bg-foreground"
           )}
           initial={false}
@@ -858,7 +858,7 @@ function SliderThumbElement({
           "absolute inset-0 rounded-full border ring-ring/50 transition-shadow motion-reduce:transition-none group-has-focus-visible/thumb:ring-3",
           options.edgeVariant === "filled"
             ? "border-primary bg-primary"
-            : "border-ring bg-background"
+            : "border-primary bg-background"
         )}
         animate={{
           scale: !options.showEdge ? 0.4 : dragging ? THUMB_SCALE[options.edgePress] : 1,
