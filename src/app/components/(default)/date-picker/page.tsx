@@ -2,8 +2,8 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { DatePicker } from "@/components/ui/date-picker"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxDatePicker } from "@/components/ui/date-picker"
 import { format } from "date-fns"
 
 // Each format is labelled with this date written in it, e.g. "28/09/2026" rather than "dd/MM/yyyy".
@@ -165,13 +165,13 @@ const controls = {
   fixedWeeks: { group: "Calendar", type: "checkbox", label: "Fixed 6 weeks", value: true },
   disablePast: { group: "Calendar", type: "checkbox", label: "Disable past dates", value: false },
   highlightToday: { group: "Calendar", type: "checkbox", label: "Highlight today", value: false },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-type DatePickerProps = React.ComponentProps<typeof DatePicker>
+type DatePickerProps = React.ComponentProps<typeof HpxDatePicker>
 
 export default function DatePickerPage() {
   const [date, setDate] = React.useState<Date>()
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
@@ -181,7 +181,7 @@ export default function DatePickerPage() {
         A button that opens a calendar to pick a single date.
       </p>
       <div className="mt-6 flex min-h-48 items-center justify-center">
-        <DatePicker
+        <HpxDatePicker
           value={date}
           onChange={setDate}
           showIcon={values.showIcon}
@@ -209,7 +209,7 @@ export default function DatePickerPage() {
         />
       </div>
 
-      <ControlsPanel title="Date Picker" {...panel} />
+      <HpxControlsPanel title="Date Picker" {...panel} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { HoverCardDemo } from "./hover-card-demo"
+import { HpxHoverCardDemo } from "./hover-card-demo"
 
 export default function HoverCardPage() {
   return (
@@ -10,7 +10,7 @@ export default function HoverCardPage() {
         </p>
       </div>
 
-      <HoverCardDemo />
+      <HpxHoverCardDemo />
     </div>
   )
 }

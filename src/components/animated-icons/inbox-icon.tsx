@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface InboxIconHandle {
+export interface HpxInboxIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface InboxIconProps extends Omit<
   color?: string
 }
 
-const InboxIcon = forwardRef<InboxIconHandle, InboxIconProps>(
+const InboxIcon = forwardRef<HpxInboxIconHandle, InboxIconProps>(
   (
     {
       onMouseEnter,
@@ -146,4 +146,4 @@ const InboxIcon = forwardRef<InboxIconHandle, InboxIconProps>(
 )
 
 InboxIcon.displayName = "InboxIcon"
-export { InboxIcon }
+export { InboxIcon as HpxInboxIcon }

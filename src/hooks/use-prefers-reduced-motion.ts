@@ -10,7 +10,7 @@ function subscribe(onChange: () => void) {
   return () => media.removeEventListener("change", onChange)
 }
 
-export function usePrefersReducedMotion() {
+export function useHpxPrefersReducedMotion() {
   return React.useSyncExternalStore(
     subscribe,
     () => window.matchMedia(QUERY).matches,

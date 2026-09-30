@@ -1,32 +1,32 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
-import { FillButton } from "@/components/ui/hover-effects"
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxFillButton } from "@/components/ui/hover-effects"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Questionnaire,
-  QuestionnaireActions,
-  QuestionnaireChoice,
-  QuestionnaireChoiceDescription,
-  QuestionnaireChoices,
-  QuestionnaireDescription,
-  QuestionnaireError,
-  QuestionnaireInput,
-  QuestionnaireItem,
-  QuestionnaireNext,
-  QuestionnairePrevious,
-  QuestionnaireProgress,
-  QuestionnaireSkip,
-  QuestionnaireSubmit,
-  QuestionnaireTitle,
-  type QuestionnaireChoiceColor,
-  type QuestionnaireChoiceHover,
-  type QuestionnaireChoiceLayout,
-  type QuestionnaireChoiceIndicator,
-  type QuestionnaireContent,
-  type QuestionnaireIndicatorRounded,
+  HpxQuestionnaire,
+  HpxQuestionnaireActions,
+  HpxQuestionnaireChoice,
+  HpxQuestionnaireChoiceDescription,
+  HpxQuestionnaireChoices,
+  HpxQuestionnaireDescription,
+  HpxQuestionnaireError,
+  HpxQuestionnaireInput,
+  HpxQuestionnaireItem,
+  HpxQuestionnaireNext,
+  HpxQuestionnairePrevious,
+  HpxQuestionnaireProgress,
+  HpxQuestionnaireSkip,
+  HpxQuestionnaireSubmit,
+  HpxQuestionnaireTitle,
+  type HpxQuestionnaireChoiceColor,
+  type HpxQuestionnaireChoiceHover,
+  type HpxQuestionnaireChoiceLayout,
+  type HpxQuestionnaireChoiceIndicator,
+  type HpxQuestionnaireContent,
+  type HpxQuestionnaireIndicatorRounded,
 } from "@/components/ui/questionnaire"
 
 const questions = [
@@ -173,10 +173,10 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function QuestionnaireDemo() {
-  const panel = useControls(controls)
+export function HpxQuestionnaireDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [answers, setAnswers] = React.useState<Answer[] | null>(null)
   const [round, setRound] = React.useState(0)
@@ -206,7 +206,7 @@ export function QuestionnaireDemo() {
                 ))}
               </ul>
             </div>
-            <FillButton
+            <HpxFillButton
               className="h-11 px-5 text-base"
               onClick={() => {
                 setAnswers(null)
@@ -214,23 +214,23 @@ export function QuestionnaireDemo() {
               }}
             >
               Start again
-            </FillButton>
+            </HpxFillButton>
           </div>
         ) : (
-          <Questionnaire
+          <HpxQuestionnaire
             key={round}
             shortcuts={values.shortcuts === "off" ? undefined : (values.shortcuts as "letters" | "numbers")}
-            content={values.content as QuestionnaireContent}
+            content={values.content as HpxQuestionnaireContent}
             distance={values.distance}
             duration={values.duration}
             bounce={values.bounce}
             multiple={values.multiple}
-            choiceLayout={values.choiceLayout as QuestionnaireChoiceLayout}
-            choiceHover={values.choiceHover as QuestionnaireChoiceHover}
-            choiceColor={values.choiceColor as QuestionnaireChoiceColor}
-            indicatorRounded={values.indicatorRounded as QuestionnaireIndicatorRounded}
+            choiceLayout={values.choiceLayout as HpxQuestionnaireChoiceLayout}
+            choiceHover={values.choiceHover as HpxQuestionnaireChoiceHover}
+            choiceColor={values.choiceColor as HpxQuestionnaireChoiceColor}
+            indicatorRounded={values.indicatorRounded as HpxQuestionnaireIndicatorRounded}
             indicatorBorder={values.indicatorBorder}
-            choiceIndicator={values.choiceIndicator as QuestionnaireChoiceIndicator}
+            choiceIndicator={values.choiceIndicator as HpxQuestionnaireChoiceIndicator}
             staggerChoices={values.staggerChoices}
             stagger={values.stagger}
             showProgress={values.showProgress}
@@ -248,53 +248,53 @@ export function QuestionnaireDemo() {
               )
             }}
           >
-            <QuestionnaireProgress />
+            <HpxQuestionnaireProgress />
 
-            <QuestionnaireItem name="role" required>
-              <QuestionnaireTitle>What best describes your role?</QuestionnaireTitle>
-              <QuestionnaireChoices>
-                <QuestionnaireChoice value="designer">Designer</QuestionnaireChoice>
-                <QuestionnaireChoice value="developer">Developer</QuestionnaireChoice>
-                <QuestionnaireChoice value="product">
+            <HpxQuestionnaireItem name="role" required>
+              <HpxQuestionnaireTitle>What best describes your role?</HpxQuestionnaireTitle>
+              <HpxQuestionnaireChoices>
+                <HpxQuestionnaireChoice value="designer">Designer</HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="developer">Developer</HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="product">
                   Product manager
-                  <QuestionnaireChoiceDescription>Owns the roadmap and priorities</QuestionnaireChoiceDescription>
-                </QuestionnaireChoice>
-                <QuestionnaireChoice value="other">Something else</QuestionnaireChoice>
-              </QuestionnaireChoices>
-              <QuestionnaireError />
-            </QuestionnaireItem>
+                  <HpxQuestionnaireChoiceDescription>Owns the roadmap and priorities</HpxQuestionnaireChoiceDescription>
+                </HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="other">Something else</HpxQuestionnaireChoice>
+              </HpxQuestionnaireChoices>
+              <HpxQuestionnaireError />
+            </HpxQuestionnaireItem>
 
-            <QuestionnaireItem name="tools">
-              <QuestionnaireTitle>Which tools do you use every week?</QuestionnaireTitle>
-              <QuestionnaireDescription>Pick as many as you like, or skip.</QuestionnaireDescription>
-              <QuestionnaireChoices>
-                <QuestionnaireChoice value="figma">Figma</QuestionnaireChoice>
-                <QuestionnaireChoice value="github">GitHub</QuestionnaireChoice>
-                <QuestionnaireChoice value="linear">Linear</QuestionnaireChoice>
-                <QuestionnaireChoice value="notion">Notion</QuestionnaireChoice>
-              </QuestionnaireChoices>
-            </QuestionnaireItem>
+            <HpxQuestionnaireItem name="tools">
+              <HpxQuestionnaireTitle>Which tools do you use every week?</HpxQuestionnaireTitle>
+              <HpxQuestionnaireDescription>Pick as many as you like, or skip.</HpxQuestionnaireDescription>
+              <HpxQuestionnaireChoices>
+                <HpxQuestionnaireChoice value="figma">Figma</HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="github">GitHub</HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="linear">Linear</HpxQuestionnaireChoice>
+                <HpxQuestionnaireChoice value="notion">Notion</HpxQuestionnaireChoice>
+              </HpxQuestionnaireChoices>
+            </HpxQuestionnaireItem>
 
-            <QuestionnaireItem name="feedback">
-              <QuestionnaireTitle>Anything you&apos;d like us to know?</QuestionnaireTitle>
-              <QuestionnaireDescription>A sentence is plenty.</QuestionnaireDescription>
-              <QuestionnaireInput placeholder="Type your answer…" />
-            </QuestionnaireItem>
+            <HpxQuestionnaireItem name="feedback">
+              <HpxQuestionnaireTitle>Anything you&apos;d like us to know?</HpxQuestionnaireTitle>
+              <HpxQuestionnaireDescription>A sentence is plenty.</HpxQuestionnaireDescription>
+              <HpxQuestionnaireInput placeholder="Type your answer…" />
+            </HpxQuestionnaireItem>
 
-            <QuestionnaireActions>
-              <QuestionnairePrevious />
-              <QuestionnaireSkip />
-              <QuestionnaireNext />
-              <QuestionnaireSubmit />
-            </QuestionnaireActions>
-          </Questionnaire>
+            <HpxQuestionnaireActions>
+              <HpxQuestionnairePrevious />
+              <HpxQuestionnaireSkip />
+              <HpxQuestionnaireNext />
+              <HpxQuestionnaireSubmit />
+            </HpxQuestionnaireActions>
+          </HpxQuestionnaire>
         )}
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: press a choice&apos;s letter to pick it, Enter to continue, and ← to go back.
       </p>
 
-      <ControlsPanel title="Questionnaire" {...panel} />
+      <HpxControlsPanel title="Questionnaire" {...panel} />
     </div>
   )
 }

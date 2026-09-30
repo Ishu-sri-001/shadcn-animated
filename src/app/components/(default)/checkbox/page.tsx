@@ -1,4 +1,4 @@
-import { CheckboxDemo } from "./checkbox-demo"
+import { HpxCheckboxDemo } from "./checkbox-demo"
 
 export default function CheckboxPage() {
   return (
@@ -11,7 +11,7 @@ export default function CheckboxPage() {
         </p>
       </div>
 
-      <CheckboxDemo />
+      <HpxCheckboxDemo />
     </div>
   )
 }

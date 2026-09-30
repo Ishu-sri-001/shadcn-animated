@@ -1,25 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  DataTable,
-  type DataTableAlign,
-  type DataTableColumn,
-  type DataTableCountUp,
-  type DataTableHighlight,
-  type DataTableHoverTone,
-  type DataTableRadius,
-  type DataTableRow,
-  type DataTableSelectMark,
-  type DataTableStatus,
+  HpxDataTable,
+  type HpxDataTableAlign,
+  type HpxDataTableColumn,
+  type HpxDataTableCountUp,
+  type HpxDataTableHighlight,
+  type HpxDataTableHoverTone,
+  type HpxDataTableRadius,
+  type HpxDataTableRow,
+  type HpxDataTableSelectMark,
+  type HpxDataTableStatus,
 } from "@/components/ui/data-table"
 
 const methods = ["Credit Card", "PayPal", "Bank Transfer"]
 
-const invoices: DataTableRow[] = [
+const invoices: HpxDataTableRow[] = [
   { id: "INV001", status: "Paid", method: "Credit Card", amount: 250 },
   { id: "INV002", status: "Pending", method: "PayPal", amount: 150 },
   { id: "INV003", status: "Unpaid", method: "Bank Transfer", amount: 350 },
@@ -34,14 +34,14 @@ const invoices: DataTableRow[] = [
   { id: "INV012", status: "Paid", method: "Credit Card", amount: 275 },
 ]
 
-const columns: DataTableColumn[] = [
+const columns: HpxDataTableColumn[] = [
   { key: "id", header: "Invoice", className: "w-[20%] font-medium" },
   { key: "status", header: "Status", kind: "status" },
   { key: "method", header: "Method" },
   { key: "amount", header: "Amount", kind: "currency", align: "right" },
 ]
 
-const statuses: DataTableStatus[] = [
+const statuses: HpxDataTableStatus[] = [
   { value: "Paid", tone: "success" },
   { value: "Pending", tone: "warning", pulse: true },
   { value: "Unpaid", tone: "danger" },
@@ -190,10 +190,10 @@ const controls = {
   },
   stickyFooter: { disabled: (v) => !v.highlightTotal, group: "Layout", type: "checkbox", label: "Sticky last row", value: true },
   skeleton: { group: "Layout", type: "checkbox", label: "Loading skeleton", value: true },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 export default function TablePage() {
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [replay, setReplay] = React.useState(0)
   const [loading, setLoading] = React.useState(false)
@@ -222,7 +222,7 @@ export default function TablePage() {
         </div>
       </div>
 
-      <DataTable
+      <HpxDataTable
         key={replay}
         // On phones the table breaks out of the page's 80vw column to 94vw, centred.
         className="max-md:relative max-md:left-1/2 max-md:w-[94vw] max-md:-translate-x-1/2"
@@ -248,16 +248,16 @@ export default function TablePage() {
         {...values}
         height={`${values.height}vh`}
         sortable={false}
-        highlight={values.highlight as DataTableHighlight}
-        countUp={values.countUp as DataTableCountUp}
-        hoverTone={values.hoverTone as DataTableHoverTone}
-        selectMark={values.selectMark as DataTableSelectMark}
-        textAlign={values.textAlign as DataTableAlign}
-        radius={values.radius as DataTableRadius}
+        highlight={values.highlight as HpxDataTableHighlight}
+        countUp={values.countUp as HpxDataTableCountUp}
+        hoverTone={values.hoverTone as HpxDataTableHoverTone}
+        selectMark={values.selectMark as HpxDataTableSelectMark}
+        textAlign={values.textAlign as HpxDataTableAlign}
+        radius={values.radius as HpxDataTableRadius}
         drag={values.drag ? "rows" : "none"}
       />
 
-      <ControlsPanel title="Table" {...panel} />
+      <HpxControlsPanel title="Table" {...panel} />
     </div>
   )
 }

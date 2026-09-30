@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   motion,
@@ -11,8 +11,8 @@ import {
 } from "motion/react"
 import { ArrowRightIcon, LoaderCircleIcon } from "lucide-react"
 
-import { SearchIcon, type SearchIconHandle } from "@/components/animated-icons/search-icon"
-import { SettingsIcon, type SettingsIconHandle } from "@/components/animated-icons/settings-icon"
+import { HpxSearchIcon, type HpxSearchIconHandle } from "@/components/animated-icons/search-icon"
+import { HpxSettingsIcon, type HpxSettingsIconHandle } from "@/components/animated-icons/settings-icon"
 
 /** dot-fill: a dot grows from the pointer to fill. char-stagger: letters roll one by one. scramble: letters shuffle into place. link: a line draws under the text. border-draw: the border draws around the button. */
 type AnimatedButtonVariant = "dot-fill" | "char-stagger" | "scramble" | "link" | "border-draw"
@@ -164,8 +164,8 @@ const TONES: Record<
 
 // Shows the icon at rest, and plays it while the button is hovered
 function ButtonIcon({ icon, hovered }: { icon: AnimatedButtonIcon; hovered: boolean }) {
-  const search = React.useRef<SearchIconHandle>(null)
-  const settings = React.useRef<SettingsIconHandle>(null)
+  const search = React.useRef<HpxSearchIconHandle>(null)
+  const settings = React.useRef<HpxSettingsIconHandle>(null)
   const reduceMotion = useReducedMotion()
 
   React.useEffect(() => {
@@ -174,8 +174,8 @@ function ButtonIcon({ icon, hovered }: { icon: AnimatedButtonIcon; hovered: bool
     else handle?.stopAnimation()
   }, [hovered, icon])
 
-  if (icon === "search") return <SearchIcon ref={search} size={20} isAnimated={false} />
-  if (icon === "settings") return <SettingsIcon ref={settings} size={20} isAnimated={false} />
+  if (icon === "search") return <HpxSearchIcon ref={search} size={20} isAnimated={false} />
+  if (icon === "settings") return <HpxSettingsIcon ref={settings} size={20} isAnimated={false} />
   if (icon !== "arrow") return null
   // Reduced motion: a plain arrow that stays put
   if (reduceMotion) return <ArrowRightIcon aria-hidden className="size-5" />
@@ -533,7 +533,7 @@ function AnimatedButton({
             if (typeof ref === "function") ref(node)
             else if (ref) ref.current = node
           }}
-          data-slot="animated-button"
+          data-hpx-slot="animated-button"
           data-active={hovered ? "true" : "false"}
           aria-busy={status === "loading" || undefined}
           onPointerEnter={(event) => {
@@ -681,13 +681,13 @@ function AnimatedButton({
   )
 }
 
-export { AnimatedButton }
+export { AnimatedButton as HpxAnimatedButton }
 export type {
-  AnimatedButtonVariant,
-  AnimatedButtonSurface,
-  AnimatedButtonTone,
-  AnimatedButtonIcon,
-  AnimatedButtonIconPosition,
-  AnimatedButtonStatus,
-  AnimatedButtonRounded,
+  AnimatedButtonVariant as HpxAnimatedButtonVariant,
+  AnimatedButtonSurface as HpxAnimatedButtonSurface,
+  AnimatedButtonTone as HpxAnimatedButtonTone,
+  AnimatedButtonIcon as HpxAnimatedButtonIcon,
+  AnimatedButtonIconPosition as HpxAnimatedButtonIconPosition,
+  AnimatedButtonStatus as HpxAnimatedButtonStatus,
+  AnimatedButtonRounded as HpxAnimatedButtonRounded,
 }

@@ -2,16 +2,16 @@
 
 import { MailPlusIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
-import { useInbox } from "./sidebar-shell"
+import { useHpxInbox } from "./sidebar-shell"
 
-export function ReceiveMessage() {
-  const { receive } = useInbox()
+export function HpxReceiveMessage() {
+  const { receive } = useHpxInbox()
   return (
-    <Button variant="outline" size="sm" onClick={receive}>
+    <HpxButton variant="outline" size="sm" onClick={receive}>
       <MailPlusIcon />
       Receive a message
-    </Button>
+    </HpxButton>
   )
 }

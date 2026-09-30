@@ -1,8 +1,161 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Hpx state variants */
+@custom-variant hpx-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-checked {
+  &:where([data-state="checked"]),
+  &:where([data-checked]:not([data-checked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-unchecked {
+  &:where([data-state="unchecked"]),
+  &:where([data-unchecked]:not([data-unchecked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-selected {
+  &:where([data-selected="true"]) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-disabled {
+  &:where([data-disabled="true"]),
+  &:where([data-disabled]:not([data-disabled="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-active {
+  &:where([data-state="active"]),
+  &:where([data-active]:not([data-active="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-horizontal {
+  &:where([data-orientation="horizontal"]) {
+    @slot;
+  }
+}
+
+@custom-variant hpx-vertical {
+  &:where([data-orientation="vertical"]) {
+    @slot;
+  }
+}
+
+@utility hpx-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@property --hpx-fade-s {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --hpx-fade-e {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --hpx-fade-mask {
+  syntax: "*";
+  inherits: false;
+}
+
+@theme inline {
+  @keyframes hpx-fade-reveal-s {
+    from {
+      --hpx-fade-s: 0px;
+    }
+    to {
+      --hpx-fade-s: var(--_hpx-fade-size-s, min(12%, calc(var(--spacing) * 10)));
+    }
+  }
+
+  @keyframes hpx-fade-reveal-e {
+    from {
+      --hpx-fade-e: var(--_hpx-fade-size-e, min(12%, calc(var(--spacing) * 10)));
+    }
+    to {
+      --hpx-fade-e: 0px;
+    }
+  }
+}
+
+@utility hpx-scroll-fade-x {
+  --_hpx-fade-size-s: min(12%, calc(var(--spacing) * 10));
+  --_hpx-fade-size-e: min(12%, calc(var(--spacing) * 10));
+  --hpx-fade-inline: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--hpx-fade-s, 0px),
+    #000 calc(100% - var(--hpx-fade-e, 0px)),
+    transparent 100%
+  );
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    --hpx-fade-inline: linear-gradient(
+      to left,
+      transparent 0,
+      #000 var(--hpx-fade-s, 0px),
+      #000 calc(100% - var(--hpx-fade-e, 0px)),
+      transparent 100%
+    );
+  }
+  -webkit-mask-image: var(--hpx-fade-mask, var(--hpx-fade-inline));
+  mask-image: var(--hpx-fade-mask, var(--hpx-fade-inline));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  @supports (animation-timeline: scroll()) {
+    animation:
+      hpx-fade-reveal-s 1ms ease-in-out,
+      hpx-fade-reveal-e 1ms ease-in-out;
+    animation-timeline: scroll(self inline), scroll(self inline);
+    animation-range:
+      0 calc(var(--spacing) * 24),
+      calc(100% - calc(var(--spacing) * 24)) 100%;
+    animation-fill-mode: both;
+  }
+
+  @supports not (animation-timeline: scroll()) {
+    --hpx-fade-s: var(--_hpx-fade-size-s);
+    --hpx-fade-e: var(--_hpx-fade-size-e);
+  }
+}
+
+@utility hpx-scroll-fade-none {
+  --hpx-fade-mask: none;
+}
 
 /* Keep the old theme underneath the new theme's left-to-right reveal. */
 html.theme-sweeping::view-transition-old(root),

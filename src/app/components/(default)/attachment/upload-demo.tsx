@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   FileArchiveIcon,
   FileSpreadsheetIcon,
@@ -12,20 +12,20 @@ import {
 } from "lucide-react"
 import { AnimatePresence } from "motion/react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Attachment,
-  AttachmentAction,
-  AttachmentActions,
-  AttachmentContent,
-  AttachmentDescription,
-  AttachmentDropzone,
-  AttachmentGroup,
-  AttachmentMedia,
-  AttachmentProgress,
-  AttachmentStatusIcon,
-  AttachmentTitle,
-  AttachmentTrigger,
+  HpxAttachment,
+  HpxAttachmentAction,
+  HpxAttachmentActions,
+  HpxAttachmentContent,
+  HpxAttachmentDescription,
+  HpxAttachmentDropzone,
+  HpxAttachmentGroup,
+  HpxAttachmentMedia,
+  HpxAttachmentProgress,
+  HpxAttachmentStatusIcon,
+  HpxAttachmentTitle,
+  HpxAttachmentTrigger,
 } from "@/components/ui/attachment"
 
 type State = "uploading" | "processing" | "error" | "done"
@@ -98,7 +98,7 @@ const controls = {
   expand: { group: "Group", type: "checkbox", label: "Open image preview", value: true },
 
   failures: { group: "Demo", type: "checkbox", label: "Simulate failures", value: true },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 function truncateName(name: string, limit = 20) {
   return name.length > limit ? `${name.slice(0, limit)}…` : name
@@ -116,8 +116,8 @@ function fileIcon(item: Item) {
   return FileTextIcon
 }
 
-export function UploadDemo() {
-  const panel = useControls(controls)
+export function HpxUploadDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   const [items, setItems] = React.useState<Item[]>(seed)
@@ -233,7 +233,7 @@ export function UploadDemo() {
       case "uploading":
         return (
           <>
-            Uploading · <AttachmentProgress value={item.progress} rolling={values.rolling} />
+            Uploading · <HpxAttachmentProgress value={item.progress} rolling={values.rolling} />
           </>
         )
       case "processing":
@@ -248,7 +248,7 @@ export function UploadDemo() {
   function renderItem(item: Item) {
     const image = item.kind === "image"
     return (
-      <Attachment
+      <HpxAttachment
         key={item.id}
         value={item.id}
         state={item.state}
@@ -264,7 +264,7 @@ export function UploadDemo() {
         progress={item.progress}
       >
         {image ? (
-          <AttachmentMedia
+          <HpxAttachmentMedia
             variant="image"
             zoom={values.zoom}
             develop={values.develop}
@@ -276,38 +276,38 @@ export function UploadDemo() {
             ) : (
               <div className={`size-full bg-linear-to-br ${item.gradient}`} />
             )}
-          </AttachmentMedia>
+          </HpxAttachmentMedia>
         ) : (
-          <AttachmentMedia>
-            <AttachmentStatusIcon state={item.state} icon={fileIcon(item)} />
-          </AttachmentMedia>
+          <HpxAttachmentMedia>
+            <HpxAttachmentStatusIcon state={item.state} icon={fileIcon(item)} />
+          </HpxAttachmentMedia>
         )}
-        <AttachmentContent>
-          <AttachmentTitle shimmer={values.shimmer} title={item.name}>
+        <HpxAttachmentContent>
+          <HpxAttachmentTitle shimmer={values.shimmer} title={item.name}>
             {truncateName(item.name)}
-          </AttachmentTitle>
-          <AttachmentDescription>{describe(item)}</AttachmentDescription>
-        </AttachmentContent>
-        <AttachmentActions>
+          </HpxAttachmentTitle>
+          <HpxAttachmentDescription>{describe(item)}</HpxAttachmentDescription>
+        </HpxAttachmentContent>
+        <HpxAttachmentActions>
           {item.state === "error" && item.retryable && (
-            <AttachmentAction
+            <HpxAttachmentAction
               variant={image ? "secondary" : undefined}
               aria-label={`Retry ${item.name}`}
               onClick={() => retry(item.id)}
             >
               <RotateCwIcon />
-            </AttachmentAction>
+            </HpxAttachmentAction>
           )}
-          <AttachmentAction
+          <HpxAttachmentAction
             variant={image ? "secondary" : undefined}
             reveal={values.reveal}
             aria-label={`Remove ${item.name}`}
             onClick={() => remove(item.id)}
           >
             <XIcon />
-          </AttachmentAction>
-        </AttachmentActions>
-      </Attachment>
+          </HpxAttachmentAction>
+        </HpxAttachmentActions>
+      </HpxAttachment>
     )
   }
 
@@ -323,16 +323,16 @@ export function UploadDemo() {
         </p>
       </div>
       <div className="flex items-center justify-between gap-6">
-        <Attachment state="idle" enter={false}>
-          <AttachmentMedia>
+        <HpxAttachment state="idle" enter={false}>
+          <HpxAttachmentMedia>
             <PlusIcon />
-          </AttachmentMedia>
-          <AttachmentContent>
-            <AttachmentTitle>Add files</AttachmentTitle>
-            <AttachmentDescription>Up to 10 MB each</AttachmentDescription>
-          </AttachmentContent>
-          <AttachmentTrigger aria-label="Add files" onClick={() => inputRef.current?.click()} />
-        </Attachment>
+          </HpxAttachmentMedia>
+          <HpxAttachmentContent>
+            <HpxAttachmentTitle>Add files</HpxAttachmentTitle>
+            <HpxAttachmentDescription>Up to 10 MB each</HpxAttachmentDescription>
+          </HpxAttachmentContent>
+          <HpxAttachmentTrigger aria-label="Add files" onClick={() => inputRef.current?.click()} />
+        </HpxAttachment>
         <button
           type="button"
           disabled={items.length === 0}
@@ -347,12 +347,12 @@ export function UploadDemo() {
         </button>
       </div>
 
-      <AttachmentDropzone
+      <HpxAttachmentDropzone
         marching={values.marching}
         onFiles={addFiles}
         className="flex min-h-76 flex-col gap-4 p-6 max-md:p-4"
       >
-        <AttachmentGroup
+        <HpxAttachmentGroup
           reorder={values.reorder}
           tilt={values.tilt}
           wrap={values.wrap}
@@ -362,9 +362,9 @@ export function UploadDemo() {
           <AnimatePresence initial={false} mode="popLayout">
             {files.map(renderItem)}
           </AnimatePresence>
-        </AttachmentGroup>
+        </HpxAttachmentGroup>
 
-        <AttachmentGroup
+        <HpxAttachmentGroup
           reorder={values.reorder}
           tilt={values.tilt}
           wrap={values.wrap}
@@ -374,7 +374,7 @@ export function UploadDemo() {
           <AnimatePresence initial={false} mode="popLayout">
             {images.map(renderItem)}
           </AnimatePresence>
-        </AttachmentGroup>
+        </HpxAttachmentGroup>
 
         <input
           ref={inputRef}
@@ -386,9 +386,9 @@ export function UploadDemo() {
             e.target.value = ""
           }}
         />
-      </AttachmentDropzone>
+      </HpxAttachmentDropzone>
 
-      <ControlsPanel title="Attachment" {...panel} />
+      <HpxControlsPanel title="Attachment" {...panel} />
     </section>
   )
 }

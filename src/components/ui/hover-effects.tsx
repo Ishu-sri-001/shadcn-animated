@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
 /** Text that rolls up to a copy of itself while the nearest `group/roll` is hovered. */
 function RollText({ children }: { children: React.ReactNode }) {
@@ -97,11 +97,11 @@ function FillButton({
   onPointerEnter,
   onPointerLeave,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: React.ComponentProps<typeof HpxButton>) {
   const { place, circle, label } = useHoverFill()
 
   return (
-    <Button
+    <HpxButton
       variant="outline"
       onPointerEnter={(event) => {
         onPointerEnter?.(event)
@@ -116,8 +116,8 @@ function FillButton({
     >
       {circle}
       {label(children)}
-    </Button>
+    </HpxButton>
   )
 }
 
-export { FillButton, HOVER_FILL_CLASSES, RollText, useHoverFill, useTriggerHover }
+export { FillButton as HpxFillButton, HOVER_FILL_CLASSES as HPX_HOVER_FILL_CLASSES, RollText as HpxRollText, useHoverFill as useHpxHoverFill, useTriggerHover as useHpxTriggerHover }

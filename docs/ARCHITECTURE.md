@@ -1,8 +1,8 @@
 # How the project works
 
-This project takes shadcn/ui components and adds animation on top, using Motion (`motion/react`) and GSAP. Each component has its own page with a controls panel, so every animation can be switched on and off live.
+This project builds Hpx components and adds animation on top, using Motion (`motion/react`) and GSAP. Each component has its own page with a controls panel, so every animation can be switched on and off live.
 
-**Stack:** Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui (`base-nova` style, built on Base UI), Motion, GSAP, next-themes.
+**Stack:** Next.js 16 (App Router), React 19, Tailwind CSS v4, Base UI primitives, Motion, GSAP, next-themes.
 
 ## Folder layout
 
@@ -24,7 +24,7 @@ src/
         sidebar-shell.tsx      The sidebar, header and controls panel
         page.tsx, page-content.tsx, receive-message.tsx
   components/
-    ui/                        The components (shadcn files, plus our additions)
+    ui/                        The components (Hpx components)
     animated-icons/            Icons that animate on hover (used by the sidebar)
     controls-panel.tsx         The floating controls panel and useControls
     registry.ts                The list shown on the home page
@@ -44,7 +44,7 @@ Each component has its own route, `/components/<slug>`.
 
 **Adding a component:**
 
-1. Install the base: `npx shadcn@latest add <name>` (lands in `src/components/ui/`).
+1. Create the base component in `src/components/ui/`, named `Hpx<Name>`.
 2. Add the animations to that file, each as a prop.
 3. Create `src/app/components/(default)/<slug>/<slug>-demo.tsx` (controls, state, the component with its props) and `page.tsx` (title, description, the demo), as in [The common pattern](#the-common-pattern).
 4. Add `{ slug, name, description }` to `src/components/registry.ts`.
@@ -67,7 +67,7 @@ ControlsPanel ──set()──▶ values (in the demo) ──props──▶ Rad
 
 ### 1. The component (`src/components/ui/<name>.tsx`)
 
-The shadcn file, plus our animations. Every animation is a prop with a default, and the component knows nothing about the demo or the controls panel. Group components share their props with their items through context (see [From a group component to its items](#from-a-group-component-to-its-items)).
+The base component, plus our animations. Every animation is a prop with a default, and the component knows nothing about the demo or the controls panel. Group components share their props with their items through context (see [From a group component to its items](#from-a-group-component-to-its-items)).
 
 ```tsx
 function RadioGroup({ value, defaultValue, onValueChange, variant = "default", reorder = false, ...optionProps }) {
@@ -176,7 +176,7 @@ The shared `(default)/layout.tsx` wraps it with the page frame and the "← All 
 
 ## Do components depend on each other?
 
-Mostly not. Each component in `src/components/ui/` stands on its own and can be used on any page. The only links are shadcn building blocks one component imports from another:
+Mostly not. Each component in `src/components/ui/` stands on its own and can be used on any page. The only links are building blocks one component imports from another:
 
 | Component | Imports |
 | --- | --- |
@@ -240,7 +240,7 @@ For example, `SidebarProvider` takes options like `highlightTone`, `textRoll`, `
 
 ### Value, defaultValue and onValueChange
 
-Components with a selection follow the React (and shadcn) pattern:
+Components with a selection follow the standard React pattern:
 - **Uncontrolled:** pass `defaultValue` and the component keeps its own state.
 - **Controlled:** pass `value` and `onValueChange`, and the parent owns the state. The demos do this (for example `CheckboxGroup value={picks} onValueChange={setPicks}`).
 

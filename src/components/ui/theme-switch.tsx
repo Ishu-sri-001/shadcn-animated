@@ -1,21 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import gsap from "gsap"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { flushSync } from "react-dom"
 import { MoonIcon, SunIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
 /** swipe: the new theme wipes across, and back the other way. fade: it fades in. circle: it grows from the button. */
 type ThemeSwitchVariant = "swipe" | "fade" | "circle"
 /** spin: the old icon spins away, the new one spins in. orbit: the two icons circle each other. */
 type ThemeSwitchIconMotion = "spin" | "orbit"
 
-type ThemeSwitchProps = Omit<React.ComponentProps<typeof Button>, "size" | "onClick"> & {
+type ThemeSwitchProps = Omit<React.ComponentProps<typeof HpxButton>, "size" | "onClick"> & {
   /** How the new theme reveals itself. */
   transition?: ThemeSwitchVariant
   /** Seconds. */
@@ -188,7 +188,7 @@ function ThemeSwitch({
   return (
     <span
       ref={wrapper}
-      data-slot="theme-switch-root"
+      data-hpx-slot="theme-switch-root"
       className="relative inline-flex"
       onPointerEnter={() => setHovered(true)}
       // The transition overlay steals the pointer, so leaving is checked afterwards
@@ -196,8 +196,8 @@ function ThemeSwitch({
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
-      <Button
-        data-slot="theme-switch"
+      <HpxButton
+        data-hpx-slot="theme-switch"
         variant={variant}
         size="icon-lg"
         aria-label="Toggle theme"
@@ -229,7 +229,7 @@ function ThemeSwitch({
             <MoonIcon ref={moon} className={cn("absolute opacity-0 dark:opacity-100", iconClass)} />
           </>
         )}
-      </Button>
+      </HpxButton>
 
       {mounted && resolvedTheme && (
         <span role="status" aria-live="polite" className="sr-only">
@@ -273,5 +273,5 @@ function ThemeSwitch({
   )
 }
 
-export { ThemeSwitch }
-export type { ThemeSwitchIconMotion, ThemeSwitchVariant }
+export { ThemeSwitch as HpxThemeSwitch }
+export type { ThemeSwitchIconMotion as HpxThemeSwitchIconMotion, ThemeSwitchVariant as HpxThemeSwitchVariant }

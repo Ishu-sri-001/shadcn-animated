@@ -2,19 +2,19 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItemDescription,
-  DropdownMenuItemTitle,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-  DropdownMenuTriggerIcon,
-  DropdownMenuValue,
+  HpxDropdownMenu,
+  HpxDropdownMenuContent,
+  HpxDropdownMenuGroup,
+  HpxDropdownMenuItemDescription,
+  HpxDropdownMenuItemTitle,
+  HpxDropdownMenuRadioGroup,
+  HpxDropdownMenuRadioItem,
+  HpxDropdownMenuTrigger,
+  HpxDropdownMenuTriggerIcon,
+  HpxDropdownMenuValue,
 } from "@/components/ui/dropdown-menu"
 
 const options = [
@@ -130,10 +130,10 @@ const controls = {
     value: false,
   },
   typeahead: { group: "Behaviour", type: "checkbox", label: "Type to jump", value: false },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 export default function DropdownMenuPage() {
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [frequency, setFrequency] = React.useState("fortnightly")
   const selected = options.find((option) => option.value === frequency) ?? options[1]
@@ -148,7 +148,7 @@ export default function DropdownMenuPage() {
       </div>
 
       <div className="flex min-h-[50vh] items-start justify-center">
-        <DropdownMenu
+        <HpxDropdownMenu
           animation={values.animation as "collapse" | "slide" | "scale" | "reveal" | "morph"}
           exitFast={values.exitFast}
           duration={values.duration}
@@ -163,12 +163,12 @@ export default function DropdownMenuPage() {
           pressFeedback={values.pressFeedback}
           typeahead={values.typeahead}
         >
-          <DropdownMenuTrigger
+          <HpxDropdownMenuTrigger
             openOnHover={values.openOnHover}
             delay={100}
             animateValue={values.animateValue}
             render={
-              <Button
+              <HpxButton
                 variant="outline"
                 className="h-auto w-[60%] cursor-pointer justify-between gap-4 px-4 py-3 hover:bg-background aria-expanded:bg-background max-md:w-full dark:hover:bg-input/30 dark:aria-expanded:bg-input/30"
               />
@@ -178,40 +178,40 @@ export default function DropdownMenuPage() {
               <span className="text-sm font-normal text-muted-foreground">
                 Your coffee arrives
               </span>
-              <DropdownMenuValue className="text-base">
+              <HpxDropdownMenuValue className="text-base">
                 {selected.label}
-              </DropdownMenuValue>
+              </HpxDropdownMenuValue>
             </span>
-            <DropdownMenuTriggerIcon
+            <HpxDropdownMenuTriggerIcon
               icon={values.icon as "chevron" | "plus"}
               className="text-muted-foreground"
             />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="p-1.5">
-            <DropdownMenuGroup>
-              <DropdownMenuRadioGroup aria-label="Delivery frequency" value={frequency} onValueChange={setFrequency}>
+          </HpxDropdownMenuTrigger>
+          <HpxDropdownMenuContent className="p-1.5">
+            <HpxDropdownMenuGroup>
+              <HpxDropdownMenuRadioGroup aria-label="Delivery frequency" value={frequency} onValueChange={setFrequency}>
                 {options.map((option) => (
-                  <DropdownMenuRadioItem
+                  <HpxDropdownMenuRadioItem
                     key={option.value}
                     value={option.value}
                     label={option.label}
                     className="py-2"
                   >
                     <span className="flex flex-col gap-0.5">
-                      <DropdownMenuItemTitle>{option.label}</DropdownMenuItemTitle>
-                      <DropdownMenuItemDescription>
+                      <HpxDropdownMenuItemTitle>{option.label}</HpxDropdownMenuItemTitle>
+                      <HpxDropdownMenuItemDescription>
                         {option.description}
-                      </DropdownMenuItemDescription>
+                      </HpxDropdownMenuItemDescription>
                     </span>
-                  </DropdownMenuRadioItem>
+                  </HpxDropdownMenuRadioItem>
                 ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              </HpxDropdownMenuRadioGroup>
+            </HpxDropdownMenuGroup>
+          </HpxDropdownMenuContent>
+        </HpxDropdownMenu>
       </div>
 
-      <ControlsPanel title="Dropdown Menu" {...panel} />
+      <HpxControlsPanel title="Dropdown Menu" {...panel} />
     </div>
   )
 }

@@ -2,14 +2,14 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Switch,
-  type SwitchColor,
-  type SwitchLabelSide,
-  type SwitchRounded,
-  type SwitchSize,
-  type SwitchVariant,
+  HpxSwitch,
+  type HpxSwitchColor,
+  type HpxSwitchLabelSide,
+  type HpxSwitchRounded,
+  type HpxSwitchSize,
+  type HpxSwitchVariant,
 } from "@/components/ui/switch"
 
 const controls = {
@@ -103,27 +103,27 @@ const controls = {
     max: 0.7,
     step: 0.05,
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function SwitchDemo() {
-  const panel = useControls(controls)
+export function HpxSwitchDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [on, setOn] = React.useState(true)
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[50vh] items-center justify-center rounded-lg border px-4 py-8">
-        <Switch
+        <HpxSwitch
           checked={on}
           onCheckedChange={setOn}
           label="Wi-Fi"
-          variant={values.variant as SwitchVariant}
-          size={values.size as SwitchSize}
-          color={values.color as SwitchColor}
+          variant={values.variant as HpxSwitchVariant}
+          size={values.size as HpxSwitchSize}
+          color={values.color as HpxSwitchColor}
           green={values.green}
-          rounded={values.rounded as SwitchRounded}
+          rounded={values.rounded as HpxSwitchRounded}
           marks={values.marks}
-          labelSide={values.labelSide as SwitchLabelSide}
+          labelSide={values.labelSide as HpxSwitchLabelSide}
           squeeze={values.squeeze}
           duration={values.duration}
           bounce={values.bounce}
@@ -133,7 +133,7 @@ export function SwitchDemo() {
         Tip: press and hold to see the handle squeeze before you let go. On Apple, drag the handle across.
       </p>
 
-      <ControlsPanel title="Switch" {...panel} />
+      <HpxControlsPanel title="Switch" {...panel} />
     </div>
   )
 }

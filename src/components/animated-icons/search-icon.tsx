@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface SearchIconHandle {
+export interface HpxSearchIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface SearchIconProps extends Omit<
   color?: string
 }
 
-const SearchIcon = forwardRef<SearchIconHandle, SearchIconProps>(
+const SearchIcon = forwardRef<HpxSearchIconHandle, SearchIconProps>(
   (
     {
       onMouseEnter,
@@ -129,4 +129,4 @@ const SearchIcon = forwardRef<SearchIconHandle, SearchIconProps>(
 )
 
 SearchIcon.displayName = "SearchIcon"
-export { SearchIcon }
+export { SearchIcon as HpxSearchIcon }

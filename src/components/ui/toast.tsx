@@ -3,7 +3,7 @@
 import * as React from "react"
 import { flushSync } from "react-dom"
 import { Toast as ToastPrimitive } from "@base-ui/react/toast"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   ChevronDownIcon,
   CircleCheckIcon,
@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
 const toast = ToastPrimitive.createToastManager()
 
@@ -187,7 +187,7 @@ function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
 }
 
 function ToastPortal({ ...props }: ToastPrimitive.Portal.Props) {
-  return <ToastPrimitive.Portal data-slot="toast-portal" {...props} />
+  return <ToastPrimitive.Portal data-hpx-slot="toast-portal" {...props} />
 }
 
 function ToastViewport({
@@ -207,7 +207,7 @@ function ToastViewport({
   return (
     <StackShiftContext.Provider value={reportShift}>
       <ToastPrimitive.Viewport
-        data-slot="toast-viewport"
+        data-hpx-slot="toast-viewport"
         style={{ translate: `0 ${stackShift}px`, ...style }}
         className={cn(
           "pointer-events-none fixed inset-x-4 z-50 mx-auto w-auto max-w-md outline-none transition-[translate] duration-300 ease-out motion-reduce:transition-none sm:w-full",
@@ -257,7 +257,7 @@ function Toast({
         if (typeof ref === "function") ref(node)
         else if (ref) ref.current = node
       }}
-      data-slot="toast"
+      data-hpx-slot="toast"
       swipeDirection={SWIPE_DIRECTIONS[effects.position]}
       className={cn(
         "group/toast pointer-events-auto absolute right-0 z-[calc(1000-var(--toast-index))] w-full border text-popover-foreground shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
@@ -296,7 +296,7 @@ function ToastContent({ className, ...props }: ToastPrimitive.Content.Props) {
   const { pill, contentFade } = React.useContext(ToastEffectsContext)
   return (
     <ToastPrimitive.Content
-      data-slot="toast-content"
+      data-hpx-slot="toast-content"
       className={cn(
         "flex h-full items-start gap-3 overflow-hidden py-4 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100",
         pill ? "px-6" : "px-4",
@@ -312,7 +312,7 @@ function ToastContent({ className, ...props }: ToastPrimitive.Content.Props) {
 function ToastTitle({ className, ...props }: ToastPrimitive.Title.Props) {
   return (
     <ToastPrimitive.Title
-      data-slot="toast-title"
+      data-hpx-slot="toast-title"
       className={cn("text-sm font-medium", className)}
       {...props}
     />
@@ -325,7 +325,7 @@ function ToastDescription({
 }: ToastPrimitive.Description.Props) {
   return (
     <ToastPrimitive.Description
-      data-slot="toast-description"
+      data-hpx-slot="toast-description"
       className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
@@ -334,13 +334,13 @@ function ToastDescription({
 
 function ToastAction({
   className,
-  render = <Button variant="outline" size="sm" />,
+  render = <HpxButton variant="outline" size="sm" />,
   ...props
 }: ToastPrimitive.Action.Props) {
   const { pill } = React.useContext(ToastEffectsContext)
   return (
     <ToastPrimitive.Action
-      data-slot="toast-action"
+      data-hpx-slot="toast-action"
       render={render}
       className={cn(
         "-my-1 shrink-0",
@@ -356,13 +356,13 @@ function ToastAction({
 function ToastClose({
   className,
   children,
-  render = <Button variant="ghost" size="icon-sm" />,
+  render = <HpxButton variant="ghost" size="icon-sm" />,
   ...props
 }: ToastPrimitive.Close.Props) {
   const { pill } = React.useContext(ToastEffectsContext)
   return (
     <ToastPrimitive.Close
-      data-slot="toast-close"
+      data-hpx-slot="toast-close"
       aria-label="Close toast"
       render={render}
       className={cn(
@@ -439,7 +439,7 @@ function ToastIcon({ type }: { type: string | undefined }) {
 
   return (
     <span
-      data-slot="toast-icon"
+      data-hpx-slot="toast-icon"
       className="relative mt-0.5 grid shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4"
     >
       {morphIcon ? (
@@ -590,7 +590,7 @@ function ToastItem({ toastItem }: { toastItem: ToastPrimitive.Root.ToastObject<T
         </div>
         <ToastAction />
         {collapsible && (
-          <Button
+          <HpxButton
             variant="ghost"
             size="icon-sm"
             aria-expanded={phase === "open"}
@@ -603,7 +603,7 @@ function ToastItem({ toastItem }: { toastItem: ToastPrimitive.Root.ToastObject<T
             )}
           >
             <ChevronDownIcon aria-hidden="true" />
-          </Button>
+          </HpxButton>
         )}
         <ToastClose />
         {showTimer && (
@@ -691,20 +691,20 @@ const createToastManager = ToastPrimitive.createToastManager
 const useToastManager = ToastPrimitive.useToastManager
 
 export {
-  Toaster,
-  Toast,
-  ToastAction,
-  ToastClose,
-  ToastContent,
-  ToastDescription,
-  ToastPortal,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-  createToastManager,
-  toast,
-  toastOrigin,
-  useToastManager,
-  type ToastPosition,
-  type ToastRounded,
+  Toaster as HpxToaster,
+  Toast as HpxToast,
+  ToastAction as HpxToastAction,
+  ToastClose as HpxToastClose,
+  ToastContent as HpxToastContent,
+  ToastDescription as HpxToastDescription,
+  ToastPortal as HpxToastPortal,
+  ToastProvider as HpxToastProvider,
+  ToastTitle as HpxToastTitle,
+  ToastViewport as HpxToastViewport,
+  createToastManager as createHpxToastManager,
+  toast as hpxToast,
+  toastOrigin as hpxToastOrigin,
+  useToastManager as useHpxToastManager,
+  type ToastPosition as HpxToastPosition,
+  type ToastRounded as HpxToastRounded,
 }

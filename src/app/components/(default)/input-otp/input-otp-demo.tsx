@@ -1,23 +1,23 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
 import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-  type InputOTPAllow,
-  type InputOTPCharAnimation,
-  type InputOTPRounded,
-  type InputOTPSize,
+  HpxInputOTP,
+  HpxInputOTPGroup,
+  HpxInputOTPSeparator,
+  HpxInputOTPSlot,
+  type HpxInputOTPAllow,
+  type HpxInputOTPCharAnimation,
+  type HpxInputOTPRounded,
+  type HpxInputOTPSize,
 } from "@/components/ui/input-otp"
 
 /** The right code for each kind of input. */
-const CODES: Record<InputOTPAllow, string> = {
+const CODES: Record<HpxInputOTPAllow, string> = {
   numbers: "427193",
   letters: "KQWMZT",
   symbols: "!@#$%&",
@@ -101,12 +101,12 @@ const controls = {
       { label: "Full", value: "full" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function InputOTPDemo() {
-  const panel = useControls(controls)
+export function HpxInputOTPDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
-  const allow = values.allow as InputOTPAllow
+  const allow = values.allow as HpxInputOTPAllow
   const CODE = CODES[allow]
   const [code, setCode] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
@@ -131,7 +131,7 @@ export function InputOTPDemo() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-lg border px-4">
-        <InputOTP
+        <HpxInputOTP
           maxLength={CODE.length}
           value={code}
           onChange={change}
@@ -141,26 +141,26 @@ export function InputOTPDemo() {
           success={success}
           aria-label="Verification code"
           glide={values.glide}
-          charAnimation={values.charAnimation as InputOTPCharAnimation}
+          charAnimation={values.charAnimation as HpxInputOTPCharAnimation}
           pasteStagger={values.pasteStagger}
           shakeOnError={values.shakeOnError}
           successWave={values.successWave}
-          boxSize={values.boxSize as InputOTPSize}
-          rounded={values.rounded as InputOTPRounded}
+          boxSize={values.boxSize as HpxInputOTPSize}
+          rounded={values.rounded as HpxInputOTPRounded}
           joined={values.joined}
         >
-          <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
-          </InputOTPGroup>
-          <InputOTPSeparator />
-          <InputOTPGroup>
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
-          </InputOTPGroup>
-        </InputOTP>
+          <HpxInputOTPGroup>
+            <HpxInputOTPSlot index={0} />
+            <HpxInputOTPSlot index={1} />
+            <HpxInputOTPSlot index={2} />
+          </HpxInputOTPGroup>
+          <HpxInputOTPSeparator />
+          <HpxInputOTPGroup>
+            <HpxInputOTPSlot index={3} />
+            <HpxInputOTPSlot index={4} />
+            <HpxInputOTPSlot index={5} />
+          </HpxInputOTPGroup>
+        </HpxInputOTP>
         <p
           className={cn(
             "text-center text-sm text-muted-foreground",
@@ -177,22 +177,22 @@ export function InputOTPDemo() {
                 : "Enter the code we emailed you."}
         </p>
         <div className="flex gap-2">
-          <Button
+          <HpxButton
             variant="ghost"
             size="sm"
             className={cn(LINE_BUTTON, "hover:bg-transparent dark:hover:bg-transparent")}
             onClick={() => change(CODE)}
           >
             <span className={LINE_TEXT}>Paste the right code</span>
-          </Button>
-          <Button
+          </HpxButton>
+          <HpxButton
             variant="ghost"
             size="sm"
             className={cn(LINE_BUTTON, "hover:bg-transparent dark:hover:bg-transparent")}
             onClick={() => change("")}
           >
             <span className={LINE_TEXT}>Clear</span>
-          </Button>
+          </HpxButton>
         </div>
       </div>
       <p className="text-sm text-muted-foreground">
@@ -200,7 +200,7 @@ export function InputOTPDemo() {
         that isn&apos;t allowed is blocked with a message.
       </p>
 
-      <ControlsPanel title="Input OTP" {...panel} />
+      <HpxControlsPanel title="Input OTP" {...panel} />
     </div>
   )
 }

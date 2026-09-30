@@ -3,8 +3,8 @@
 import * as React from "react"
 import { AnimatePresence, motion } from "motion/react"
 
-import { ReceiveMessage } from "./receive-message"
-import { useActivePage } from "./sidebar-shell"
+import { HpxReceiveMessage } from "./receive-message"
+import { useHpxActivePage } from "./sidebar-shell"
 
 const pages: Record<string, string> = {
   Inbox: "Messages from customers.",
@@ -34,13 +34,13 @@ function Page({ page }: { page: string }) {
         A collapsible side navigation. Press ⌘B (Ctrl+B) or the button in the header to collapse
         it to icons; on mobile it slides in from the left, or swipe in from the edge.
       </Heading>
-      <ReceiveMessage />
+      <HpxReceiveMessage />
     </div>
   )
 }
 
-export function PageContent() {
-  const { page, scaleContent } = useActivePage()
+export function HpxPageContent() {
+  const { page, scaleContent } = useHpxActivePage()
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div

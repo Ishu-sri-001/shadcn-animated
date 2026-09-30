@@ -11,7 +11,7 @@ function subscribe(onChange: () => void) {
   return () => media.removeEventListener("change", onChange)
 }
 
-export function useIsMobile() {
+export function useHpxIsMobile() {
   return React.useSyncExternalStore(
     subscribe,
     () => window.matchMedia(QUERY).matches,

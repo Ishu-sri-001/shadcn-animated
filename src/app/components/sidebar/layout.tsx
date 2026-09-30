@@ -1,11 +1,11 @@
-import { SidebarShell } from "./sidebar-shell"
-import { ApiReference } from "@/components/api-reference"
+import { HpxSidebarShell } from "./sidebar-shell"
+import { HpxApiReference } from "@/components/api-reference"
 
 export default function SidebarLayout({ children }: LayoutProps<"/components/sidebar">) {
   return (
-    <SidebarShell>
+    <HpxSidebarShell>
       {children}
-      <ApiReference slug="sidebar" />
-    </SidebarShell>
+      <HpxApiReference slug="sidebar" />
+    </HpxSidebarShell>
   )
 }

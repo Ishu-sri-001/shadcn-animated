@@ -7,7 +7,7 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
 const ThemeTransitionContext = React.createContext<(() => void) | null>(null)
 
-export function useThemeTransition() {
+export function useHpxThemeTransition() {
   const toggleTheme = React.useContext(ThemeTransitionContext)
   if (!toggleTheme) throw new Error("useThemeTransition requires ThemeProvider")
   return toggleTheme
@@ -67,7 +67,7 @@ function ThemeTransition({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function ThemeProvider({
+export function HpxThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {

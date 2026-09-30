@@ -1,11 +1,11 @@
-import { ComponentsNav } from "./components-nav"
-import { ApiReferenceProvider } from "@/components/api-reference-visibility"
+import { HpxComponentsNav } from "./components-nav"
+import { HpxApiReferenceProvider } from "@/components/api-reference-visibility"
 
 export default function ComponentsRootLayout({ children }: LayoutProps<"/components">) {
   return (
-    <ApiReferenceProvider showApiReference={true}>
+    <HpxApiReferenceProvider showApiReference={true}>
       {children}
-      <ComponentsNav />
-    </ApiReferenceProvider>
+      <HpxComponentsNav />
+    </HpxApiReferenceProvider>
   )
 }

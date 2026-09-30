@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface HouseIconHandle {
+export interface HpxHouseIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface HouseIconProps extends Omit<
   color?: string
 }
 
-const HouseIcon = forwardRef<HouseIconHandle, HouseIconProps>(
+const HouseIcon = forwardRef<HpxHouseIconHandle, HouseIconProps>(
   (
     {
       onMouseEnter,
@@ -149,4 +149,4 @@ const HouseIcon = forwardRef<HouseIconHandle, HouseIconProps>(
 )
 
 HouseIcon.displayName = "HouseIcon"
-export { HouseIcon }
+export { HouseIcon as HpxHouseIcon }

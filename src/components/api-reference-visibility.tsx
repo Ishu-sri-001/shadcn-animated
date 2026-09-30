@@ -4,7 +4,7 @@ import { createContext, useContext, type ReactNode } from "react"
 
 const ApiReferenceContext = createContext(true)
 
-export function ApiReferenceProvider({
+export function HpxApiReferenceProvider({
   showApiReference = true,
   children,
 }: {
@@ -19,7 +19,7 @@ export function ApiReferenceProvider({
   )
 }
 
-export function ApiReferenceVisibility({ children }: { children: ReactNode }) {
+export function HpxApiReferenceVisibility({ children }: { children: ReactNode }) {
   const showApiReference = useContext(ApiReferenceContext)
   return showApiReference ? children : null
 }

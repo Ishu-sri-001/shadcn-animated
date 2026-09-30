@@ -10,63 +10,63 @@ import {
   UserIcon,
 } from "lucide-react"
 
-import { AnimatedLinkText } from "@/components/animated-link"
-import { Button } from "@/components/ui/button"
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxAnimatedLinkText } from "@/components/animated-link"
+import { HpxButton } from "@/components/ui/button"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Command,
-  CommandDialog,
-  CommandSearch,
-  type CommandBackdrop,
-  type CommandDropdown,
-  type CommandHoverColor,
-  type CommandItemHover,
-  type CommandRounded,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
+  HpxCommand,
+  HpxCommandDialog,
+  HpxCommandSearch,
+  type HpxCommandBackdrop,
+  type HpxCommandDropdown,
+  type HpxCommandHoverColor,
+  type HpxCommandItemHover,
+  type HpxCommandRounded,
+  HpxCommandEmpty,
+  HpxCommandGroup,
+  HpxCommandInput,
+  HpxCommandItem,
+  HpxCommandList,
+  HpxCommandSeparator,
+  HpxCommandShortcut,
 } from "@/components/ui/command"
 
 function Items({ onSelect }: { onSelect?: () => void }) {
   return (
     <>
-      <CommandEmpty>No results found.</CommandEmpty>
-      <CommandGroup heading="Suggestions">
-        <CommandItem onSelect={onSelect}>
+      <HpxCommandEmpty>No results found.</HpxCommandEmpty>
+      <HpxCommandGroup heading="Suggestions">
+        <HpxCommandItem onSelect={onSelect}>
           <CalendarIcon />
           <span>Calendar</span>
-        </CommandItem>
-        <CommandItem onSelect={onSelect}>
+        </HpxCommandItem>
+        <HpxCommandItem onSelect={onSelect}>
           <SmileIcon />
           <span>Search emoji</span>
-        </CommandItem>
-        <CommandItem onSelect={onSelect}>
+        </HpxCommandItem>
+        <HpxCommandItem onSelect={onSelect}>
           <CalculatorIcon />
           <span>Calculator</span>
-        </CommandItem>
-      </CommandGroup>
-      <CommandSeparator />
-      <CommandGroup heading="Settings">
-        <CommandItem onSelect={onSelect}>
+        </HpxCommandItem>
+      </HpxCommandGroup>
+      <HpxCommandSeparator />
+      <HpxCommandGroup heading="Settings">
+        <HpxCommandItem onSelect={onSelect}>
           <UserIcon />
           <span>Profile</span>
-          <CommandShortcut>⌘P</CommandShortcut>
-        </CommandItem>
-        <CommandItem onSelect={onSelect}>
+          <HpxCommandShortcut>⌘P</HpxCommandShortcut>
+        </HpxCommandItem>
+        <HpxCommandItem onSelect={onSelect}>
           <CreditCardIcon />
           <span>Billing</span>
-          <CommandShortcut>⌘B</CommandShortcut>
-        </CommandItem>
-        <CommandItem onSelect={onSelect}>
+          <HpxCommandShortcut>⌘B</HpxCommandShortcut>
+        </HpxCommandItem>
+        <HpxCommandItem onSelect={onSelect}>
           <SettingsIcon />
           <span>Settings</span>
-          <CommandShortcut>⌘S</CommandShortcut>
-        </CommandItem>
-      </CommandGroup>
+          <HpxCommandShortcut>⌘S</HpxCommandShortcut>
+        </HpxCommandItem>
+      </HpxCommandGroup>
     </>
   )
 }
@@ -197,12 +197,12 @@ const controls = {
     step: 0.01,
     unit: "s",
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function CommandDemo() {
+export function HpxCommandDemo() {
   const [open, setOpen] = React.useState(false)
   const search = React.useRef<HTMLInputElement>(null)
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   const motionProps = {
@@ -211,9 +211,9 @@ export function CommandDemo() {
     staggerItems: values.staggerItems,
     stagger: values.stagger,
     iconMotion: values.iconMotion,
-    itemHover: values.itemHover as CommandItemHover,
-    hoverColor: values.hoverColor as CommandHoverColor,
-    rounded: values.rounded as CommandRounded,
+    itemHover: values.itemHover as HpxCommandItemHover,
+    hoverColor: values.hoverColor as HpxCommandHoverColor,
+    rounded: values.rounded as HpxCommandRounded,
     textRoll: values.textRoll,
   }
 
@@ -238,49 +238,49 @@ export function CommandDemo() {
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[60vh] flex-col items-center justify-start gap-[4vw] rounded-lg border px-[4vw] py-8 max-md:gap-[10vw]">
         <div className="w-full max-w-xs">
-          <CommandSearch
+          <HpxCommandSearch
             inputRef={search}
             placeholder="Search commands…"
             hint="/"
-            dropdown={values.dropdown as CommandDropdown}
+            dropdown={values.dropdown as HpxCommandDropdown}
             morphWidth={values.morphWidth}
             {...motionProps}
           >
             <Items />
-          </CommandSearch>
+          </HpxCommandSearch>
         </div>
 
-        <Button
+        <HpxButton
           variant="outline"
           className="group/link h-11 px-4 text-base border-none hover:bg-background aria-expanded:bg-background dark:hover:bg-input/30 dark:aria-expanded:bg-input/30"
           onClick={() => setOpen(true)}
         >
-          <AnimatedLinkText>Open palette</AnimatedLinkText>
+          <HpxAnimatedLinkText>Open palette</HpxAnimatedLinkText>
           <kbd className="rounded-sm bg-muted px-1.5 font-mono text-sm text-muted-foreground">⌘K</kbd>
-        </Button>
+        </HpxButton>
 
-        <CommandDialog
+        <HpxCommandDialog
           open={open}
           onOpenChange={setOpen}
           scale={values.scale}
           fade={values.fade}
           delay={values.delay}
-          backdrop={values.backdrop as CommandBackdrop}
+          backdrop={values.backdrop as HpxCommandBackdrop}
           {...motionProps}
         >
-          <Command className="rounded-[inherit]">
-            <CommandInput placeholder="Type a command or search…" />
-            <CommandList>
+          <HpxCommand className="rounded-[inherit]">
+            <HpxCommandInput placeholder="Type a command or search…" />
+            <HpxCommandList>
               <Items onSelect={() => setOpen(false)} />
-            </CommandList>
-          </Command>
-        </CommandDialog>
+            </HpxCommandList>
+          </HpxCommand>
+        </HpxCommandDialog>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: press / to search, ⌘K for the palette, ↑ ↓ to move, Enter to pick and Esc to close.
       </p>
 
-      <ControlsPanel title="Command" {...panel} />
+      <HpxControlsPanel title="Command" {...panel} />
     </div>
   )
 }

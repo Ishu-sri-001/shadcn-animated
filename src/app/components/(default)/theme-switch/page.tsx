@@ -1,4 +1,4 @@
-import { ThemeSwitchDemo } from "./theme-switch-demo"
+import { HpxThemeSwitchDemo } from "./theme-switch-demo"
 
 export default function ThemeSwitchPage() {
   return (
@@ -10,7 +10,7 @@ export default function ThemeSwitchPage() {
         </p>
       </div>
 
-      <ThemeSwitchDemo />
+      <HpxThemeSwitchDemo />
     </div>
   )
 }

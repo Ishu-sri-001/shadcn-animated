@@ -1,10 +1,10 @@
-import { ApiReference } from "@/components/api-reference"
+import { HpxApiReference } from "@/components/api-reference"
 
 export default function ComponentLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      <ApiReference slug="tooltip" />
+      <HpxApiReference slug="tooltip" />
     </>
   )
 }

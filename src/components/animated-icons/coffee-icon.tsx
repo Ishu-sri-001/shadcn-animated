@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface CoffeeIconHandle {
+export interface HpxCoffeeIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface CoffeeIconProps extends Omit<
   color?: string
 }
 
-const CoffeeIcon = forwardRef<CoffeeIconHandle, CoffeeIconProps>(
+const CoffeeIcon = forwardRef<HpxCoffeeIconHandle, CoffeeIconProps>(
   (
     {
       onMouseEnter,
@@ -151,4 +151,4 @@ const CoffeeIcon = forwardRef<CoffeeIconHandle, CoffeeIconProps>(
 )
 
 CoffeeIcon.displayName = "CoffeeIcon"
-export { CoffeeIcon }
+export { CoffeeIcon as HpxCoffeeIcon }

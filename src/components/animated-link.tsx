@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 /**
  * A text link whose underline draws in from the left on hover and focus, and retracts to the
@@ -34,4 +34,4 @@ function AnimatedLinkText({ className, ...props }: React.ComponentProps<"span">)
   )
 }
 
-export { AnimatedLink, AnimatedLinkText }
+export { AnimatedLink as HpxAnimatedLink, AnimatedLinkText as HpxAnimatedLinkText }

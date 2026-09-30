@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface DropletsIconHandle {
+export interface HpxDropletsIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface DropletsIconProps extends Omit<
   color?: string
 }
 
-const DropletsIcon = forwardRef<DropletsIconHandle, DropletsIconProps>(
+const DropletsIcon = forwardRef<HpxDropletsIconHandle, DropletsIconProps>(
   (
     {
       onMouseEnter,
@@ -141,4 +141,4 @@ const DropletsIcon = forwardRef<DropletsIconHandle, DropletsIconProps>(
 )
 
 DropletsIcon.displayName = "DropletsIcon"
-export { DropletsIcon }
+export { DropletsIcon as HpxDropletsIcon }

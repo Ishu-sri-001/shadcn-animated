@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Command as CommandPrimitive, useCommandState } from "cmdk"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   MotionConfig,
@@ -14,8 +14,8 @@ import {
 } from "motion/react"
 
 import {
-  InputGroup,
-  InputGroupAddon,
+  HpxInputGroup,
+  HpxInputGroupAddon,
 } from "@/components/ui/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
@@ -125,7 +125,7 @@ function Command({
   return (
     <CommandMotionContext.Provider value={motionProps}>
       <CommandPrimitive
-        data-slot="command"
+        data-hpx-slot="command"
         className={cn(
           "flex size-full flex-col overflow-hidden bg-popover p-1 text-popover-foreground",
           ROUNDED[motionProps.rounded],
@@ -183,7 +183,7 @@ function CommandDialog({
             {open && (
               <DialogPrimitive.Portal keepMounted>
                 <DialogPrimitive.Backdrop
-                  data-slot="command-overlay"
+                  data-hpx-slot="command-overlay"
                   render={
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -195,7 +195,7 @@ function CommandDialog({
                   className={cn("fixed inset-0 isolate z-50", BACKDROP[backdrop])}
                 />
                 <DialogPrimitive.Popup
-                  data-slot="command-dialog"
+                  data-hpx-slot="command-dialog"
                   render={
                     <motion.div
                       initial={from}
@@ -246,21 +246,21 @@ function CommandInput({
 
   return (
     <div
-      data-slot="command-input-wrapper"
+      data-hpx-slot="command-input-wrapper"
       className={plain ? "" : "p-2"}
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
     >
-      <InputGroup
+      <HpxInputGroup
         className={cn(
-          "shadow-none! *:data-[slot=input-group-addon]:pr-4!",
+          "shadow-none! *:data-[hpx-slot=input-group-addon]:pr-4!",
           plain
-            ? "h-14! rounded-none! border-0! bg-transparent! has-[[data-slot=input-group-control]:focus-visible]:ring-0!"
+            ? "h-14! rounded-none! border-0! bg-transparent! has-[[data-hpx-slot=input-group-control]:focus-visible]:ring-0!"
             : "h-12! rounded-lg! border-input/30 bg-input/30"
         )}
       >
         <CommandPrimitive.Input
-          data-slot="command-input"
+          data-hpx-slot="command-input"
           onFocus={(event) => {
             setFocused(true)
             onFocus?.(event)
@@ -276,7 +276,7 @@ function CommandInput({
           )}
           {...props}
         />
-        <InputGroupAddon align="inline-end">
+        <HpxInputGroupAddon align="inline-end">
           <motion.span
             className="flex"
             initial={false}
@@ -285,8 +285,8 @@ function CommandInput({
           >
             <SearchIcon className="size-5 shrink-0" />
           </motion.span>
-        </InputGroupAddon>
-      </InputGroup>
+        </HpxInputGroupAddon>
+      </HpxInputGroup>
     </div>
   )
 }
@@ -322,9 +322,9 @@ function CommandList({
     <CommandListContext.Provider value={listId}>
       <CommandPrimitive.List
         ref={list}
-        data-slot="command-list"
+        data-hpx-slot="command-list"
         className={cn(
-          "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+          "hpx-no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
           className
         )}
         {...props}
@@ -347,7 +347,7 @@ function CommandEmpty({
 
   return (
     <CommandPrimitive.Empty
-      data-slot="command-empty"
+      data-hpx-slot="command-empty"
       className={cn("py-6 text-center text-base", className)}
       {...props}
     />
@@ -360,7 +360,7 @@ function CommandGroup({
 }: React.ComponentProps<typeof CommandPrimitive.Group>) {
   return (
     <CommandPrimitive.Group
-      data-slot="command-group"
+      data-hpx-slot="command-group"
       className={cn(
         "p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-sm **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground",
         className
@@ -376,7 +376,7 @@ function CommandSeparator({
 }: React.ComponentProps<typeof CommandPrimitive.Separator>) {
   return (
     <CommandPrimitive.Separator
-      data-slot="command-separator"
+      data-hpx-slot="command-separator"
       className={cn("-mx-1 h-px bg-border", className)}
       {...props}
     />
@@ -389,8 +389,8 @@ const HOVER_BG: Record<CommandHoverColor, string> = {
 }
 
 const HOVER_TEXT: Record<CommandHoverColor, string> = {
-  muted: "data-selected:text-foreground",
-  primary: "data-selected:text-primary-foreground",
+  muted: "hpx-selected:text-foreground",
+  primary: "hpx-selected:text-primary-foreground",
 }
 
 function CommandItem({
@@ -412,13 +412,13 @@ function CommandItem({
   return (
     <CommandPrimitive.Item
       ref={setNode}
-      data-slot="command-item"
+      data-hpx-slot="command-item"
       className={cn(
         "group/command-item relative isolate flex cursor-default items-center gap-2 px-2 py-2 text-base outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         ROUNDED[rounded],
         itemHover !== "none" && "transition-colors duration-200 motion-reduce:transition-none",
-        itemHover === "none" ? "data-selected:bg-muted data-selected:text-foreground" : HOVER_TEXT[hoverColor],
-        itemHover === "none" && hoverColor === "primary" && "data-selected:bg-primary data-selected:text-primary-foreground",
+        itemHover === "none" ? "hpx-selected:bg-muted hpx-selected:text-foreground" : HOVER_TEXT[hoverColor],
+        itemHover === "none" && hoverColor === "primary" && "hpx-selected:bg-primary hpx-selected:text-primary-foreground",
         className
       )}
       {...props}
@@ -438,7 +438,7 @@ function CommandItem({
           aria-hidden
           className={cn(
             bg,
-            "origin-top scale-y-0 transition-transform duration-300 ease-out group-data-selected/command-item:scale-y-100 motion-reduce:transition-none"
+            "origin-top scale-y-0 transition-transform duration-300 ease-out group-hpx-selected/command-item:scale-y-100 motion-reduce:transition-none"
           )}
         />
       )}
@@ -449,13 +449,13 @@ function CommandItem({
         }
         return child
       }) : children}
-      <CheckIcon className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
+      <CheckIcon className="ml-auto opacity-0 group-has-data-[hpx-slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
   )
 }
 
 function CommandRollText({ children }: { children: string }) {
-  const roll = "block transition-transform duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-data-selected/command-item:-translate-y-full motion-reduce:transition-none"
+  const roll = "block transition-transform duration-400 ease-[cubic-bezier(0.33,1,0.68,1)] group-hpx-selected/command-item:-translate-y-full motion-reduce:transition-none"
   return (
     <span className="relative inline-block overflow-hidden align-bottom">
       <span className={roll}>{children}</span>
@@ -470,9 +470,9 @@ function CommandShortcut({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="command-shortcut"
+      data-hpx-slot="command-shortcut"
       className={cn(
-        "ml-auto text-sm tracking-widest text-muted-foreground group-data-selected/command-item:text-inherit",
+        "ml-auto text-sm tracking-widest text-muted-foreground group-hpx-selected/command-item:text-inherit",
         className
       )}
       {...props}
@@ -549,7 +549,7 @@ function CommandSearch({
       <MotionConfig reducedMotion="user">
         <div
           ref={root}
-          data-slot="command-search"
+          data-hpx-slot="command-search"
           onFocus={(event) => {
             if (event.target instanceof HTMLInputElement) setOpen(true)
           }}
@@ -600,7 +600,7 @@ function CommandSearch({
                   onPointerEnter={() => setTriggerHovered(true)}
                   onPointerLeave={() => setTriggerHovered(false)}
                 >
-                  <div className={cn("transition-opacity duration-200 motion-reduce:transition-none [&_[data-slot=input-group-addon]]:invisible", !open && "pointer-events-none opacity-0")} aria-hidden={!open}>
+                  <div className={cn("transition-opacity duration-200 motion-reduce:transition-none [&_[data-hpx-slot=input-group-addon]]:invisible", !open && "pointer-events-none opacity-0")} aria-hidden={!open}>
                     <CommandInput ref={inputRef} plain placeholder={placeholder} tabIndex={open ? 0 : -1} onFocus={() => setInputFocused(true)} onBlur={() => setInputFocused(false)} />
                   </div>
                   {!open && (
@@ -696,15 +696,15 @@ function CommandSearch({
 }
 
 export {
-  Command,
-  CommandDialog,
-  CommandSearch,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandShortcut,
-  CommandSeparator,
+  Command as HpxCommand,
+  CommandDialog as HpxCommandDialog,
+  CommandSearch as HpxCommandSearch,
+  CommandInput as HpxCommandInput,
+  CommandList as HpxCommandList,
+  CommandEmpty as HpxCommandEmpty,
+  CommandGroup as HpxCommandGroup,
+  CommandItem as HpxCommandItem,
+  CommandShortcut as HpxCommandShortcut,
+  CommandSeparator as HpxCommandSeparator,
 }
-export type { CommandRounded, CommandBackdrop, CommandDropdown, CommandItemHover, CommandHoverColor }
+export type { CommandRounded as HpxCommandRounded, CommandBackdrop as HpxCommandBackdrop, CommandDropdown as HpxCommandDropdown, CommandItemHover as HpxCommandItemHover, CommandHoverColor as HpxCommandHoverColor }

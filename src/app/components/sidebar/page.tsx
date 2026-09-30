@@ -1,5 +1,5 @@
-import { PageContent } from "./page-content"
+import { HpxPageContent } from "./page-content"
 
 export default function SidebarPage() {
-  return <PageContent />
+  return <HpxPageContent />
 }

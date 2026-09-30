@@ -1,16 +1,16 @@
 "use client"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsPanels,
-  TabsTrigger,
-  type TabsActiveColor,
-  type TabsContentMotion,
-  type TabsIndicator,
-  type TabsRounded,
+  HpxTabs,
+  HpxTabsContent,
+  HpxTabsList,
+  HpxTabsPanels,
+  HpxTabsTrigger,
+  type HpxTabsActiveColor,
+  type HpxTabsContentMotion,
+  type HpxTabsIndicator,
+  type HpxTabsRounded,
 } from "@/components/ui/tabs"
 
 const tabs = [
@@ -138,42 +138,42 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function TabsDemo() {
-  const panel = useControls(controls)
+export function HpxTabsDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
     <div className="flex flex-col gap-3">
       {/* Top-aligned, so the tabs stay put and only the content below moves as its height changes */}
       <div className="flex min-h-[60vh] flex-col justify-start rounded-lg border px-[4vw] py-8">
-        <Tabs
+        <HpxTabs
           defaultValue="overview"
-          indicator={values.indicator as TabsIndicator}
-          content={values.content as TabsContentMotion}
+          indicator={values.indicator as HpxTabsIndicator}
+          content={values.content as HpxTabsContentMotion}
           distance={values.distance}
           duration={values.duration}
           fadeDuration={values.fadeDuration}
           bounce={values.bounce}
-          activeColor={values.activeColor as TabsActiveColor}
+          activeColor={values.activeColor as HpxTabsActiveColor}
           smoothHeight={values.smoothHeight}
           hover={values.hover}
           divider={values.divider}
           listBorder={values.listBorder}
           panelBorder={values.panelBorder}
-          rounded={values.rounded as TabsRounded}
+          rounded={values.rounded as HpxTabsRounded}
         >
-          <TabsList>
+          <HpxTabsList>
             {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
+              <HpxTabsTrigger key={tab.value} value={tab.value}>
                 {tab.label}
-              </TabsTrigger>
+              </HpxTabsTrigger>
             ))}
-          </TabsList>
-          <TabsPanels>
+          </HpxTabsList>
+          <HpxTabsPanels>
             {tabs.map((tab) => (
-              <TabsContent key={tab.value} value={tab.value}>
+              <HpxTabsContent key={tab.value} value={tab.value}>
                 <h3 className="font-semibold">{tab.title}</h3>
                 <p className="text-muted-foreground">{tab.body}</p>
                 {tab.extra && (
@@ -185,16 +185,16 @@ export function TabsDemo() {
                     ))}
                   </ul>
                 )}
-              </TabsContent>
+              </HpxTabsContent>
             ))}
-          </TabsPanels>
-        </Tabs>
+          </HpxTabsPanels>
+        </HpxTabs>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: click tabs left and right to see the content travel the way you moved. Arrow keys switch tabs too.
       </p>
 
-      <ControlsPanel title="Tabs" {...panel} />
+      <HpxControlsPanel title="Tabs" {...panel} />
     </div>
   )
 }

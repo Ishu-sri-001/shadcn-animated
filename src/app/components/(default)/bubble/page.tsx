@@ -1,4 +1,4 @@
-import { ChatDemo } from "./chat-demo"
+import { HpxChatDemo } from "./chat-demo"
 
 export default function BubblePage() {
   return (
@@ -10,7 +10,7 @@ export default function BubblePage() {
         </p>
       </div>
 
-      <ChatDemo />
+      <HpxChatDemo />
     </div>
   )
 }

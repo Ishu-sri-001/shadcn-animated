@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Navbar } from "@/components/navbar";
-import { ThemeProvider } from "@/components/theme-provider";
+import { HpxNavbar } from "@/components/navbar";
+import { HpxThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "shadcn-animated",
-  description: "shadcn/ui components with Motion and GSAP animations",
+  title: "Hyperiux Animated",
+  description: "Hyperiux components with Motion and GSAP animations",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -27,15 +27,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider
+        <HpxThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          <HpxNavbar />
           {children}
-        </ThemeProvider>
+        </HpxThemeProvider>
       </body>
     </html>
   );

@@ -17,7 +17,7 @@ import {
   type HTMLAttributes,
 } from "react"
 
-export interface UtensilsIconHandle {
+export interface HpxUtensilsIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -38,7 +38,7 @@ interface UtensilsIconProps extends Omit<
   color?: string
 }
 
-const UtensilsIcon = forwardRef<UtensilsIconHandle, UtensilsIconProps>(
+const UtensilsIcon = forwardRef<HpxUtensilsIconHandle, UtensilsIconProps>(
   (
     {
       onMouseEnter,
@@ -168,4 +168,4 @@ const UtensilsIcon = forwardRef<UtensilsIconHandle, UtensilsIconProps>(
 )
 
 UtensilsIcon.displayName = "UtensilsIcon"
-export { UtensilsIcon }
+export { UtensilsIcon as HpxUtensilsIcon }

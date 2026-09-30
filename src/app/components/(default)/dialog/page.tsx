@@ -1,4 +1,4 @@
-import { DialogDemo } from "./dialog-demo"
+import { HpxDialogDemo } from "./dialog-demo"
 
 export default function DialogPage() {
   return (
@@ -10,7 +10,7 @@ export default function DialogPage() {
         </p>
       </div>
 
-      <DialogDemo />
+      <HpxDialogDemo />
     </div>
   )
 }

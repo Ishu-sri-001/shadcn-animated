@@ -1,4 +1,4 @@
-import { RadioDemo } from "./radio-demo"
+import { HpxRadioDemo } from "./radio-demo"
 
 export default function RadioPage() {
   return (
@@ -10,7 +10,7 @@ export default function RadioPage() {
         </p>
       </div>
 
-      <RadioDemo />
+      <HpxRadioDemo />
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { Menubar as MenubarPrimitive } from "@base-ui/react/menubar"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   animate,
   AnimatePresence,
@@ -16,29 +16,29 @@ import {
 } from "motion/react"
 
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuItemTitle,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-  DrawnCheck,
-  MorphChevron,
-  itemVariants,
-  panelVariants,
-  unscaledRect,
-  useDropdownMenu,
-  type DropdownMenuHighlight,
-  type DropdownMenuHighlightColor,
-  type DropdownMenuIndicator,
+  HpxDropdownMenu,
+  HpxDropdownMenuCheckboxItem,
+  HpxDropdownMenuGroup,
+  HpxDropdownMenuItem,
+  HpxDropdownMenuItemTitle,
+  HpxDropdownMenuLabel,
+  HpxDropdownMenuPortal,
+  HpxDropdownMenuRadioGroup,
+  HpxDropdownMenuRadioItem,
+  HpxDropdownMenuShortcut,
+  HpxDropdownMenuSub,
+  HpxDropdownMenuSubContent,
+  HpxDropdownMenuSubTrigger,
+  HpxDropdownMenuTrigger,
+  HpxDrawnCheck,
+  HpxMorphChevron,
+  hpxItemVariants,
+  hpxPanelVariants,
+  hpxUnscaledRect,
+  useHpxDropdownMenu,
+  type HpxDropdownMenuHighlight,
+  type HpxDropdownMenuHighlightColor,
+  type HpxDropdownMenuIndicator,
 } from "@/components/ui/dropdown-menu"
 
 type MenubarAnimation = "collapse" | "scale" | "slide" | "reveal"
@@ -54,10 +54,10 @@ type MenubarMotion = {
   delay: number
   exitFast: boolean
   triggerHighlight: MenubarTriggerHighlight
-  triggerHighlightColor: DropdownMenuHighlightColor
-  itemHighlight: DropdownMenuHighlight
-  itemHighlightColor: DropdownMenuHighlightColor
-  indicator: DropdownMenuIndicator
+  triggerHighlightColor: HpxDropdownMenuHighlightColor
+  itemHighlight: HpxDropdownMenuHighlight
+  itemHighlightColor: HpxDropdownMenuHighlightColor
+  indicator: HpxDropdownMenuIndicator
   textRoll: boolean
   triggerTextRoll: boolean
   pressFeedback: boolean
@@ -125,12 +125,12 @@ const INNER_ROUNDED: Record<MenubarRounded, string> = {
 }
 
 const ITEM_ROUNDED: Record<MenubarRounded, string> = {
-  none: "**:data-[slot$=-item]:rounded-none",
-  sm: "**:data-[slot$=-item]:rounded-xs",
-  md: "**:data-[slot$=-item]:rounded-sm",
-  lg: "**:data-[slot$=-item]:rounded-md",
-  xl: "**:data-[slot$=-item]:rounded-lg",
-  "2xl": "**:data-[slot$=-item]:rounded-xl",
+  none: "**:data-[hpx-slot$=-item]:rounded-none",
+  sm: "**:data-[hpx-slot$=-item]:rounded-xs",
+  md: "**:data-[hpx-slot$=-item]:rounded-sm",
+  lg: "**:data-[hpx-slot$=-item]:rounded-md",
+  xl: "**:data-[hpx-slot$=-item]:rounded-lg",
+  "2xl": "**:data-[hpx-slot$=-item]:rounded-xl",
 }
 
 type PanelBox = { width: number; height: number; left: number; el: HTMLElement }
@@ -325,7 +325,7 @@ function Menubar({
     <MenubarContext.Provider value={context}>
       <MenubarPrimitive
         ref={root}
-        data-slot="menubar"
+        data-hpx-slot="menubar"
         className={cn(
           "flex items-center border bg-background max-[1025px]:hidden",
           BAR_SIZE[size],
@@ -341,7 +341,7 @@ function Menubar({
   )
 }
 
-function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typeof DropdownMenu>) {
+function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typeof HpxDropdownMenu>) {
   const { motion: options, onMenuOpenChange } = useMenubar()
   const menu = React.useId()
   const [hoverOpen, setHoverOpen] = React.useState(props.defaultOpen ?? false)
@@ -365,8 +365,8 @@ function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typ
   return (
     <MenubarMenuContext.Provider value={menu}>
     <MenubarHoverContext.Provider value={hover}>
-      <DropdownMenu
-        data-slot="menubar-menu"
+      <HpxDropdownMenu
+        data-hpx-slot="menubar-menu"
         open={hoverOpen}
         animation={options.animation}
         duration={options.duration}
@@ -390,15 +390,15 @@ function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typ
   )
 }
 
-function DesktopMenubarGroup({ ...props }: React.ComponentProps<typeof DropdownMenuGroup>) {
-  return <DropdownMenuGroup data-slot="menubar-group" {...props} />
+function DesktopMenubarGroup({ ...props }: React.ComponentProps<typeof HpxDropdownMenuGroup>) {
+  return <HpxDropdownMenuGroup data-hpx-slot="menubar-group" {...props} />
 }
 
-function MenubarPortal({ ...props }: React.ComponentProps<typeof DropdownMenuPortal>) {
-  return <DropdownMenuPortal data-slot="menubar-portal" {...props} />
+function MenubarPortal({ ...props }: React.ComponentProps<typeof HpxDropdownMenuPortal>) {
+  return <HpxDropdownMenuPortal data-hpx-slot="menubar-portal" {...props} />
 }
 
-const TRIGGER_FILL: Record<DropdownMenuHighlightColor, string> = {
+const TRIGGER_FILL: Record<HpxDropdownMenuHighlightColor, string> = {
   primary: "bg-primary",
   muted: "bg-muted",
 }
@@ -438,7 +438,7 @@ function DesktopMenubarTrigger({
   onFocus,
   onBlur,
   ...props
-}: React.ComponentProps<typeof DropdownMenuTrigger> & {
+}: React.ComponentProps<typeof HpxDropdownMenuTrigger> & {
   chevron?: boolean
 }) {
   const { id, motion: options, active, highlightOn, highlightVisible, setHovered } = useMenubar()
@@ -451,8 +451,8 @@ function DesktopMenubarTrigger({
   const lit = highlightOn === menu && highlightVisible
 
   return (
-    <DropdownMenuTrigger
-      data-slot="menubar-trigger"
+    <HpxDropdownMenuTrigger
+      data-hpx-slot="menubar-trigger"
       data-menubar-menu={menu}
       className={cn(
         "relative isolate flex items-center gap-2 font-medium transition-colors outline-hidden select-none",
@@ -461,7 +461,7 @@ function DesktopMenubarTrigger({
         marker === "pill" &&
           options.triggerHighlightColor === "primary" &&
           lit &&
-          "text-primary-foreground **:data-[slot=menubar-trigger-icon]:text-primary-foreground/70",
+          "text-primary-foreground **:data-[hpx-slot=menubar-trigger-icon]:text-primary-foreground/70",
         className
       )}
       onPointerEnter={(event) => {
@@ -491,8 +491,8 @@ function DesktopMenubarTrigger({
         children
       )}
       {showChevron && (
-        <MorphChevron
-          data-slot="menubar-trigger-icon"
+        <HpxMorphChevron
+          data-hpx-slot="menubar-trigger-icon"
           open={open}
           duration={options.duration}
           className="size-3 text-muted-foreground"
@@ -521,7 +521,7 @@ function DesktopMenubarTrigger({
           }}
         />
       )}
-    </DropdownMenuTrigger>
+    </HpxDropdownMenuTrigger>
   )
 }
 
@@ -631,10 +631,10 @@ function MorphBox({
   return (
     <div
       ref={node}
-      data-slot="menubar-surface"
+      data-hpx-slot="menubar-surface"
       className={cn("relative max-h-(--available-height) overflow-hidden", surface)}
     >
-      <div data-slot="menubar-surface-content" className="w-max min-w-full">
+      <div data-hpx-slot="menubar-surface-content" className="w-max min-w-full">
         {children}
       </div>
     </div>
@@ -652,13 +652,13 @@ function slideOutPrevious(
   options: Pick<MenubarMotion, "contentSwitch" | "contentShift">
 ) {
   if (options.contentSwitch === "none" || direction === 0) return null
-  const source = previous.querySelector<HTMLElement>(":scope > [data-slot=menubar-surface-content]")
+  const source = previous.querySelector<HTMLElement>(":scope > [data-hpx-slot=menubar-surface-content]")
   if (!source) return null
 
   const boxRect = previous.getBoundingClientRect()
   const sourceRect = source.getBoundingClientRect()
   const ghost = source.cloneNode(true) as HTMLElement
-  ghost.removeAttribute("data-slot")
+  ghost.removeAttribute("data-hpx-slot")
   ghost.setAttribute("aria-hidden", "true")
   ghost.inert = true
   Object.assign(ghost.style, {
@@ -704,7 +704,7 @@ function DesktopMenubarContent({
   ...props
 }: MenuPrimitive.Popup.Props &
   Pick<MenuPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
-  const dropdown = useDropdownMenu()
+  const dropdown = useHpxDropdownMenu()
   const hover = React.useContext(MenubarHoverContext)
   const menubar = useMenubar()
   const menu = React.useContext(MenubarMenuContext)
@@ -714,13 +714,13 @@ function DesktopMenubarContent({
   const anchor = React.useCallback(() => {
     const trigger = triggerRef.current
     if (!trigger) return null
-    return { getBoundingClientRect: () => unscaledRect(trigger), contextElement: trigger }
+    return { getBoundingClientRect: () => hpxUnscaledRect(trigger), contextElement: trigger }
   }, [triggerRef])
   // Popup isn't positioned yet; use trigger
   const restLeft = React.useCallback(() => {
     const trigger = triggerRef.current
     const offset = typeof alignOffset === "number" ? alignOffset : 0
-    return trigger ? unscaledRect(trigger).left + offset : 0
+    return trigger ? hpxUnscaledRect(trigger).left + offset : 0
   }, [triggerRef, alignOffset])
 
   const glide = options.switchAnimation === "glide"
@@ -734,7 +734,7 @@ function DesktopMenubarContent({
   )
 
   const variantsFor = (panelSide: string): Variants => {
-    const base = panelVariants(dropdown, panelSide)
+    const base = hpxPanelVariants(dropdown, panelSide)
     if (!glide) return base
     const panel = options.animation === "collapse" ? clipCollapse(base, panelSide) : base
     return {
@@ -755,7 +755,7 @@ function DesktopMenubarContent({
         sideOffset={sideOffset}
       >
         <MenuPrimitive.Popup
-          data-slot="menubar-content"
+          data-hpx-slot="menubar-content"
           className={cn(
             "z-50 w-max origin-(--transform-origin) outline-none",
             !glide &&
@@ -763,7 +763,7 @@ function DesktopMenubarContent({
                 "max-h-(--available-height) overflow-x-hidden overflow-y-auto",
                 surface
               ),
-            "**:data-[slot=menubar-group]:flex **:data-[slot=menubar-group]:flex-col **:data-[slot=menubar-group]:gap-0.5",
+            "**:data-[hpx-slot=menubar-group]:flex **:data-[hpx-slot=menubar-group]:flex-col **:data-[hpx-slot=menubar-group]:gap-0.5",
             options.animation === "collapse" && !glide && "overflow-hidden",
             ITEM_ROUNDED[options.rounded],
             className
@@ -806,7 +806,7 @@ function DesktopMenubarContent({
 function MenubarColumns({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="menubar-columns"
+      data-hpx-slot="menubar-columns"
       className={cn(
         "grid auto-cols-fr grid-flow-col gap-6 max-[1025px]:grid-flow-row max-[1025px]:gap-0.5",
         className
@@ -822,7 +822,7 @@ function DesktopMenubarItem({
   description,
   children,
   ...props
-}: React.ComponentProps<typeof DropdownMenuItem> & {
+}: React.ComponentProps<typeof HpxDropdownMenuItem> & {
   icon?: React.ReactNode
   description?: React.ReactNode
 }) {
@@ -831,15 +831,15 @@ function DesktopMenubarItem({
   const showDescription = options.descriptions && description
   const heading = React.Children.map(children, (child) =>
     typeof child === "string" && child.trim() ? (
-      <DropdownMenuItemTitle>{child.trim()}</DropdownMenuItemTitle>
+      <HpxDropdownMenuItemTitle>{child.trim()}</HpxDropdownMenuItemTitle>
     ) : (
       child
     )
   )
 
   return (
-    <DropdownMenuItem
-      data-slot="menubar-item"
+    <HpxDropdownMenuItem
+      data-hpx-slot="menubar-item"
       className={cn(
         "group/menubar-item cursor-pointer gap-2.5",
         PANEL_ITEM_SIZE[options.size],
@@ -849,7 +849,7 @@ function DesktopMenubarItem({
     >
       {showIcon && (
         <span
-          data-slot="menubar-item-icon"
+          data-hpx-slot="menubar-item-icon"
           className="flex shrink-0 items-center justify-center text-muted-foreground group-focus/menubar-item:text-current group-data-pill/menubar-item:text-current [&_svg:not([class*='size-'])]:size-4"
         >
           {icon}
@@ -859,7 +859,7 @@ function DesktopMenubarItem({
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="inline-flex items-baseline gap-1.5">{heading}</span>
           <span
-            data-slot="menubar-item-description"
+            data-hpx-slot="menubar-item-description"
             className="block text-xs text-muted-foreground group-focus/menubar-item:text-current/70 group-data-pill/menubar-item:text-current/70"
           >
             {description}
@@ -868,48 +868,48 @@ function DesktopMenubarItem({
       ) : (
         heading
       )}
-    </DropdownMenuItem>
+    </HpxDropdownMenuItem>
   )
 }
 
 function DesktopMenubarCheckboxItem({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuCheckboxItem>) {
+}: React.ComponentProps<typeof HpxDropdownMenuCheckboxItem>) {
   const { motion: options } = useMenubar()
 
   return (
-    <DropdownMenuCheckboxItem
-      data-slot="menubar-checkbox-item"
+    <HpxDropdownMenuCheckboxItem
+      data-hpx-slot="menubar-checkbox-item"
       className={cn("cursor-pointer", PANEL_ITEM_SIZE[options.size], className)}
       {...props}
     />
   )
 }
 
-function DesktopMenubarRadioGroup({ ...props }: React.ComponentProps<typeof DropdownMenuRadioGroup>) {
-  return <DropdownMenuRadioGroup data-slot="menubar-radio-group" {...props} />
+function DesktopMenubarRadioGroup({ ...props }: React.ComponentProps<typeof HpxDropdownMenuRadioGroup>) {
+  return <HpxDropdownMenuRadioGroup data-hpx-slot="menubar-radio-group" {...props} />
 }
 
 function DesktopMenubarRadioItem({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuRadioItem>) {
+}: React.ComponentProps<typeof HpxDropdownMenuRadioItem>) {
   const { motion: options } = useMenubar()
 
   return (
-    <DropdownMenuRadioItem
-      data-slot="menubar-radio-item"
+    <HpxDropdownMenuRadioItem
+      data-hpx-slot="menubar-radio-item"
       className={cn("cursor-pointer", PANEL_ITEM_SIZE[options.size], className)}
       {...props}
     />
   )
 }
 
-function DesktopMenubarLabel({ className, ...props }: React.ComponentProps<typeof DropdownMenuLabel>) {
+function DesktopMenubarLabel({ className, ...props }: React.ComponentProps<typeof HpxDropdownMenuLabel>) {
   return (
-    <DropdownMenuLabel
-      data-slot="menubar-label"
+    <HpxDropdownMenuLabel
+      data-hpx-slot="menubar-label"
       className={cn("px-1.5 py-1 text-xs font-medium", className)}
       {...props}
     />
@@ -917,14 +917,14 @@ function DesktopMenubarLabel({ className, ...props }: React.ComponentProps<typeo
 }
 
 function DesktopMenubarSeparator({ className, ...props }: MenuPrimitive.Separator.Props) {
-  const dropdown = useDropdownMenu()
+  const dropdown = useHpxDropdownMenu()
 
   return (
     <MenuPrimitive.Separator
-      data-slot="menubar-separator"
+      data-hpx-slot="menubar-separator"
       className={cn("-mx-1 my-1 h-px bg-border", className)}
       // Staggers in with the items around it.
-      render={<motion.div variants={itemVariants(dropdown)} />}
+      render={<motion.div variants={hpxItemVariants(dropdown)} />}
       {...props}
     />
   )
@@ -933,29 +933,29 @@ function DesktopMenubarSeparator({ className, ...props }: MenuPrimitive.Separato
 function DesktopMenubarShortcut({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuShortcut>) {
+}: React.ComponentProps<typeof HpxDropdownMenuShortcut>) {
   return (
-    <DropdownMenuShortcut
-      data-slot="menubar-shortcut"
+    <HpxDropdownMenuShortcut
+      data-hpx-slot="menubar-shortcut"
       className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
   )
 }
 
-function DesktopMenubarSub({ ...props }: React.ComponentProps<typeof DropdownMenuSub>) {
-  return <DropdownMenuSub data-slot="menubar-sub" {...props} />
+function DesktopMenubarSub({ ...props }: React.ComponentProps<typeof HpxDropdownMenuSub>) {
+  return <HpxDropdownMenuSub data-hpx-slot="menubar-sub" {...props} />
 }
 
 function DesktopMenubarSubTrigger({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuSubTrigger>) {
+}: React.ComponentProps<typeof HpxDropdownMenuSubTrigger>) {
   const { motion: options } = useMenubar()
 
   return (
-    <DropdownMenuSubTrigger
-      data-slot="menubar-sub-trigger"
+    <HpxDropdownMenuSubTrigger
+      data-hpx-slot="menubar-sub-trigger"
       className={cn("cursor-pointer", PANEL_ITEM_SIZE[options.size], className)}
       {...props}
     />
@@ -965,10 +965,10 @@ function DesktopMenubarSubTrigger({
 function DesktopMenubarSubContent({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuSubContent>) {
+}: React.ComponentProps<typeof HpxDropdownMenuSubContent>) {
   return (
-    <DropdownMenuSubContent
-      data-slot="menubar-sub-content"
+    <HpxDropdownMenuSubContent
+      data-hpx-slot="menubar-sub-content"
       // Keeps the submenu clear of the parent panel
       sideOffset={24}
       className={cn("min-w-40", className)}
@@ -1050,7 +1050,7 @@ function MobileMenubar({ children }: { children: React.ReactNode }) {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={root} data-slot="menubar-mobile" className="relative hidden max-[1025px]:block">
+      <div ref={root} data-hpx-slot="menubar-mobile" className="relative hidden max-[1025px]:block">
         <button
           type="button"
           aria-expanded={open}
@@ -1066,7 +1066,7 @@ function MobileMenubar({ children }: { children: React.ReactNode }) {
             <motion.nav
               id={id}
               aria-label="Menu"
-              data-slot="menubar-mobile-panel"
+              data-hpx-slot="menubar-mobile-panel"
               className="absolute top-full left-1/2 z-50 my-2 flex h-[60vh] w-[45vw] -translate-x-1/2 flex-col gap-0.5 overflow-y-auto overscroll-contain rounded-xl bg-popover p-2 text-popover-foreground shadow-md ring-1 ring-foreground/10 max-md:w-[90vw]"
               initial="closed"
               animate="open"
@@ -1099,7 +1099,7 @@ function MobileSection({ nested, children }: { nested?: boolean; children?: Reac
   return (
     <MobileSectionContext.Provider value={value}>
       <motion.div
-        data-slot="menubar-mobile-section"
+        data-hpx-slot="menubar-mobile-section"
         className="flex flex-col"
         variants={nested ? undefined : { open: { opacity: 1, y: 0 }, closed: { opacity: 0, y: 6 } }}
       >
@@ -1124,7 +1124,7 @@ function MobileSectionTrigger({ nested, children }: { nested?: boolean; children
       )}
     >
       {children}
-      <MorphChevron open={open} className="size-3 text-muted-foreground" />
+      <HpxMorphChevron open={open} className="size-3 text-muted-foreground" />
     </button>
   )
 }
@@ -1171,7 +1171,7 @@ function MobileMenubarItem({
   return (
     <button
       type="button"
-      data-slot="menubar-item"
+      data-hpx-slot="menubar-item"
       disabled={disabled}
       onClick={(event) => {
         onClick?.(event)
@@ -1213,14 +1213,14 @@ function MobileMenubarCheckboxItem({
       type="button"
       role="checkbox"
       aria-checked={!!checked}
-      data-slot="menubar-checkbox-item"
+      data-hpx-slot="menubar-checkbox-item"
       disabled={disabled}
       onClick={() => onCheckedChange?.(!checked, undefined as never)}
       className={cn(MOBILE_ROW, typeof className === "string" && className)}
     >
       {children}
       <span aria-hidden className="ml-auto flex size-4 shrink-0 items-center justify-center">
-        <DrawnCheck checked={!!checked} />
+        <HpxDrawnCheck checked={!!checked} />
       </span>
     </button>
   )
@@ -1257,14 +1257,14 @@ function MobileMenubarRadioItem({
       type="button"
       role="radio"
       aria-checked={checked}
-      data-slot="menubar-radio-item"
+      data-hpx-slot="menubar-radio-item"
       disabled={disabled}
       onClick={() => group?.onValueChange?.(value, undefined as never)}
       className={cn(MOBILE_ROW, typeof className === "string" && className)}
     >
       {children}
       <span aria-hidden className="ml-auto flex size-4 shrink-0 items-center justify-center">
-        <DrawnCheck checked={checked} />
+        <HpxDrawnCheck checked={checked} />
       </span>
     </button>
   )
@@ -1363,30 +1363,30 @@ const MenubarSubContent = responsive(
 )
 
 export {
-  Menubar,
-  MenubarPortal,
-  MenubarMenu,
-  MenubarTrigger,
-  MenubarContent,
-  MenubarGroup,
-  MenubarColumns,
-  MenubarSeparator,
-  MenubarLabel,
-  MenubarItem,
-  MenubarShortcut,
-  MenubarCheckboxItem,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSub,
-  MenubarSubTrigger,
-  MenubarSubContent,
+  Menubar as HpxMenubar,
+  MenubarPortal as HpxMenubarPortal,
+  MenubarMenu as HpxMenubarMenu,
+  MenubarTrigger as HpxMenubarTrigger,
+  MenubarContent as HpxMenubarContent,
+  MenubarGroup as HpxMenubarGroup,
+  MenubarColumns as HpxMenubarColumns,
+  MenubarSeparator as HpxMenubarSeparator,
+  MenubarLabel as HpxMenubarLabel,
+  MenubarItem as HpxMenubarItem,
+  MenubarShortcut as HpxMenubarShortcut,
+  MenubarCheckboxItem as HpxMenubarCheckboxItem,
+  MenubarRadioGroup as HpxMenubarRadioGroup,
+  MenubarRadioItem as HpxMenubarRadioItem,
+  MenubarSub as HpxMenubarSub,
+  MenubarSubTrigger as HpxMenubarSubTrigger,
+  MenubarSubContent as HpxMenubarSubContent,
 }
 export type {
-  MenubarAnimation,
-  MenubarSwitch,
-  MenubarTriggerHighlight,
-  MenubarRounded,
-  MenubarSize,
-  MenubarContentSwitch,
-  MenubarContentShift,
+  MenubarAnimation as HpxMenubarAnimation,
+  MenubarSwitch as HpxMenubarSwitch,
+  MenubarTriggerHighlight as HpxMenubarTriggerHighlight,
+  MenubarRounded as HpxMenubarRounded,
+  MenubarSize as HpxMenubarSize,
+  MenubarContentSwitch as HpxMenubarContentSwitch,
+  MenubarContentShift as HpxMenubarContentShift,
 }

@@ -24,36 +24,36 @@ import {
   UndoIcon,
 } from "lucide-react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Menubar,
-  MenubarCheckboxItem,
-  MenubarColumns,
-  MenubarContent,
-  MenubarGroup,
-  MenubarItem,
-  MenubarLabel,
-  MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarTrigger,
-  type MenubarAnimation,
-  type MenubarContentShift,
-  type MenubarContentSwitch,
-  type MenubarRounded,
-  type MenubarSize,
-  type MenubarSwitch,
-  type MenubarTriggerHighlight,
+  HpxMenubar,
+  HpxMenubarCheckboxItem,
+  HpxMenubarColumns,
+  HpxMenubarContent,
+  HpxMenubarGroup,
+  HpxMenubarItem,
+  HpxMenubarLabel,
+  HpxMenubarMenu,
+  HpxMenubarRadioGroup,
+  HpxMenubarRadioItem,
+  HpxMenubarSeparator,
+  HpxMenubarShortcut,
+  HpxMenubarSub,
+  HpxMenubarSubContent,
+  HpxMenubarSubTrigger,
+  HpxMenubarTrigger,
+  type HpxMenubarAnimation,
+  type HpxMenubarContentShift,
+  type HpxMenubarContentSwitch,
+  type HpxMenubarRounded,
+  type HpxMenubarSize,
+  type HpxMenubarSwitch,
+  type HpxMenubarTriggerHighlight,
 } from "@/components/ui/menubar"
 import type {
-  DropdownMenuHighlight,
-  DropdownMenuHighlightColor,
-  DropdownMenuIndicator,
+  HpxDropdownMenuHighlight,
+  HpxDropdownMenuHighlightColor,
+  HpxDropdownMenuIndicator,
 } from "@/components/ui/dropdown-menu"
 
 const controls = {
@@ -227,10 +227,10 @@ const controls = {
       { label: "2xl", value: "2xl" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function MenubarDemo() {
-  const panel = useControls(controls)
+export function HpxMenubarDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [showRatio, setShowRatio] = React.useState(true)
   const [showTimer, setShowTimer] = React.useState(true)
@@ -241,181 +241,181 @@ export function MenubarDemo() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[50vh] flex-col items-center gap-[3vw] py-[4vw] max-md:gap-[6vw]">
-        <Menubar
-          animation={values.animation as MenubarAnimation}
-          switchAnimation={values.switchAnimation as MenubarSwitch}
+        <HpxMenubar
+          animation={values.animation as HpxMenubarAnimation}
+          switchAnimation={values.switchAnimation as HpxMenubarSwitch}
           exitFast={values.exitFast}
           duration={values.duration}
           delay={values.delay}
           stagger={values.stagger}
-          triggerHighlight={values.triggerHighlight as MenubarTriggerHighlight}
+          triggerHighlight={values.triggerHighlight as HpxMenubarTriggerHighlight}
           pressFeedback={values.pressFeedback}
           openOnClick={values.openOnClick}
-          itemHighlight={values.itemHighlight as DropdownMenuHighlight}
-          itemHighlightColor={values.itemHighlightColor as DropdownMenuHighlightColor}
-          triggerHighlightColor={values.triggerHighlightColor as DropdownMenuHighlightColor}
-          indicator={values.indicator as DropdownMenuIndicator}
+          itemHighlight={values.itemHighlight as HpxDropdownMenuHighlight}
+          itemHighlightColor={values.itemHighlightColor as HpxDropdownMenuHighlightColor}
+          triggerHighlightColor={values.triggerHighlightColor as HpxDropdownMenuHighlightColor}
+          indicator={values.indicator as HpxDropdownMenuIndicator}
           textRoll={values.textRoll}
           triggerTextRoll={values.triggerTextRoll}
-          contentSwitch={values.contentSwitch as MenubarContentSwitch}
-          contentShift={values.contentShift as MenubarContentShift}
+          contentSwitch={values.contentSwitch as HpxMenubarContentSwitch}
+          contentShift={values.contentShift as HpxMenubarContentShift}
           chevrons={values.chevrons}
           icons={values.icons}
           descriptions={values.descriptions}
-          size={values.size as MenubarSize}
-          rounded={values.rounded as MenubarRounded}
+          size={values.size as HpxMenubarSize}
+          rounded={values.rounded as HpxMenubarRounded}
         >
-          <MenubarMenu>
-            <MenubarTrigger>File</MenubarTrigger>
-            <MenubarContent>
-              <MenubarGroup>
-                <MenubarLabel>Start</MenubarLabel>
-                <MenubarItem
+          <HpxMenubarMenu>
+            <HpxMenubarTrigger>File</HpxMenubarTrigger>
+            <HpxMenubarContent>
+              <HpxMenubarGroup>
+                <HpxMenubarLabel>Start</HpxMenubarLabel>
+                <HpxMenubarItem
                   icon={<FilePlusIcon />}
                   description="A blank recipe, ready to dial in."
                 >
-                  New brew <MenubarShortcut>⌘N</MenubarShortcut>
-                </MenubarItem>
-                <MenubarItem
+                  New brew <HpxMenubarShortcut>⌘N</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarItem
                   icon={<CopyIcon />}
                   description="Copy this recipe and tweak it."
                 >
-                  Duplicate <MenubarShortcut>⌘D</MenubarShortcut>
-                </MenubarItem>
-                <MenubarItem
+                  Duplicate <HpxMenubarShortcut>⌘D</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarItem
                   icon={<FolderOpenIcon />}
                   description="Browse everything you've saved."
                 >
-                  Open recent <MenubarShortcut>⌘O</MenubarShortcut>
-                </MenubarItem>
-                <MenubarSub>
-                  <MenubarSubTrigger>Export</MenubarSubTrigger>
-                  <MenubarSubContent>
-                    <MenubarItem icon={<FileTextIcon />}>As a recipe card</MenubarItem>
-                    <MenubarItem icon={<TableIcon />}>As a spreadsheet</MenubarItem>
-                    <MenubarItem icon={<FileIcon />}>As plain text</MenubarItem>
-                  </MenubarSubContent>
-                </MenubarSub>
-              </MenubarGroup>
-              <MenubarSeparator />
-              <MenubarGroup>
-                <MenubarItem
+                  Open recent <HpxMenubarShortcut>⌘O</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarSub>
+                  <HpxMenubarSubTrigger>Export</HpxMenubarSubTrigger>
+                  <HpxMenubarSubContent>
+                    <HpxMenubarItem icon={<FileTextIcon />}>As a recipe card</HpxMenubarItem>
+                    <HpxMenubarItem icon={<TableIcon />}>As a spreadsheet</HpxMenubarItem>
+                    <HpxMenubarItem icon={<FileIcon />}>As plain text</HpxMenubarItem>
+                  </HpxMenubarSubContent>
+                </HpxMenubarSub>
+              </HpxMenubarGroup>
+              <HpxMenubarSeparator />
+              <HpxMenubarGroup>
+                <HpxMenubarItem
                   icon={<ShareIcon />}
                   description="Send a link your friends can brew from."
                 >
-                  Share <MenubarShortcut>⇧⌘S</MenubarShortcut>
-                </MenubarItem>
-                <MenubarItem icon={<PrinterIcon />} description="One page, kitchen friendly.">
-                  Print <MenubarShortcut>⌘P</MenubarShortcut>
-                </MenubarItem>
-              </MenubarGroup>
-            </MenubarContent>
-          </MenubarMenu>
+                  Share <HpxMenubarShortcut>⇧⌘S</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarItem icon={<PrinterIcon />} description="One page, kitchen friendly.">
+                  Print <HpxMenubarShortcut>⌘P</HpxMenubarShortcut>
+                </HpxMenubarItem>
+              </HpxMenubarGroup>
+            </HpxMenubarContent>
+          </HpxMenubarMenu>
 
-          <MenubarMenu>
-            <MenubarTrigger>Edit</MenubarTrigger>
-            <MenubarContent>
-              <MenubarGroup>
-                <MenubarItem icon={<UndoIcon />} description="Step back one change.">
-                  Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-                </MenubarItem>
-                <MenubarItem icon={<RedoIcon />} description="Put that change back.">
-                  Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-                </MenubarItem>
-                <MenubarItem icon={<PencilIcon />} description="Give this brew a better name.">
+          <HpxMenubarMenu>
+            <HpxMenubarTrigger>Edit</HpxMenubarTrigger>
+            <HpxMenubarContent>
+              <HpxMenubarGroup>
+                <HpxMenubarItem icon={<UndoIcon />} description="Step back one change.">
+                  Undo <HpxMenubarShortcut>⌘Z</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarItem icon={<RedoIcon />} description="Put that change back.">
+                  Redo <HpxMenubarShortcut>⇧⌘Z</HpxMenubarShortcut>
+                </HpxMenubarItem>
+                <HpxMenubarItem icon={<PencilIcon />} description="Give this brew a better name.">
                   Rename brew
-                </MenubarItem>
-                <MenubarItem
+                </HpxMenubarItem>
+                <HpxMenubarItem
                   icon={<Trash2Icon />}
                   variant="destructive"
                   description="This can't be undone."
                 >
                   Delete brew
-                </MenubarItem>
-              </MenubarGroup>
-            </MenubarContent>
-          </MenubarMenu>
+                </HpxMenubarItem>
+              </HpxMenubarGroup>
+            </HpxMenubarContent>
+          </HpxMenubarMenu>
 
-          <MenubarMenu>
-            <MenubarTrigger>View</MenubarTrigger>
-            <MenubarContent>
-              <MenubarCheckboxItem checked={showRatio} onCheckedChange={setShowRatio}>
+          <HpxMenubarMenu>
+            <HpxMenubarTrigger>View</HpxMenubarTrigger>
+            <HpxMenubarContent>
+              <HpxMenubarCheckboxItem checked={showRatio} onCheckedChange={setShowRatio}>
                 Brew ratio
-              </MenubarCheckboxItem>
-              <MenubarCheckboxItem checked={showTimer} onCheckedChange={setShowTimer}>
+              </HpxMenubarCheckboxItem>
+              <HpxMenubarCheckboxItem checked={showTimer} onCheckedChange={setShowTimer}>
                 Timer
-              </MenubarCheckboxItem>
-              <MenubarCheckboxItem checked={showNotes} onCheckedChange={setShowNotes}>
+              </HpxMenubarCheckboxItem>
+              <HpxMenubarCheckboxItem checked={showNotes} onCheckedChange={setShowNotes}>
                 Tasting notes
-              </MenubarCheckboxItem>
-            </MenubarContent>
-          </MenubarMenu>
+              </HpxMenubarCheckboxItem>
+            </HpxMenubarContent>
+          </HpxMenubarMenu>
 
-          <MenubarMenu>
-            <MenubarTrigger>Roast</MenubarTrigger>
-            <MenubarContent>
-              <MenubarGroup>
-                <MenubarLabel>Roast level</MenubarLabel>
-                <MenubarRadioGroup value={roast} onValueChange={setRoast}>
-                  <MenubarRadioItem value="light">Light</MenubarRadioItem>
-                  <MenubarRadioItem value="medium">Medium</MenubarRadioItem>
-                  <MenubarRadioItem value="dark">Dark</MenubarRadioItem>
-                </MenubarRadioGroup>
-              </MenubarGroup>
-              <MenubarSeparator />
-              <MenubarGroup>
-                <MenubarLabel>Method</MenubarLabel>
-                <MenubarRadioGroup value={method} onValueChange={setMethod}>
-                  <MenubarRadioItem value="pour-over">Pour-over</MenubarRadioItem>
-                  <MenubarRadioItem value="espresso">Espresso</MenubarRadioItem>
-                  <MenubarRadioItem value="french-press">French press</MenubarRadioItem>
-                </MenubarRadioGroup>
-              </MenubarGroup>
-            </MenubarContent>
-          </MenubarMenu>
+          <HpxMenubarMenu>
+            <HpxMenubarTrigger>Roast</HpxMenubarTrigger>
+            <HpxMenubarContent>
+              <HpxMenubarGroup>
+                <HpxMenubarLabel>Roast level</HpxMenubarLabel>
+                <HpxMenubarRadioGroup value={roast} onValueChange={setRoast}>
+                  <HpxMenubarRadioItem value="light">Light</HpxMenubarRadioItem>
+                  <HpxMenubarRadioItem value="medium">Medium</HpxMenubarRadioItem>
+                  <HpxMenubarRadioItem value="dark">Dark</HpxMenubarRadioItem>
+                </HpxMenubarRadioGroup>
+              </HpxMenubarGroup>
+              <HpxMenubarSeparator />
+              <HpxMenubarGroup>
+                <HpxMenubarLabel>Method</HpxMenubarLabel>
+                <HpxMenubarRadioGroup value={method} onValueChange={setMethod}>
+                  <HpxMenubarRadioItem value="pour-over">Pour-over</HpxMenubarRadioItem>
+                  <HpxMenubarRadioItem value="espresso">Espresso</HpxMenubarRadioItem>
+                  <HpxMenubarRadioItem value="french-press">French press</HpxMenubarRadioItem>
+                </HpxMenubarRadioGroup>
+              </HpxMenubarGroup>
+            </HpxMenubarContent>
+          </HpxMenubarMenu>
 
-          <MenubarMenu>
-            <MenubarTrigger>Beans</MenubarTrigger>
-            <MenubarContent>
+          <HpxMenubarMenu>
+            <HpxMenubarTrigger>Beans</HpxMenubarTrigger>
+            <HpxMenubarContent>
               {/* Two columns side by side, with a gap between them. */}
-              <MenubarColumns>
-                <MenubarGroup>
-                  <MenubarLabel>Single origin</MenubarLabel>
-                  <MenubarItem icon={<CitrusIcon />} description="Jasmine, peach, black tea.">
+              <HpxMenubarColumns>
+                <HpxMenubarGroup>
+                  <HpxMenubarLabel>Single origin</HpxMenubarLabel>
+                  <HpxMenubarItem icon={<CitrusIcon />} description="Jasmine, peach, black tea.">
                     Ethiopia Guji
-                  </MenubarItem>
-                  <MenubarItem icon={<CherryIcon />} description="Red apple, caramel, cocoa.">
+                  </HpxMenubarItem>
+                  <HpxMenubarItem icon={<CherryIcon />} description="Red apple, caramel, cocoa.">
                     Colombia Huila
-                  </MenubarItem>
-                  <MenubarItem icon={<MountainIcon />} description="Blackcurrant and bright acidity.">
+                  </HpxMenubarItem>
+                  <HpxMenubarItem icon={<MountainIcon />} description="Blackcurrant and bright acidity.">
                     Kenya Nyeri
-                  </MenubarItem>
-                </MenubarGroup>
-                <MenubarGroup>
-                  <MenubarLabel>Blends & more</MenubarLabel>
-                  <MenubarItem icon={<FlameIcon />} description="Dark chocolate, built for milk.">
+                  </HpxMenubarItem>
+                </HpxMenubarGroup>
+                <HpxMenubarGroup>
+                  <HpxMenubarLabel>Blends & more</HpxMenubarLabel>
+                  <HpxMenubarItem icon={<FlameIcon />} description="Dark chocolate, built for milk.">
                     House espresso
-                  </MenubarItem>
-                  <MenubarItem icon={<MoonIcon />} description="All the flavour, none of the buzz.">
+                  </HpxMenubarItem>
+                  <HpxMenubarItem icon={<MoonIcon />} description="All the flavour, none of the buzz.">
                     Swiss water decaf
-                  </MenubarItem>
-                  <MenubarItem icon={<SparklesIcon />} description="A new lot, only this month.">
+                  </HpxMenubarItem>
+                  <HpxMenubarItem icon={<SparklesIcon />} description="A new lot, only this month.">
                     Roaster&apos;s pick
-                  </MenubarItem>
-                </MenubarGroup>
-              </MenubarColumns>
-              <MenubarSeparator />
-              <MenubarGroup>
-                <MenubarItem icon={<HeartIcon />} description="Everything you've starred.">
+                  </HpxMenubarItem>
+                </HpxMenubarGroup>
+              </HpxMenubarColumns>
+              <HpxMenubarSeparator />
+              <HpxMenubarGroup>
+                <HpxMenubarItem icon={<HeartIcon />} description="Everything you've starred.">
                   Favourites
-                </MenubarItem>
-                <MenubarItem icon={<LeafIcon />} description="Organic and direct-trade lots.">
+                </HpxMenubarItem>
+                <HpxMenubarItem icon={<LeafIcon />} description="Organic and direct-trade lots.">
                   Browse all beans
-                </MenubarItem>
-              </MenubarGroup>
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
+                </HpxMenubarItem>
+              </HpxMenubarGroup>
+            </HpxMenubarContent>
+          </HpxMenubarMenu>
+        </HpxMenubar>
 
         <div className="flex flex-col items-center gap-1 text-center text-sm text-muted-foreground">
           <span>
@@ -432,7 +432,7 @@ export function MenubarDemo() {
         Tip: open a menu, then slide the pointer along the bar or press the arrow keys.
       </p>
 
-      <ControlsPanel title="Menubar" {...panel} />
+      <HpxControlsPanel title="Menubar" {...panel} />
     </div>
   )
 }

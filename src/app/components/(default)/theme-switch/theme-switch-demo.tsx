@@ -1,10 +1,10 @@
 "use client"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  ThemeSwitch,
-  type ThemeSwitchIconMotion,
-  type ThemeSwitchVariant,
+  HpxThemeSwitch,
+  type HpxThemeSwitchIconMotion,
+  type HpxThemeSwitchVariant,
 } from "@/components/ui/theme-switch"
 
 const controls = {
@@ -52,19 +52,19 @@ const controls = {
       { label: "Secondary", value: "secondary" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function ThemeSwitchDemo() {
-  const panel = useControls(controls)
+export function HpxThemeSwitchDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border">
-        <ThemeSwitch
-          transition={values.transition as ThemeSwitchVariant}
+        <HpxThemeSwitch
+          transition={values.transition as HpxThemeSwitchVariant}
           duration={values.duration}
-          iconMotion={values.iconMotion as ThemeSwitchIconMotion}
+          iconMotion={values.iconMotion as HpxThemeSwitchIconMotion}
           tooltip={values.tooltip}
           variant={values.variant as "outline" | "ghost" | "default" | "secondary"}
         />
@@ -73,7 +73,7 @@ export function ThemeSwitchDemo() {
         Tip: The circle grows from the button
       </p>
 
-      <ControlsPanel title="Theme switch" {...panel} />
+      <HpxControlsPanel title="Theme switch" {...panel} />
     </div>
   )
 }

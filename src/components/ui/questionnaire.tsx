@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Questionnaire as QuestionnairePrimitive } from "@shadcn/react/questionnaire"
-import { cn } from "cn"
+import { HpxQuestionnairePrimitive as QuestionnairePrimitive } from "@/components/ui/questionnaire-primitive"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion, type Transition, type Variants } from "motion/react"
 
-import { buttonVariants, type Button } from "@/components/ui/button"
+import { hpxButtonVariants, type HpxButton } from "@/components/ui/button"
 
 /** slide-x / slide-y: the next question travels in the direction you move. fade: it fades in place. scale: it grows in. */
 type QuestionnaireContent = "slide-x" | "slide-y" | "fade" | "scale" | "none"
@@ -120,7 +120,7 @@ function Questionnaire({
   return (
     <QuestionnaireContext.Provider value={context}>
       <QuestionnairePrimitive.Root
-        data-slot="questionnaire"
+        data-hpx-slot="questionnaire"
         ref={(node) => {
           root.current = node
           if (typeof ref === "function") ref(node)
@@ -130,7 +130,7 @@ function Questionnaire({
         item={itemProp}
         onItemChange={(next) => {
           // Which way to travel, from where the two questions sit in the form
-          const names = [...(root.current?.querySelectorAll<HTMLElement>('[data-slot="questionnaire-item"]') ?? [])].map(
+          const names = [...(root.current?.querySelectorAll<HTMLElement>('[data-hpx-slot="questionnaire-item"]') ?? [])].map(
             (el) => el.dataset.name
           )
           const from = item ?? names[0]
@@ -190,7 +190,7 @@ function QuestionnaireProgress({
   if (context.progressStyle === "text") {
     return (
       <QuestionnairePrimitive.Progress
-        data-slot="questionnaire-progress"
+        data-hpx-slot="questionnaire-progress"
         className={text}
         render={(progressProps) => {
           const { children, ...rest } = progressProps
@@ -203,7 +203,7 @@ function QuestionnaireProgress({
 
   return (
     <QuestionnairePrimitive.Progress
-      data-slot="questionnaire-progress"
+      data-hpx-slot="questionnaire-progress"
       render={(progressProps, state) => {
         const { children, ...rest } = progressProps
         return (
@@ -304,11 +304,11 @@ function QuestionnaireItem({
       name={name}
       multiple={multiple ?? context.multiple}
       data-name={name}
-      data-slot="questionnaire-item"
+      data-hpx-slot="questionnaire-item"
       // All items share one cell, so the form keeps the tallest height
       hidden={false}
       className={cn(
-        "col-start-1 row-start-2 min-w-0 border-0 p-0 outline-none not-data-active:invisible",
+        "col-start-1 row-start-2 min-w-0 border-0 p-0 outline-none not-hpx-active:invisible",
         leaving && "visible!",
         className
       )}
@@ -339,9 +339,9 @@ function QuestionnaireTitle({
 }: React.ComponentProps<typeof QuestionnairePrimitive.Title>) {
   return (
     <QuestionnairePrimitive.Title
-      data-slot="questionnaire-title"
+      data-hpx-slot="questionnaire-title"
       className={cn(
-        "font-heading text-xl leading-snug font-medium text-pretty [&:not(:has(~[data-slot=questionnaire-description]))]:mb-4",
+        "font-heading text-xl leading-snug font-medium text-pretty [&:not(:has(~[data-hpx-slot=questionnaire-description]))]:mb-4",
         className
       )}
       {...props}
@@ -355,7 +355,7 @@ function QuestionnaireDescription({
 }: React.ComponentProps<typeof QuestionnairePrimitive.Description>) {
   return (
     <QuestionnairePrimitive.Description
-      data-slot="questionnaire-description"
+      data-hpx-slot="questionnaire-description"
       className={cn("text-base text-pretty text-muted-foreground", className)}
       {...props}
     />
@@ -370,7 +370,7 @@ function QuestionnaireChoices({
 
   return (
     <QuestionnairePrimitive.Choices
-      data-slot="questionnaire-choices"
+      data-hpx-slot="questionnaire-choices"
       className={cn(
         "group/questionnaire-choices grid min-w-0",
         choiceLayout === "inline" ? "gap-1" : "gap-2",
@@ -403,7 +403,7 @@ function QuestionnaireChoice({
 
   return (
     <QuestionnairePrimitive.Choice
-      data-slot="questionnaire-choice"
+      data-hpx-slot="questionnaire-choice"
       render={(choiceProps) => (
         <motion.label {...(choiceProps as React.ComponentProps<typeof motion.label>)} variants={choiceVariants}>
           {card && (
@@ -415,8 +415,8 @@ function QuestionnaireChoice({
                 "border-input",
                 hover === "fade" &&
                   (primary
-                    ? "group-data-checked/questionnaire-choice:border-primary"
-                    : "group-data-checked/questionnaire-choice:border-transparent"),
+                    ? "group-hpx-checked/questionnaire-choice:border-primary"
+                    : "group-hpx-checked/questionnaire-choice:border-transparent"),
                 hover === "fade" &&
                   (primary
                     ? "group-hover/questionnaire-choice:border-primary"
@@ -439,8 +439,8 @@ function QuestionnaireChoice({
                     : "group-hover/questionnaire-choice:bg-muted"),
                 hover !== "top" &&
                   (primary
-                    ? "group-data-checked/questionnaire-choice:bg-primary dark:group-data-checked/questionnaire-choice:bg-primary"
-                    : "group-data-checked/questionnaire-choice:bg-muted dark:group-data-checked/questionnaire-choice:bg-muted")
+                    ? "group-hpx-checked/questionnaire-choice:bg-primary dark:group-hpx-checked/questionnaire-choice:bg-primary"
+                    : "group-hpx-checked/questionnaire-choice:bg-muted dark:group-hpx-checked/questionnaire-choice:bg-muted")
               )}
             />
           )}
@@ -449,7 +449,7 @@ function QuestionnaireChoice({
               aria-hidden
               className={cn(
                 layer,
-                "[clip-path:inset(0_0_100%_0)] transition-[clip-path] duration-300 ease-out group-hover/questionnaire-choice:[clip-path:inset(0)] group-data-checked/questionnaire-choice:[clip-path:inset(0)] motion-reduce:transition-none"
+                "[clip-path:inset(0_0_100%_0)] transition-[clip-path] duration-300 ease-out group-hover/questionnaire-choice:[clip-path:inset(0)] group-hpx-checked/questionnaire-choice:[clip-path:inset(0)] motion-reduce:transition-none"
               )}
             />
           )}
@@ -460,14 +460,14 @@ function QuestionnaireChoice({
         "group/questionnaire-choice relative isolate flex cursor-pointer items-center text-start text-base outline-none select-none",
         card
           ? "min-h-14 rounded-lg border border-transparent px-4 py-3"
-          : "min-h-9 rounded-none border-b border-border py-2.5 text-muted-foreground transition-colors hover:text-foreground data-checked:font-medium data-checked:text-foreground",
-        "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
+          : "min-h-9 rounded-none border-b border-border py-2.5 text-muted-foreground transition-colors hover:text-foreground hpx-checked:font-medium hpx-checked:text-foreground",
+        "hpx-disabled:pointer-events-none hpx-disabled:cursor-not-allowed hpx-disabled:opacity-50",
         className
       )}
       {...props}
     >
       <QuestionnairePrimitive.ChoiceInput
-        data-slot="questionnaire-choice-input"
+        data-hpx-slot="questionnaire-choice-input"
         className="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
       />
       <span
@@ -478,38 +478,38 @@ function QuestionnaireChoice({
             ? "mr-2.5 w-5 opacity-100"
             : "mr-0 w-0 opacity-0",
           choiceIndicator === "check" &&
-            "group-data-checked/questionnaire-choice:mr-2.5 group-data-checked/questionnaire-choice:w-5 group-data-checked/questionnaire-choice:opacity-100"
+            "group-hpx-checked/questionnaire-choice:mr-2.5 group-hpx-checked/questionnaire-choice:w-5 group-hpx-checked/questionnaire-choice:opacity-100"
         )}
         style={{ transitionDuration: `${reduceMotion ? 0 : duration}s` }}
       >
       <span
         aria-hidden="true"
-        data-slot="questionnaire-choice-indicator"
+        data-hpx-slot="questionnaire-choice-indicator"
         data-indicator={choiceIndicator}
         className={cn(
-          "pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-[background-color,border-color,color,border-radius] duration-300 group-hover/questionnaire-choice:border-foreground/40 group-data-checked/questionnaire-choice:border-primary dark:bg-input/30",
-          "group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:group-data-checked/questionnaire-choice:bg-primary",
+          "pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-[background-color,border-color,color,border-radius] duration-300 group-hover/questionnaire-choice:border-foreground/40 group-hpx-checked/questionnaire-choice:border-primary dark:bg-input/30",
+          "group-hpx-checked/questionnaire-choice:bg-primary group-hpx-checked/questionnaire-choice:text-primary-foreground dark:group-hpx-checked/questionnaire-choice:bg-primary",
           choiceIndicator === "radio" && "rounded-full",
           choiceIndicator === "check" && INDICATOR_ROUNDED[indicatorRounded],
           solid &&
-            "group-data-checked/questionnaire-choice:border-primary-foreground group-data-checked/questionnaire-choice:bg-primary-foreground group-data-checked/questionnaire-choice:text-primary dark:group-data-checked/questionnaire-choice:bg-primary-foreground",
+            "group-hpx-checked/questionnaire-choice:border-primary-foreground group-hpx-checked/questionnaire-choice:bg-primary-foreground group-hpx-checked/questionnaire-choice:text-primary dark:group-hpx-checked/questionnaire-choice:bg-primary-foreground",
           bare &&
             cn(
-              "border-transparent bg-transparent shadow-none group-hover/questionnaire-choice:border-transparent group-data-checked/questionnaire-choice:border-transparent group-data-checked/questionnaire-choice:bg-transparent dark:bg-transparent dark:group-data-checked/questionnaire-choice:bg-transparent",
-              solid ? "group-data-checked/questionnaire-choice:text-primary-foreground" : "group-data-checked/questionnaire-choice:text-primary"
+              "border-transparent bg-transparent shadow-none group-hover/questionnaire-choice:border-transparent group-hpx-checked/questionnaire-choice:border-transparent group-hpx-checked/questionnaire-choice:bg-transparent dark:bg-transparent dark:group-hpx-checked/questionnaire-choice:bg-transparent",
+              solid ? "group-hpx-checked/questionnaire-choice:text-primary-foreground" : "group-hpx-checked/questionnaire-choice:text-primary"
             )
         )}
       >
         <span
-          data-slot="questionnaire-choice-indicator-dot"
+          data-hpx-slot="questionnaire-choice-indicator-dot"
           className={cn(
-            "size-2.5 scale-0 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-data-checked/questionnaire-choice:scale-100 motion-reduce:transition-none",
+            "size-2.5 scale-0 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hpx-checked/questionnaire-choice:scale-100 motion-reduce:transition-none",
             solid ? "bg-primary" : "bg-primary-foreground",
             choiceIndicator === "check" && "hidden"
           )}
         />
         <svg
-          data-slot="questionnaire-choice-indicator-check"
+          data-hpx-slot="questionnaire-choice-indicator-check"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -526,24 +526,24 @@ function QuestionnaireChoice({
             d="M4 12.5 9.5 18 20 6.5"
             pathLength={1}
             strokeDasharray={1}
-            className="[stroke-dashoffset:1] transition-[stroke-dashoffset] duration-300 ease-out group-data-checked/questionnaire-choice:[stroke-dashoffset:0] motion-reduce:transition-none"
+            className="[stroke-dashoffset:1] transition-[stroke-dashoffset] duration-300 ease-out group-hpx-checked/questionnaire-choice:[stroke-dashoffset:0] motion-reduce:transition-none"
           />
         </svg>
       </span>
       </span>
       <QuestionnairePrimitive.ChoiceLabel
-        data-slot="questionnaire-choice-label"
+        data-hpx-slot="questionnaire-choice-label"
         className={cn(
           "flex min-w-0 flex-1 flex-col gap-0.5 leading-snug",
           // Text inverts under the fill, so both change at the same point
           card &&
-            "text-white mix-blend-difference [&_[data-slot=questionnaire-choice-description]]:text-white/60"
+            "text-white mix-blend-difference [&_[data-hpx-slot=questionnaire-choice-description]]:text-white/60"
         )}
       >
         {children}
       </QuestionnairePrimitive.ChoiceLabel>
       <QuestionnairePrimitive.ChoiceShortcut
-        data-slot="questionnaire-choice-shortcut"
+        data-hpx-slot="questionnaire-choice-shortcut"
         className="pointer-events-none ms-2.5 hidden size-5 shrink-0 items-center justify-center rounded-md border border-input bg-background font-mono text-[0.625rem] leading-none font-medium text-muted-foreground group-data-[shortcut]/questionnaire-choice:inline-flex"
       />
     </QuestionnairePrimitive.Choice>
@@ -556,7 +556,7 @@ function QuestionnaireChoiceDescription({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="questionnaire-choice-description"
+      data-hpx-slot="questionnaire-choice-description"
       className={cn("text-muted-foreground", className)}
       {...props}
     />
@@ -569,11 +569,11 @@ function QuestionnaireInput({
 }: React.ComponentProps<typeof QuestionnairePrimitive.Input>) {
   return (
     <div
-      data-slot="questionnaire-input-wrapper"
+      data-hpx-slot="questionnaire-input-wrapper"
       className="group/questionnaire-input relative w-full min-w-0"
     >
       <QuestionnairePrimitive.Input
-        data-slot="questionnaire-input"
+        data-hpx-slot="questionnaire-input"
         className={cn(
           "h-12 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-1 text-base transition-[color,box-shadow,background-color] outline-none focus-visible:border-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
           "selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
@@ -591,7 +591,7 @@ function QuestionnaireError({
 }: React.ComponentProps<typeof QuestionnairePrimitive.Error>) {
   return (
     <QuestionnairePrimitive.Error
-      data-slot="questionnaire-error"
+      data-hpx-slot="questionnaire-error"
       className={cn("mt-2 text-sm text-destructive", className)}
       {...props}
     />
@@ -604,7 +604,7 @@ function QuestionnaireActions({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="questionnaire-actions"
+      data-hpx-slot="questionnaire-actions"
       className={cn(
         "row-start-3 grid min-h-12 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2",
         className
@@ -614,7 +614,7 @@ function QuestionnaireActions({
   )
 }
 
-type ActionVariant = React.ComponentProps<typeof Button>["variant"]
+type ActionVariant = React.ComponentProps<typeof HpxButton>["variant"]
 type ActionPointerHandler = (event: React.PointerEvent<HTMLButtonElement>) => void
 
 // The hover fill grows from where the pointer came in
@@ -676,15 +676,15 @@ function QuestionnairePrevious({
   onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Previous> &
-  Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  Pick<React.ComponentProps<typeof HpxButton>, "size" | "variant">) {
   const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Previous
-      data-slot="questionnaire-previous"
+      data-hpx-slot="questionnaire-previous"
       data-size={size}
       data-variant={variant}
       className={cn(
-        buttonVariants({ size, variant }),
+        hpxButtonVariants({ size, variant }),
         "col-start-1 row-start-1 justify-self-start",
         hover.className,
         className
@@ -707,15 +707,15 @@ function QuestionnaireSkip({
   onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Skip> &
-  Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  Pick<React.ComponentProps<typeof HpxButton>, "size" | "variant">) {
   const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Skip
-      data-slot="questionnaire-skip"
+      data-hpx-slot="questionnaire-skip"
       data-size={size}
       data-variant={variant}
       className={cn(
-        buttonVariants({ size, variant }),
+        hpxButtonVariants({ size, variant }),
         "col-start-2 row-start-1 justify-self-end",
         hover.className,
         className
@@ -738,15 +738,15 @@ function QuestionnaireNext({
   onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Next> &
-  Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  Pick<React.ComponentProps<typeof HpxButton>, "size" | "variant">) {
   const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Next
-      data-slot="questionnaire-next"
+      data-hpx-slot="questionnaire-next"
       data-size={size}
       data-variant={variant}
       className={cn(
-        buttonVariants({ size, variant }),
+        hpxButtonVariants({ size, variant }),
         "col-start-3 row-start-1 justify-self-end",
         hover.className,
         className
@@ -769,15 +769,15 @@ function QuestionnaireSubmit({
   onPointerLeave,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Submit> &
-  Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
+  Pick<React.ComponentProps<typeof HpxButton>, "size" | "variant">) {
   const hover = useActionHover(variant, onPointerEnter, onPointerLeave)
   return (
     <QuestionnairePrimitive.Submit
-      data-slot="questionnaire-submit"
+      data-hpx-slot="questionnaire-submit"
       data-size={size}
       data-variant={variant}
       className={cn(
-        buttonVariants({ size, variant }),
+        hpxButtonVariants({ size, variant }),
         "col-start-3 row-start-1 justify-self-end",
         hover.className,
         className
@@ -792,28 +792,28 @@ function QuestionnaireSubmit({
 }
 
 export {
-  Questionnaire,
-  QuestionnaireActions,
-  QuestionnaireChoice,
-  QuestionnaireChoiceDescription,
-  QuestionnaireChoices,
-  QuestionnaireDescription,
-  QuestionnaireError,
-  QuestionnaireInput,
-  QuestionnaireItem,
-  QuestionnaireNext,
-  QuestionnairePrevious,
-  QuestionnaireProgress,
-  QuestionnaireSkip,
-  QuestionnaireSubmit,
-  QuestionnaireTitle,
+  Questionnaire as HpxQuestionnaire,
+  QuestionnaireActions as HpxQuestionnaireActions,
+  QuestionnaireChoice as HpxQuestionnaireChoice,
+  QuestionnaireChoiceDescription as HpxQuestionnaireChoiceDescription,
+  QuestionnaireChoices as HpxQuestionnaireChoices,
+  QuestionnaireDescription as HpxQuestionnaireDescription,
+  QuestionnaireError as HpxQuestionnaireError,
+  QuestionnaireInput as HpxQuestionnaireInput,
+  QuestionnaireItem as HpxQuestionnaireItem,
+  QuestionnaireNext as HpxQuestionnaireNext,
+  QuestionnairePrevious as HpxQuestionnairePrevious,
+  QuestionnaireProgress as HpxQuestionnaireProgress,
+  QuestionnaireSkip as HpxQuestionnaireSkip,
+  QuestionnaireSubmit as HpxQuestionnaireSubmit,
+  QuestionnaireTitle as HpxQuestionnaireTitle,
 }
 export type {
-  QuestionnaireChoiceHover,
-  QuestionnaireChoiceLayout,
-  QuestionnaireChoiceColor,
-  QuestionnaireChoiceIndicator,
-  QuestionnaireContent,
-  QuestionnaireIndicatorRounded,
-  QuestionnaireProgressStyle,
+  QuestionnaireChoiceHover as HpxQuestionnaireChoiceHover,
+  QuestionnaireChoiceLayout as HpxQuestionnaireChoiceLayout,
+  QuestionnaireChoiceColor as HpxQuestionnaireChoiceColor,
+  QuestionnaireChoiceIndicator as HpxQuestionnaireChoiceIndicator,
+  QuestionnaireContent as HpxQuestionnaireContent,
+  QuestionnaireIndicatorRounded as HpxQuestionnaireIndicatorRounded,
+  QuestionnaireProgressStyle as HpxQuestionnaireProgressStyle,
 }

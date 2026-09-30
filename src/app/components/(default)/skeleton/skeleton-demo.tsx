@@ -4,18 +4,18 @@ import * as React from "react"
 import { RotateCcwIcon } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
-import { cn } from "cn"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
-  SKELETON_ROUNDED,
-  Skeleton,
-  SkeletonGroup,
-  SkeletonSwap,
-  SkeletonText,
-  type SkeletonAnimation,
-  type SkeletonRounded,
-  type SkeletonSwapKind,
+  HPX_SKELETON_ROUNDED,
+  HpxSkeleton,
+  HpxSkeletonGroup,
+  HpxSkeletonSwap,
+  HpxSkeletonText,
+  type HpxSkeletonAnimation,
+  type HpxSkeletonRounded,
+  type HpxSkeletonSwapKind,
 } from "@/components/ui/skeleton"
 
 const controls = {
@@ -112,7 +112,7 @@ const controls = {
     step: 0.5,
     unit: "s",
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 /** The status label, rolling up to its new text when it changes. */
 function StatusRoll({ children }: { children: string }) {
@@ -136,8 +136,8 @@ function StatusRoll({ children }: { children: string }) {
   )
 }
 
-export function SkeletonDemo() {
-  const panel = useControls(controls)
+export function HpxSkeletonDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [loading, setLoading] = React.useState(true)
   const timer = React.useRef(0)
@@ -158,29 +158,29 @@ export function SkeletonDemo() {
   }
 
   const placeholder = (
-    <SkeletonGroup
-      animation={values.animation as SkeletonAnimation}
+    <HpxSkeletonGroup
+      animation={values.animation as HpxSkeletonAnimation}
       duration={values.duration}
       stagger={values.stagger}
-      rounded={values.rounded as SkeletonRounded}
+      rounded={values.rounded as HpxSkeletonRounded}
     >
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-[18vh] w-full" index={0} />
+        <HpxSkeleton className="h-[18vh] w-full" index={0} />
         <div className="flex items-center gap-3">
-          <Skeleton className="size-10 shrink-0 rounded-full" index={1} />
+          <HpxSkeleton className="size-10 shrink-0 rounded-full" index={1} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <Skeleton className="h-3.5 w-[40%]" index={2} />
-            <Skeleton className="h-3 w-[25%]" index={3} />
+            <HpxSkeleton className="h-3.5 w-[40%]" index={2} />
+            <HpxSkeleton className="h-3 w-[25%]" index={3} />
           </div>
         </div>
-        <SkeletonText lines={3} start={4} />
+        <HpxSkeletonText lines={3} start={4} />
       </div>
-    </SkeletonGroup>
+    </HpxSkeletonGroup>
   )
 
   const content = (
     <div className="flex flex-col gap-4">
-      <div className={cn("h-[18vh] w-full bg-linear-to-br from-warning/40 to-destructive/40", SKELETON_ROUNDED[values.rounded as SkeletonRounded])} />
+      <div className={cn("h-[18vh] w-full bg-linear-to-br from-warning/40 to-destructive/40", HPX_SKELETON_ROUNDED[values.rounded as HpxSkeletonRounded])} />
       <div className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
           LK
@@ -203,27 +203,27 @@ export function SkeletonDemo() {
       <div className="flex min-h-[50vh] flex-col gap-4 rounded-lg border px-6 py-6">
         <div className="flex items-center justify-between gap-4">
           <StatusRoll>{loading ? "Loading…" : "Loaded"}</StatusRoll>
-          <Button variant="outline" size="sm" onClick={replay} disabled={loading}>
+          <HpxButton variant="outline" size="sm" onClick={replay} disabled={loading}>
             <RotateCcwIcon />
             Replay
-          </Button>
+          </HpxButton>
         </div>
 
-        <SkeletonSwap
+        <HpxSkeletonSwap
           loading={loading}
-          swap={values.swap as SkeletonSwapKind}
+          swap={values.swap as HpxSkeletonSwapKind}
           duration={values.swapDuration}
           stagger={values.swapStagger}
           skeleton={placeholder}
         >
           {content}
-        </SkeletonSwap>
+        </HpxSkeletonSwap>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: the placeholders leave before the content arrives, so the card never shows both.
       </p>
 
-      <ControlsPanel title="Skeleton" {...panel} />
+      <HpxControlsPanel title="Skeleton" {...panel} />
     </div>
   )
 }

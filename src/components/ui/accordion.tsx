@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
-import { cn } from "cn"
-import { MorphChevron, MorphPlus } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import { HpxMorphChevron, HpxMorphPlus } from "@/components/ui/dropdown-menu"
 import {
   motion,
   MotionConfig,
@@ -185,7 +185,7 @@ function Accordion({
       >
         <MotionConfig reducedMotion="user">
           <AccordionPrimitive.Root
-            data-slot="accordion"
+            data-hpx-slot="accordion"
             className={cn(
               "flex w-full flex-col gap-3",
               bordered && "rounded-lg border p-[2vw] max-md:p-[4vw]",
@@ -213,7 +213,7 @@ function Accordion({
 
 const FILL_COLOR = {
   muted: { bg: "bg-muted", text: "" },
-  primary: { bg: "bg-primary", text: "data-open:**:text-primary-foreground!" },
+  primary: { bg: "bg-primary", text: "hpx-open:**:text-primary-foreground!" },
 } as const
 
 function AccordionItem({
@@ -234,7 +234,7 @@ function AccordionItem({
 
   return (
     <AccordionPrimitive.Item
-      data-slot="accordion-item"
+      data-hpx-slot="accordion-item"
       onPointerMove={(event) => {
         onPointerMove?.(event)
         if (
@@ -279,7 +279,7 @@ function AccordionItem({
             className={cn(
               "pointer-events-none absolute inset-x-0 bottom-0 h-px bg-border",
               fill &&
-                "transition-opacity duration-300 group-data-open/accordion-item:opacity-0 group-has-[+[data-open]]/accordion-item:opacity-0"
+                "transition-opacity duration-300 group-hpx-open/accordion-item:opacity-0 group-has-[+[data-open]]/accordion-item:opacity-0"
             )}
           />
           {line && <AccordionItemLine drawn={hovered || state.open} />}
@@ -343,9 +343,9 @@ function AccordionTrigger({
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
-        data-slot="accordion-trigger"
+        data-hpx-slot="accordion-trigger"
         className={cn(
-          "group/accordion-trigger px-2 relative flex flex-1 items-center justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-[border-color,box-shadow] outline-none aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
+          "group/accordion-trigger px-2 relative flex flex-1 items-center justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-[border-color,box-shadow] outline-none aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[hpx-slot=accordion-trigger-icon]:ml-auto **:data-[hpx-slot=accordion-trigger-icon]:size-4 **:data-[hpx-slot=accordion-trigger-icon]:text-muted-foreground",
           className
         )}
         render={(triggerProps, state) => (
@@ -353,15 +353,15 @@ function AccordionTrigger({
             {triggerProps.children}
             {icon === "plus" ? (
               // Shared with the dropdown trigger, so both morph the same way.
-              <MorphPlus
-                data-slot="accordion-trigger-icon"
+              <HpxMorphPlus
+                data-hpx-slot="accordion-trigger-icon"
                 open={state.open}
                 className="size-5!"
               />
             ) : (
               // Shared with the dropdown trigger, so both morph the same way.
-              <MorphChevron
-                data-slot="accordion-trigger-icon"
+              <HpxMorphChevron
+                data-hpx-slot="accordion-trigger-icon"
                 open={state.open}
                 duration={preset.iconDuration}
               />
@@ -386,7 +386,7 @@ function AccordionContent({
 
   return (
     <AccordionPrimitive.Panel
-      data-slot="accordion-content"
+      data-hpx-slot="accordion-content"
       className="overflow-hidden text-sm "
       keepMounted
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -426,4 +426,4 @@ function AccordionContent({
   )
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion as HpxAccordion, AccordionItem as HpxAccordionItem, AccordionTrigger as HpxAccordionTrigger, AccordionContent as HpxAccordionContent }

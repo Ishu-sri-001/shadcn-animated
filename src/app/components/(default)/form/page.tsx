@@ -1,4 +1,4 @@
-import { FormDemo } from "./form-demo"
+import { HpxFormDemo } from "./form-demo"
 
 export default function FormPage() {
   return (
@@ -10,7 +10,7 @@ export default function FormPage() {
         </p>
       </div>
 
-      <FormDemo />
+      <HpxFormDemo />
     </div>
   )
 }

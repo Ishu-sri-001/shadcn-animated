@@ -1,7 +1,7 @@
 // Only settings exposed by each component demo’s props remixer are listed.
 // Keep names, groups, and descriptions in sync with the demo control schemas.
-export type ApiProp = { name: string; label: string; type: string; default: string; description: string }
-export type ApiGroup = { name: string; props: ApiProp[] }
+export type HpxApiProp = { name: string; label: string; type: string; default: string; description: string }
+export type HpxApiGroup = { name: string; props: HpxApiProp[] }
 
 export const apiReferences = {
   "accordion": [
@@ -630,6 +630,6 @@ export const apiReferences = {
       {"name":"scaleContent","type":"Demo control","default":"true","description":"Adds a small scale transition when switching between the demo's pages.\nTurn it off to keep the fade transition without resizing the page content.","label":"Scale with fade"},
     ] },
   ],
-} satisfies Record<string, ApiGroup[]>
+} satisfies Record<string, HpxApiGroup[]>
 
-export type ApiReferenceSlug = keyof typeof apiReferences
+export type HpxApiReferenceSlug = keyof typeof apiReferences

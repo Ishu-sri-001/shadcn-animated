@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   MotionConfig,
@@ -12,8 +12,8 @@ import {
   type Transition,
 } from "motion/react"
 
-import { Button } from "@/components/ui/button"
-import { FillButton, useTriggerHover } from "@/components/ui/hover-effects"
+import { HpxButton } from "@/components/ui/button"
+import { HpxFillButton, useHpxTriggerHover } from "@/components/ui/hover-effects"
 import { XIcon } from "lucide-react"
 
 type DialogRounded = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl"
@@ -176,7 +176,7 @@ function Dialog({
     <DialogContext.Provider value={context}>
       <MotionConfig reducedMotion="user">
         <DialogPrimitive.Root
-          data-slot="dialog"
+          data-hpx-slot="dialog"
           open={open}
           onOpenChange={(next, details) => {
             setUncontrolledOpen(next)
@@ -199,11 +199,11 @@ function DialogTrigger({
   ...props
 }: DialogPrimitive.Trigger.Props) {
   const { setOrigin, motion: options } = useDialog()
-  const hover = useTriggerHover(options)
+  const hover = useHpxTriggerHover(options)
 
   return (
     <DialogPrimitive.Trigger
-      data-slot="dialog-trigger"
+      data-hpx-slot="dialog-trigger"
       onClick={(event) => {
         // Remember origin for grow-from-trigger.
         const rect = event.currentTarget.getBoundingClientRect()
@@ -229,11 +229,11 @@ function DialogTrigger({
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  return <DialogPrimitive.Portal data-hpx-slot="dialog-portal" {...props} />
 }
 
 function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+  return <DialogPrimitive.Close data-hpx-slot="dialog-close" {...props} />
 }
 
 function DialogOverlay({
@@ -243,7 +243,7 @@ function DialogOverlay({
   const { motion: options } = useDialog()
   return (
     <DialogPrimitive.Backdrop
-      data-slot="dialog-overlay"
+      data-hpx-slot="dialog-overlay"
       render={
         <motion.div
           initial={{ opacity: 0 }}
@@ -330,7 +330,7 @@ function DialogContent({
           />
           <DialogPrimitive.Popup
             ref={attach}
-            data-slot="dialog-content"
+            data-hpx-slot="dialog-content"
             render={
               <motion.div
                 initial={closed}
@@ -361,9 +361,9 @@ function DialogContent({
             {children}
             {showCloseButton && (
               <DialogPrimitive.Close
-                data-slot="dialog-close"
+                data-hpx-slot="dialog-close"
                 render={
-                  <Button
+                  <HpxButton
                     variant="ghost"
                     size="icon-sm"
                     className={cn(
@@ -388,7 +388,7 @@ function DialogContent({
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="dialog-header"
+      data-hpx-slot="dialog-header"
       className={cn("flex flex-col gap-2", className)}
       {...props}
     />
@@ -405,7 +405,7 @@ function DialogFooter({
 }) {
   return (
     <div
-      data-slot="dialog-footer"
+      data-hpx-slot="dialog-footer"
       className={cn(
         "-mx-8 -mb-8 flex justify-end gap-2 rounded-b-[inherit] border-t bg-muted/50 px-8 py-5 max-md:-mx-6 max-md:-mb-6 max-md:px-6 max-md:flex-col-reverse max-md:justify-start",
         className
@@ -414,7 +414,7 @@ function DialogFooter({
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
+        <DialogPrimitive.Close render={<HpxButton variant="outline" />}>
           Close
         </DialogPrimitive.Close>
       )}
@@ -424,14 +424,14 @@ function DialogFooter({
 
 
 /** Footer-sized button with hover fill. */
-function DialogButton({ className, ...props }: React.ComponentProps<typeof Button>) {
-  return <FillButton className={cn("h-auto px-3 py-2", className)} {...props} />
+function DialogButton({ className, ...props }: React.ComponentProps<typeof HpxButton>) {
+  return <HpxFillButton className={cn("h-auto px-3 py-2", className)} {...props} />
 }
 
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
-      data-slot="dialog-title"
+      data-hpx-slot="dialog-title"
       className={cn(
         "font-heading text-xl leading-tight font-medium",
         className
@@ -447,7 +447,7 @@ function DialogDescription({
 }: DialogPrimitive.Description.Props) {
   return (
     <DialogPrimitive.Description
-      data-slot="dialog-description"
+      data-hpx-slot="dialog-description"
       className={cn(
         "text-base leading-relaxed text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
         className
@@ -458,16 +458,16 @@ function DialogDescription({
 }
 
 export {
-  Dialog,
-  DialogButton,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
+  Dialog as HpxDialog,
+  DialogButton as HpxDialogButton,
+  DialogClose as HpxDialogClose,
+  DialogContent as HpxDialogContent,
+  DialogDescription as HpxDialogDescription,
+  DialogFooter as HpxDialogFooter,
+  DialogHeader as HpxDialogHeader,
+  DialogOverlay as HpxDialogOverlay,
+  DialogPortal as HpxDialogPortal,
+  DialogTitle as HpxDialogTitle,
+  DialogTrigger as HpxDialogTrigger,
 }
-export type { DialogBackdrop, DialogExit, DialogRounded }
+export type { DialogBackdrop as HpxDialogBackdrop, DialogExit as HpxDialogExit, DialogRounded as HpxDialogRounded }

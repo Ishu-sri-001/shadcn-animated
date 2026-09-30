@@ -1,15 +1,15 @@
 "use client"
 
 import { MoonIcon, SunIcon } from "lucide-react"
-import { useThemeTransition } from "@/components/theme-provider"
+import { useHpxThemeTransition } from "@/components/theme-provider"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
-export function ThemeToggle() {
-  const toggleTheme = useThemeTransition()
+export function HpxThemeToggle() {
+  const toggleTheme = useHpxThemeTransition()
 
   return (
-    <Button
+    <HpxButton
       variant="ghost"
       size="icon"
       aria-label="Toggle theme"
@@ -17,6 +17,6 @@ export function ThemeToggle() {
     >
       <SunIcon className="dark:hidden" />
       <MoonIcon className="hidden dark:block" />
-    </Button>
+    </HpxButton>
   )
 }

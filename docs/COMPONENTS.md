@@ -4,15 +4,15 @@ The nine components listed on the home page (`src/app/page.tsx`, from `src/compo
 
 | Component | Page | Source | File |
 | --- | --- | --- | --- |
-| Accordion | `/components/accordion` | shadcn `accordion` | `src/components/ui/accordion.tsx` |
-| Date Picker | `/components/date-picker` | Built here from shadcn `calendar`, `popover`, `select`, `button` | `src/components/ui/date-picker.tsx` |
-| Toast | `/components/toast` | shadcn `toast` | `src/components/ui/toast.tsx` |
-| Button | `/components/button` | shadcn `button` | `src/components/ui/button.tsx` |
-| Attachment | `/components/attachment` | shadcn `attachment` | `src/components/ui/attachment.tsx` |
-| Bubble | `/components/bubble` | shadcn `bubble` | `src/components/ui/bubble.tsx` |
-| Checkbox | `/components/checkbox` | Built here (shadcn `checkbox` is kept for the controls panel) | `src/components/ui/checkbox-group.tsx` |
+| Accordion | `/components/accordion` | Hpx `accordion` | `src/components/ui/accordion.tsx` |
+| Date Picker | `/components/date-picker` | Built here from `calendar`, `popover`, `select`, `button` | `src/components/ui/date-picker.tsx` |
+| Toast | `/components/toast` | Hpx `toast` | `src/components/ui/toast.tsx` |
+| Button | `/components/button` | Hpx `button` | `src/components/ui/button.tsx` |
+| Attachment | `/components/attachment` | Hpx `attachment` | `src/components/ui/attachment.tsx` |
+| Bubble | `/components/bubble` | Hpx `bubble` | `src/components/ui/bubble.tsx` |
+| Checkbox | `/components/checkbox` | Built here (the plain `checkbox` is kept for the controls panel) | `src/components/ui/checkbox-group.tsx` |
 | Radio | `/components/radio` | Built here | `src/components/ui/radio-group.tsx` |
-| Sidebar | `/components/sidebar` | shadcn `sidebar` (brings in `sheet`, `tooltip`, `input`, `separator`, `skeleton`, `use-mobile`) | `src/components/ui/sidebar.tsx` |
+| Sidebar | `/components/sidebar` | `sidebar` (brings in `sheet`, `tooltip`, `input`, `separator`, `skeleton`, `use-mobile`) | `src/components/ui/sidebar.tsx` |
 
 ## Accordion
 
@@ -47,7 +47,7 @@ The nine components listed on the home page (`src/app/page.tsx`, from `src/compo
 
 ## Button
 
-- The shadcn button as installed: default, secondary, outline, ghost, destructive and link variants
+- The base button: default, secondary, outline, ghost, destructive and link variants
 - No additions yet
 
 ## Attachment

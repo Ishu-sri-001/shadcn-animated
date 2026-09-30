@@ -6,7 +6,7 @@ import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { useGSAP } from "@gsap/react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import gsap from "gsap"
 import { Flip } from "gsap/Flip"
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin"
@@ -27,7 +27,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 
 if (typeof window !== "undefined") gsap.registerPlugin(useGSAP, Flip, MorphSVGPlugin)
 
@@ -71,13 +71,13 @@ const attachmentVariants = cva(
     variants: {
       size: {
         default:
-          "gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2",
-        sm: "gap-2.5 text-xs has-data-[slot=attachment-content]:px-2 has-data-[slot=attachment-content]:py-1.5 has-data-[slot=attachment-media]:p-1.5",
-        xs: "gap-1.5 rounded-lg text-xs has-data-[slot=attachment-content]:px-1.5 has-data-[slot=attachment-content]:py-1 has-data-[slot=attachment-media]:p-1",
+          "gap-2 text-sm has-data-[hpx-slot=attachment-content]:px-2.5 has-data-[hpx-slot=attachment-content]:py-2 has-data-[hpx-slot=attachment-media]:p-2",
+        sm: "gap-2.5 text-xs has-data-[hpx-slot=attachment-content]:px-2 has-data-[hpx-slot=attachment-content]:py-1.5 has-data-[hpx-slot=attachment-media]:p-1.5",
+        xs: "gap-1.5 rounded-lg text-xs has-data-[hpx-slot=attachment-content]:px-1.5 has-data-[hpx-slot=attachment-content]:py-1 has-data-[hpx-slot=attachment-media]:p-1",
       },
       orientation: {
         horizontal: "min-w-40 items-center",
-        vertical: "w-24 flex-col has-data-[slot=attachment-content]:w-30",
+        vertical: "w-24 flex-col has-data-[hpx-slot=attachment-content]:w-30",
       },
     },
   }
@@ -192,7 +192,7 @@ function Attachment({
   const filling = fill && (state === "uploading" || state === "processing")
   const motionProps = {
     ref: setRef,
-    "data-slot": "attachment",
+    "data-hpx-slot": "attachment",
     "data-state": state,
     "data-filling": filling || undefined,
     "data-size": size,
@@ -309,7 +309,7 @@ function AttachmentBorderTrace() {
 }
 
 const attachmentMediaVariants = cva(
-  "relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 group-data-[orientation=vertical]/attachment:[&_svg:not([class*='size-'])]:size-6 group-data-[size=xs]/attachment:[&_svg:not([class*='size-'])]:size-3.5",
+  "relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[hpx-slot=spinner]:size-6! [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 group-data-[orientation=vertical]/attachment:[&_svg:not([class*='size-'])]:size-6 group-data-[size=xs]/attachment:[&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
@@ -353,7 +353,7 @@ function AttachmentMedia({
 
   return (
     <div
-      data-slot="attachment-media"
+      data-hpx-slot="attachment-media"
       data-variant={variant}
       className={cn(
         attachmentMediaVariants({ variant }),
@@ -510,7 +510,7 @@ function AttachmentContent({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="attachment-content"
+      data-hpx-slot="attachment-content"
       className={cn(
         "max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1",
         className
@@ -529,7 +529,7 @@ function AttachmentTitle({
 }) {
   return (
     <span
-      data-slot="attachment-title"
+      data-hpx-slot="attachment-title"
       className={cn(
         "block max-w-full min-w-0 truncate font-medium",
         shimmer &&
@@ -547,7 +547,7 @@ function AttachmentDescription({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="attachment-description"
+      data-hpx-slot="attachment-description"
       className={cn(
         "mt-0.5 block min-w-0 truncate text-xs text-muted-foreground group-data-[state=error]/attachment:text-destructive/80",
         "max-w-full",
@@ -572,7 +572,7 @@ function AttachmentProgress({
 
   if (!rolling) {
     return (
-      <span data-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
+      <span data-hpx-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
         {text}%
       </span>
     )
@@ -580,7 +580,7 @@ function AttachmentProgress({
 
   const digits = text.split("")
   return (
-    <span data-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
+    <span data-hpx-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
       <span className="sr-only">{text}%</span>
       {digits.map((digit, i) => (
         <RollingDigit key={digits.length - i} digit={Number(digit)} />
@@ -616,7 +616,7 @@ function AttachmentActions({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="attachment-actions"
+      data-hpx-slot="attachment-actions"
       className={cn(
         "relative z-20 flex shrink-0 items-center group-data-[orientation=vertical]/attachment:absolute group-data-[orientation=vertical]/attachment:top-3 group-data-[orientation=vertical]/attachment:right-3 group-data-[orientation=vertical]/attachment:gap-1",
         className
@@ -634,14 +634,14 @@ function AttachmentAction({
   onClick,
   children,
   ...props
-}: React.ComponentProps<typeof Button> & {
+}: React.ComponentProps<typeof HpxButton> & {
   reveal?: boolean
 }) {
   const [turns, setTurns] = React.useState(0)
 
   return (
-    <Button
-      data-slot="attachment-action"
+    <HpxButton
+      data-hpx-slot="attachment-action"
       variant={variant ?? "ghost"}
       size={size}
       onClick={(event) => {
@@ -670,7 +670,7 @@ function AttachmentAction({
       >
         {children}
       </motion.span>
-    </Button>
+    </HpxButton>
   )
 }
 
@@ -727,7 +727,7 @@ function AttachmentGroup({
     const flip: { tween?: gsap.core.Timeline } = {}
     const frame = requestAnimationFrame(() => {
       const items = Array.from(
-        group.querySelectorAll<HTMLElement>(":scope > [data-slot=attachment]")
+        group.querySelectorAll<HTMLElement>(":scope > [data-hpx-slot=attachment]")
       )
       const state = Flip.getState([group, ...items])
       apply()
@@ -778,11 +778,11 @@ function AttachmentGroup({
   const reorderContext = React.useMemo(() => ({ draggable: reorder }), [reorder])
   const groupProps = {
     ref: scroller,
-    "data-slot": "attachment-group",
+    "data-hpx-slot": "attachment-group",
     "data-wrap": String(initialWrap),
     className: cn(
-      "relative flex min-w-0 scroll-fade-x snap-x snap-mandatory scroll-px-1 no-scrollbar gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start",
-      "data-[overflow=false]:scroll-fade-none data-[wrap=true]:snap-none data-[wrap=true]:scroll-fade-none data-[wrap=true]:flex-wrap data-[wrap=true]:overflow-visible",
+      "relative flex min-w-0 hpx-scroll-fade-x snap-x snap-mandatory scroll-px-1 hpx-no-scrollbar gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[hpx-slot=attachment]:flex-none *:data-[hpx-slot=attachment]:snap-start",
+      "data-[overflow=false]:hpx-scroll-fade-none data-[wrap=true]:snap-none data-[wrap=true]:hpx-scroll-fade-none data-[wrap=true]:flex-wrap data-[wrap=true]:overflow-visible",
       className
     ),
     style,
@@ -827,7 +827,7 @@ function AttachmentDropzone({
 
   return (
     <div
-      data-slot="attachment-dropzone"
+      data-hpx-slot="attachment-dropzone"
       data-dragging={dragging || undefined}
       onDragOver={(event) => {
         if (!hasFiles(event)) return
@@ -884,16 +884,16 @@ function MarchingBorder() {
 }
 
 export {
-  Attachment,
-  AttachmentGroup,
-  AttachmentDropzone,
-  AttachmentMedia,
-  AttachmentStatusIcon,
-  AttachmentContent,
-  AttachmentTitle,
-  AttachmentDescription,
-  AttachmentProgress,
-  AttachmentActions,
-  AttachmentAction,
-  AttachmentTrigger,
+  Attachment as HpxAttachment,
+  AttachmentGroup as HpxAttachmentGroup,
+  AttachmentDropzone as HpxAttachmentDropzone,
+  AttachmentMedia as HpxAttachmentMedia,
+  AttachmentStatusIcon as HpxAttachmentStatusIcon,
+  AttachmentContent as HpxAttachmentContent,
+  AttachmentTitle as HpxAttachmentTitle,
+  AttachmentDescription as HpxAttachmentDescription,
+  AttachmentProgress as HpxAttachmentProgress,
+  AttachmentActions as HpxAttachmentActions,
+  AttachmentAction as HpxAttachmentAction,
+  AttachmentTrigger as HpxAttachmentTrigger,
 }

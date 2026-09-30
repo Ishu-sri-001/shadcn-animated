@@ -1,4 +1,4 @@
-import { QuestionnaireDemo } from "./questionnaire-demo"
+import { HpxQuestionnaireDemo } from "./questionnaire-demo"
 
 export default function QuestionnairePage() {
   return (
@@ -10,7 +10,7 @@ export default function QuestionnairePage() {
         </p>
       </div>
 
-      <QuestionnaireDemo />
+      <HpxQuestionnaireDemo />
     </div>
   )
 }

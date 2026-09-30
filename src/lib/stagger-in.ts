@@ -5,7 +5,7 @@ import { animate, stagger } from "motion/react"
  * Call it as the container mounts (from a callback ref): the items are hidden first, so
  * they never show for a frame before their turn.
  */
-export function staggerIn(
+export function hpxStaggerIn(
   root: Element,
   selector: string,
   { gap, delay = 0.08, distance = 8 }: { gap: number; delay?: number; distance?: number }

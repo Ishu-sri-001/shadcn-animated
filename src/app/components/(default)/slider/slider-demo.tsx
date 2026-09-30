@@ -2,20 +2,20 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Label } from "@/components/ui/label"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxLabel } from "@/components/ui/label"
 import {
-  RollingNumber,
-  Slider,
-  type SliderEdgeSize,
-  type SliderLabels,
-  type SliderThicken,
-  type SliderThickness,
-  type SliderEdgePress,
-  type SliderEdgeVariant,
-  type SliderMarks,
-  type SliderRadius,
-  type SliderBubble,
+  HpxRollingNumber,
+  HpxSlider,
+  type HpxSliderEdgeSize,
+  type HpxSliderLabels,
+  type HpxSliderThicken,
+  type HpxSliderThickness,
+  type HpxSliderEdgePress,
+  type HpxSliderEdgeVariant,
+  type HpxSliderMarks,
+  type HpxSliderRadius,
+  type HpxSliderBubble,
 } from "@/components/ui/slider"
 
 const controls = {
@@ -163,14 +163,14 @@ const controls = {
       { label: "lg", value: "lg" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 function Rolled({ on, value }: { on: boolean; value: string }) {
-  return on ? <RollingNumber value={value} /> : value
+  return on ? <HpxRollingNumber value={value} /> : value
 }
 
-export function SliderDemo() {
-  const panel = useControls(controls)
+export function HpxSliderDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const [grind, setGrind] = React.useState(18)
   const [range, setRange] = React.useState([88, 96])
@@ -178,19 +178,19 @@ export function SliderDemo() {
   const options = {
     duration: values.duration,
     bounce: values.bounce,
-    edgePress: values.edgePress as SliderEdgePress,
-    thicken: values.thicken as SliderThicken,
+    edgePress: values.edgePress as HpxSliderEdgePress,
+    thicken: values.thicken as HpxSliderThicken,
     elastic: values.elastic,
     stretch: values.stretch,
-    labels: values.labels as SliderLabels,
-    marks: values.marks as SliderMarks,
-    bubble: values.bubble as SliderBubble,
-    edgeVariant: values.edgeVariant as SliderEdgeVariant,
+    labels: values.labels as HpxSliderLabels,
+    marks: values.marks as HpxSliderMarks,
+    bubble: values.bubble as HpxSliderBubble,
+    edgeVariant: values.edgeVariant as HpxSliderEdgeVariant,
     roll: values.roll,
     showEdge: values.showEdge,
-    radius: values.radius as SliderRadius,
-    thickenTo: values.thickenTo as SliderThickness,
-    edgeSize: values.edgeSize as SliderEdgeSize,
+    radius: values.radius as HpxSliderRadius,
+    thickenTo: values.thickenTo as HpxSliderThickness,
+    edgeSize: values.edgeSize as HpxSliderEdgeSize,
     smooth: values.smooth,
   }
 
@@ -199,12 +199,12 @@ export function SliderDemo() {
       <div className="flex min-h-[50vh] flex-col justify-center gap-[4vw] rounded-lg border px-[4vw] py-8 max-md:gap-[10vw]">
         <div className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
-            <Label htmlFor="grind">Grind size</Label>
+            <HpxLabel htmlFor="grind">Grind size</HpxLabel>
             <span className="font-mono text-sm tabular-nums text-muted-foreground">
               <Rolled on={values.roll} value={String(grind)} />
             </span>
           </div>
-          <Slider
+          <HpxSlider
             id="grind"
             min={1}
             max={30}
@@ -220,13 +220,13 @@ export function SliderDemo() {
 
         <div className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
-            <Label htmlFor="temp">Water temperature</Label>
+            <HpxLabel htmlFor="temp">Water temperature</HpxLabel>
             <span className="font-mono text-sm tabular-nums text-muted-foreground">
               <Rolled on={values.roll} value={String(range[0])} />–
               <Rolled on={values.roll} value={String(range[1])} />°C
             </span>
           </div>
-          <Slider
+          <HpxSlider
             id="temp"
             min={80}
             max={100}
@@ -244,7 +244,7 @@ export function SliderDemo() {
         Tip: drag an edge, or click straight to a spot on the track to see the fill spring across.
       </p>
 
-      <ControlsPanel title="Slider" {...panel} />
+      <HpxControlsPanel title="Slider" {...panel} />
     </div>
   )
 }

@@ -17,7 +17,7 @@ import {
   type HTMLAttributes,
 } from "react"
 
-export interface CalendarRangeIconHandle {
+export interface HpxCalendarRangeIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -40,7 +40,7 @@ interface CalendarRangeIconProps
 }
 
 const CalendarRangeIcon = forwardRef<
-  CalendarRangeIconHandle,
+  HpxCalendarRangeIconHandle,
   CalendarRangeIconProps
 >(
   (
@@ -221,4 +221,4 @@ const CalendarRangeIcon = forwardRef<
 )
 
 CalendarRangeIcon.displayName = "CalendarRangeIcon"
-export { CalendarRangeIcon }
+export { CalendarRangeIcon as HpxCalendarRangeIcon }

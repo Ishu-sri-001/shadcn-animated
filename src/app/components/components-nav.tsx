@@ -7,17 +7,17 @@ import { motion, type Variants } from "motion/react"
 
 import { registry } from "@/components/registry"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
+  HpxSidebar,
+  HpxSidebarContent,
+  HpxSidebarGroup,
+  HpxSidebarGroupContent,
+  HpxSidebarHeader,
+  HpxSidebarMenu,
+  HpxSidebarMenuButton,
+  HpxSidebarMenuItem,
+  HpxSidebarProvider,
+  HpxSidebarTrigger,
+  useHpxSidebar,
 } from "@/components/ui/sidebar"
 
 const openSpring = { type: "spring", visualDuration: 0.3, bounce: 0.28 } as const
@@ -35,7 +35,7 @@ const itemVariants: Variants = {
 
 function NavPanel() {
   const pathname = usePathname()
-  const { isMobile, open, openMobile, setOpen, setOpenMobile } = useSidebar()
+  const { isMobile, open, openMobile, setOpen, setOpenMobile } = useHpxSidebar()
   const isOpen = isMobile ? openMobile : open
   const state = isOpen ? "open" : "closed"
 
@@ -53,7 +53,7 @@ function NavPanel() {
 
   return (
     <>
-      <SidebarTrigger className="fixed top-[3.75rem] left-2 z-50 border bg-background shadow-xs" />
+      <HpxSidebarTrigger className="fixed top-[3.75rem] left-2 z-50 border bg-background shadow-xs" />
       <motion.div
         initial={false}
         animate={{ x: isOpen ? "0%" : "-100%" }}
@@ -67,8 +67,8 @@ function NavPanel() {
       >
         {/* Fills the gap the spring overshoot exposes */}
         <div className="absolute inset-y-0 right-full w-[30vw] bg-sidebar" />
-        <Sidebar collapsible="none" className="h-full w-full border-r">
-          <SidebarHeader className="h-12 justify-center pl-12">
+        <HpxSidebar collapsible="none" className="h-full w-full border-r">
+          <HpxSidebarHeader className="h-12 justify-center pl-12">
             <motion.span
               initial={false}
               animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -8 }}
@@ -77,43 +77,43 @@ function NavPanel() {
             >
               Components
             </motion.span>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
+          </HpxSidebarHeader>
+          <HpxSidebarContent>
+            <HpxSidebarGroup>
+              <HpxSidebarGroupContent>
                 <motion.div initial={false} animate={state} variants={listVariants}>
-                  <SidebarMenu>
+                  <HpxSidebarMenu>
                     {registry.map((item) => (
-                      <SidebarMenuItem key={item.slug}>
+                      <HpxSidebarMenuItem key={item.slug}>
                         <motion.div variants={itemVariants}>
-                          <SidebarMenuButton
+                          <HpxSidebarMenuButton
                             isActive={pathname === `/components/${item.slug}`}
                             render={<Link href={`/components/${item.slug}`} onClick={close} />}
                           >
                             <span>{item.name}</span>
-                          </SidebarMenuButton>
+                          </HpxSidebarMenuButton>
                         </motion.div>
-                      </SidebarMenuItem>
+                      </HpxSidebarMenuItem>
                     ))}
-                  </SidebarMenu>
+                  </HpxSidebarMenu>
                 </motion.div>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
+              </HpxSidebarGroupContent>
+            </HpxSidebarGroup>
+          </HpxSidebarContent>
+        </HpxSidebar>
       </motion.div>
     </>
   )
 }
 
-export function ComponentsNav() {
+export function HpxComponentsNav() {
   const pathname = usePathname()
   // The sidebar page has its own sidebar
   if (pathname.startsWith("/components/sidebar")) return null
 
   return (
-    <SidebarProvider defaultOpen={false} className="contents">
+    <HpxSidebarProvider defaultOpen={false} className="contents">
       <NavPanel />
-    </SidebarProvider>
+    </HpxSidebarProvider>
   )
 }

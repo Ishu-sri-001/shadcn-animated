@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   MotionConfig,
@@ -162,11 +162,11 @@ function Tabs({
       <MotionConfig reducedMotion="user">
         <TabsPrimitive.Root
           ref={root}
-          data-slot="tabs"
+          data-hpx-slot="tabs"
           value={value}
           onValueChange={(next, details) => {
             // Which way the content should travel, from where the two tabs sit in the row
-            const values = [...(root.current?.querySelectorAll<HTMLElement>('[data-slot="tabs-trigger"]') ?? [])].map(
+            const values = [...(root.current?.querySelectorAll<HTMLElement>('[data-hpx-slot="tabs-trigger"]') ?? [])].map(
               (el) => el.dataset.value
             )
             setDirection(values.indexOf(String(next)) >= values.indexOf(value) ? 1 : -1)
@@ -187,10 +187,10 @@ function TabsList({ className, ...props }: Omit<TabsPrimitive.List.Props, "rende
 
   return (
     // The line sits right under the tabs; the pill row gets a little air above it
-    <div data-slot="tabs-header" className={cn("flex min-w-0 flex-col", pill && "gap-3")}>
+    <div data-hpx-slot="tabs-header" className={cn("flex min-w-0 flex-col", pill && "gap-3")}>
       {/* On a narrow screen the row scrolls sideways, with no scrollbar, and is clipped at its border */}
       <div
-        data-slot="tabs-scroll"
+        data-hpx-slot="tabs-scroll"
         className={cn(
           "max-w-full overflow-x-auto overscroll-x-contain scrollbar-none [&::-webkit-scrollbar]:hidden",
           pill && "w-fit",
@@ -199,7 +199,7 @@ function TabsList({ className, ...props }: Omit<TabsPrimitive.List.Props, "rende
         )}
       >
         <TabsPrimitive.List
-          data-slot="tabs-list"
+          data-hpx-slot="tabs-list"
           // Arrow keys move to the next tab and show its content straight away
           activateOnFocus
           className={cn(
@@ -211,7 +211,7 @@ function TabsList({ className, ...props }: Omit<TabsPrimitive.List.Props, "rende
           {...props}
         />
       </div>
-      {divider && <div aria-hidden data-slot="tabs-divider" className="h-px w-full bg-border" />}
+      {divider && <div aria-hidden data-hpx-slot="tabs-divider" className="h-px w-full bg-border" />}
     </div>
   )
 }
@@ -240,7 +240,7 @@ function TabsTrigger({
       return
     }
     const el = tabRef.current
-    const scroller = el?.closest<HTMLElement>('[data-slot="tabs-scroll"]')
+    const scroller = el?.closest<HTMLElement>('[data-hpx-slot="tabs-scroll"]')
     if (!active || !el || !scroller) return
     const left = el.offsetLeft
     const right = left + el.offsetWidth
@@ -256,7 +256,7 @@ function TabsTrigger({
       ref={tabRef}
       value={value}
       id={`${c.id}-tab-${value}`}
-      data-slot="tabs-trigger"
+      data-hpx-slot="tabs-trigger"
       data-value={value}
       onPointerEnter={() => c.setHovered(value)}
       onPointerLeave={() => c.setHovered(null)}
@@ -265,7 +265,7 @@ function TabsTrigger({
         "transition-colors duration-200 motion-reduce:transition-none",
         // Inside the tab, so the scrolling row doesn't clip the focus ring
         "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-        "data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        "hpx-disabled:cursor-not-allowed hpx-disabled:opacity-50",
         ROUNDED[c.rounded],
         // Only the glide pill has a fill behind the text; the underline modes are just the bar
         active
@@ -342,7 +342,7 @@ function TabsPanels({ className, children }: { className?: string; children: Rea
 
   return (
     <div
-      data-slot="tabs-panels"
+      data-hpx-slot="tabs-panels"
       className={cn("overflow-hidden", c.panelBorder && "border", ROUNDED[c.rounded], className)}
     >
       <motion.div
@@ -405,7 +405,7 @@ function TabsContent({
       id={`${c.id}-panel-${value}`}
       aria-labelledby={`${c.id}-tab-${value}`}
       tabIndex={0}
-      data-slot="tabs-content"
+      data-hpx-slot="tabs-content"
       custom={c.direction}
       variants={variants}
       initial="enter"
@@ -421,5 +421,5 @@ function TabsContent({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsPanels, TabsContent }
-export type { TabsIndicator, TabsContentMotion, TabsActiveColor, TabsRounded }
+export { Tabs as HpxTabs, TabsList as HpxTabsList, TabsTrigger as HpxTabsTrigger, TabsPanels as HpxTabsPanels, TabsContent as HpxTabsContent }
+export type { TabsIndicator as HpxTabsIndicator, TabsContentMotion as HpxTabsContentMotion, TabsActiveColor as HpxTabsActiveColor, TabsRounded as HpxTabsRounded }

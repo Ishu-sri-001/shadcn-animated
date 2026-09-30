@@ -1,4 +1,4 @@
-import { ButtonDemo } from "./button-demo"
+import { HpxButtonDemo } from "./button-demo"
 
 export default function ButtonPage() {
   return (
@@ -10,7 +10,7 @@ export default function ButtonPage() {
         </p>
       </div>
 
-      <ButtonDemo />
+      <HpxButtonDemo />
     </div>
   )
 }

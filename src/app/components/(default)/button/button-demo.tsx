@@ -2,16 +2,16 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  AnimatedButton,
-  type AnimatedButtonIcon,
-  type AnimatedButtonIconPosition,
-  type AnimatedButtonRounded,
-  type AnimatedButtonStatus,
-  type AnimatedButtonSurface,
-  type AnimatedButtonTone,
-  type AnimatedButtonVariant,
+  HpxAnimatedButton,
+  type HpxAnimatedButtonIcon,
+  type HpxAnimatedButtonIconPosition,
+  type HpxAnimatedButtonRounded,
+  type HpxAnimatedButtonStatus,
+  type HpxAnimatedButtonSurface,
+  type HpxAnimatedButtonTone,
+  type HpxAnimatedButtonVariant,
 } from "@/components/ui/animated-button"
 
 const controls = {
@@ -120,12 +120,12 @@ const controls = {
     step: 0.005,
     unit: "s",
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function ButtonDemo() {
-  const panel = useControls(controls)
+export function HpxButtonDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
-  const [simulated, setSimulated] = React.useState<AnimatedButtonStatus>("idle")
+  const [simulated, setSimulated] = React.useState<HpxAnimatedButtonStatus>("idle")
   const timers = React.useRef<number[]>([])
   const status = values.loadingState ? simulated : "idle"
 
@@ -147,10 +147,10 @@ export function ButtonDemo() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border px-[4vw] py-8">
-        <AnimatedButton
-          variant={values.variant as AnimatedButtonVariant}
-          surface={values.surface as AnimatedButtonSurface}
-          tone={values.tone as AnimatedButtonTone}
+        <HpxAnimatedButton
+          variant={values.variant as HpxAnimatedButtonVariant}
+          surface={values.surface as HpxAnimatedButtonSurface}
+          tone={values.tone as HpxAnimatedButtonTone}
           shimmer={values.shimmer}
           textRoll={values.textRoll}
           magnetic={values.magnetic}
@@ -159,21 +159,21 @@ export function ButtonDemo() {
           loadingText={values.loadingState ? "Loading" : undefined}
           successText={values.loadingState ? "Success" : undefined}
           onClick={simulate}
-          iconPosition={values.iconPosition as AnimatedButtonIconPosition}
+          iconPosition={values.iconPosition as HpxAnimatedButtonIconPosition}
           underline={values.underline}
-          icon={values.icon as AnimatedButtonIcon}
-          rounded={values.rounded as AnimatedButtonRounded}
+          icon={values.icon as HpxAnimatedButtonIcon}
+          rounded={values.rounded as HpxAnimatedButtonRounded}
           duration={values.duration}
           stagger={values.stagger}
         >
           Hover me
-        </AnimatedButton>
+        </HpxAnimatedButton>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: hover in from different sides to see where the dot fill starts. Click it to see the loading and success state.
       </p>
 
-      <ControlsPanel title="Button" {...panel} />
+      <HpxControlsPanel title="Button" {...panel} />
     </div>
   )
 }

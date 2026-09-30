@@ -1,4 +1,4 @@
-import { SliderDemo } from "./slider-demo"
+import { HpxSliderDemo } from "./slider-demo"
 
 export default function SliderPage() {
   return (
@@ -10,7 +10,7 @@ export default function SliderPage() {
         </p>
       </div>
 
-      <SliderDemo />
+      <HpxSliderDemo />
     </div>
   )
 }

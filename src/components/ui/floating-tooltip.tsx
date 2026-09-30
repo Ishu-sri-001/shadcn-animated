@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   MotionConfig,
@@ -385,7 +385,7 @@ function FloatingTooltipProvider({
                     ref={shell}
                     id={tooltipId}
                     role="tooltip"
-                    data-slot="floating-tooltip"
+                    data-hpx-slot="floating-tooltip"
                     className="pointer-events-none fixed top-0 left-0 z-50 w-max"
                     style={{ x: sx, y: sy }}
                     initial={appearIn}
@@ -614,13 +614,13 @@ function FloatingTooltip({
   } as React.HTMLAttributes<HTMLElement>)
 }
 
-export { FloatingTooltip, FloatingTooltipProvider }
+export { FloatingTooltip as HpxFloatingTooltip, FloatingTooltipProvider as HpxFloatingTooltipProvider }
 export type {
-  FloatingTooltipAppear,
-  FloatingTooltipChange,
-  FloatingTooltipFollow,
-  FloatingTooltipOffset,
-  FloatingTooltipRounded,
-  FloatingTooltipSide,
-  FloatingTooltipVariant,
+  FloatingTooltipAppear as HpxFloatingTooltipAppear,
+  FloatingTooltipChange as HpxFloatingTooltipChange,
+  FloatingTooltipFollow as HpxFloatingTooltipFollow,
+  FloatingTooltipOffset as HpxFloatingTooltipOffset,
+  FloatingTooltipRounded as HpxFloatingTooltipRounded,
+  FloatingTooltipSide as HpxFloatingTooltipSide,
+  FloatingTooltipVariant as HpxFloatingTooltipVariant,
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { motion, useMotionValue, useReducedMotion, useSpring, type MotionValue } from "motion/react"
 
 
@@ -103,7 +103,7 @@ function HoverCard({
   return (
     <HoverCardContext.Provider value={context}>
       <PreviewCardPrimitive.Root
-        data-slot="hover-card"
+        data-hpx-slot="hover-card"
         open={open}
         onOpenChange={(next, details) => {
           setUncontrolledOpen(next)
@@ -126,7 +126,7 @@ function HoverCardTrigger({
   const pointerType = React.useRef("mouse")
   return (
     <PreviewCardPrimitive.Trigger
-      data-slot="hover-card-trigger"
+      data-hpx-slot="hover-card-trigger"
       delay={options.openDelay}
       closeDelay={options.closeDelay}
       onPointerDown={(event) => {
@@ -188,7 +188,7 @@ function HoverCardContent({
   const scale = options.contentAnimation === "scale" ? options.startScale : 1
 
   return (
-    <PreviewCardPrimitive.Portal data-slot="hover-card-portal">
+    <PreviewCardPrimitive.Portal data-hpx-slot="hover-card-portal">
       <PreviewCardPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
@@ -199,7 +199,7 @@ function HoverCardContent({
       >
         <PreviewCardPrimitive.Popup
           ref={attach}
-          data-slot="hover-card-content"
+          data-hpx-slot="hover-card-content"
           render={<motion.div style={{ x: options.followCursor && !reduceMotion ? x : 0 }} />}
           className={cn(
             "z-50 w-72 origin-(--transform-origin) bg-popover px-5 py-4 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
@@ -217,5 +217,5 @@ function HoverCardContent({
   )
 }
 
-export { HoverCard, HoverCardTrigger, HoverCardContent }
-export type { HoverCardAnimation, HoverCardRounded }
+export { HoverCard as HpxHoverCard, HoverCardTrigger as HpxHoverCardTrigger, HoverCardContent as HpxHoverCardContent }
+export type { HoverCardAnimation as HpxHoverCardAnimation, HoverCardRounded as HpxHoverCardRounded }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import gsap from "gsap"
 import {
   ArrowUpIcon,
@@ -24,9 +24,9 @@ import {
   type Variants,
 } from "motion/react"
 
-import { Button } from "@/components/ui/button"
-import { MorphChevron } from "@/components/ui/dropdown-menu"
-import { Skeleton } from "@/components/ui/skeleton"
+import { HpxButton } from "@/components/ui/button"
+import { HpxMorphChevron } from "@/components/ui/dropdown-menu"
+import { HpxSkeleton } from "@/components/ui/skeleton"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const easeOutCubic = [0.33, 1, 0.68, 1] as const
@@ -801,10 +801,10 @@ function DataTable({
                 <span />
               )}
               {settings.addable && (
-                <Button variant="outline" size="sm" onClick={addRow}>
+                <HpxButton variant="outline" size="sm" onClick={addRow}>
                   <PlusIcon />
                   Add row
-                </Button>
+                </HpxButton>
               )}
             </div>
           )}
@@ -833,7 +833,7 @@ function DataTable({
               />
               <motion.table
                 ref={table}
-                data-slot="table"
+                data-hpx-slot="table"
                 // Fixed layout: columns keep their widths when filtering or paging changes the rows.
                 // On phones it's wider than the screen and scrolls, so cells aren't cut off.
                 className="relative w-full table-fixed caption-bottom text-base max-md:min-w-[150vw]"
@@ -853,10 +853,10 @@ function DataTable({
                 {caption && (
                   <caption className="py-4 text-sm text-muted-foreground">{caption}</caption>
                 )}
-                <thead data-slot="table-header">{headRow}</thead>
+                <thead data-hpx-slot="table-header">{headRow}</thead>
 
                 {showSkeleton && (
-                  <tbody data-slot="table-skeleton">
+                  <tbody data-hpx-slot="table-skeleton">
                     {Array.from({ length: skeletonRows }, (_, i) => (
                       <tr key={i} className={cn(horizontalLines && "border-b")}>
                         {Array.from({ length: leading + ordered.length + trailing }, (_, j) => (
@@ -870,7 +870,7 @@ function DataTable({
                             )}
                           >
                             <div className={cn("flex items-center", removable ? "h-7" : "h-6")}>
-                              <Skeleton className="h-4 w-[70%]" />
+                              <HpxSkeleton className="h-4 w-[70%]" />
                             </div>
                           </td>
                         ))}
@@ -884,7 +884,7 @@ function DataTable({
                     axis="y"
                     values={visible}
                     onReorder={reorderRows}
-                    data-slot="table-body"
+                    data-hpx-slot="table-body"
                     className={cn(
                       "[&_tr:last-child]:border-0",
                       showSkeleton && "hidden",
@@ -895,7 +895,7 @@ function DataTable({
                   </Reorder.Group>
                 ) : (
                   <motion.tbody
-                    data-slot="table-body"
+                    data-hpx-slot="table-body"
                     className={cn(
                       "[&_tr:last-child]:border-0",
                       showSkeleton && "hidden",
@@ -908,7 +908,7 @@ function DataTable({
 
                 {totalKey && highlightTotal && (
                   <tfoot
-                    data-slot="table-footer"
+                    data-hpx-slot="table-footer"
                     className={cn(highlightTotal ? "bg-muted font-bold" : "font-normal")}
                   >
                     <tr>
@@ -956,7 +956,7 @@ function DataTable({
 
           {pagination && (
             <div className="flex items-center justify-end gap-2 text-sm">
-              <Button
+              <HpxButton
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Previous page"
@@ -964,13 +964,13 @@ function DataTable({
                 onClick={() => goToPage(currentPage - 1)}
               >
                 <ChevronLeftIcon />
-              </Button>
+              </HpxButton>
               <span className="flex items-center gap-1 text-muted-foreground">
                 Page
                 <RollingText value={String(currentPage + 1)} className="text-foreground" />
                 of {pageCount}
               </span>
-              <Button
+              <HpxButton
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Next page"
@@ -978,7 +978,7 @@ function DataTable({
                 onClick={() => goToPage(currentPage + 1)}
               >
                 <ChevronRightIcon />
-              </Button>
+              </HpxButton>
             </div>
           )}
         </div>
@@ -1007,7 +1007,7 @@ function LoadingCell({ loading, children }: { loading: boolean; children: React.
         {children}
       </div>
       {loading && (
-        <Skeleton className="absolute top-1/2 left-0 h-4 w-[70%] -translate-y-1/2" />
+        <HpxSkeleton className="absolute top-1/2 left-0 h-4 w-[70%] -translate-y-1/2" />
       )}
     </div>
   )
@@ -1164,7 +1164,7 @@ function DataTableRowView({
       {settings.expandable && (
         <td className="relative w-10 px-2 align-middle">
           <Reveal swapKey={row.id}>
-            <MorphChevron open={expanded.has(row.id)} className="size-3.5 text-muted-foreground" />
+            <HpxMorphChevron open={expanded.has(row.id)} className="size-3.5 text-muted-foreground" />
           </Reveal>
           {lines(expandCol)}
         </td>
@@ -1195,7 +1195,7 @@ function DataTableRowView({
 
   const props = {
     ref,
-    "data-slot": "table-row",
+    "data-hpx-slot": "table-row",
     "data-row-id": row.id,
     "data-selected": isSelected || undefined,
     custom,
@@ -1210,12 +1210,12 @@ function DataTableRowView({
       "relative transition-colors duration-300",
       settings.highlight === "none" &&
         (settings.hoverTone === "primary"
-          ? "hover:bg-primary hover:text-primary-foreground [&:hover_.text-muted-foreground]:text-primary-foreground/70 [&:hover_[data-slot=status-badge]]:bg-background"
+          ? "hover:bg-primary hover:text-primary-foreground [&:hover_.text-muted-foreground]:text-primary-foreground/70 [&:hover_[data-hpx-slot=status-badge]]:bg-background"
           : "hover:bg-muted/50"),
       isSelected && "bg-primary/[0.06]",
       settings.expandable && "cursor-pointer",
       onPrimary &&
-        "text-primary-foreground [&_.text-muted-foreground]:text-primary-foreground/70 [&_[data-slot=status-badge]]:bg-background"
+        "text-primary-foreground [&_.text-muted-foreground]:text-primary-foreground/70 [&_[data-hpx-slot=status-badge]]:bg-background"
     ),
     children: cells,
   }
@@ -1585,7 +1585,7 @@ function StatusBadge({
   return (
     <button
       type="button"
-      data-slot="status-badge"
+      data-hpx-slot="status-badge"
       title="Click to change status"
       onClick={(event) => {
         event.stopPropagation()
@@ -1884,15 +1884,15 @@ function ActionBar({
               selected
             </span>
             {markLabel && (
-              <Button variant="ghost" size="sm" className="rounded-full" onClick={onMark}>
+              <HpxButton variant="ghost" size="sm" className="rounded-full" onClick={onMark}>
                 Mark {markLabel.toLowerCase()}
-              </Button>
+              </HpxButton>
             )}
-            <Button variant="destructive" size="sm" className="rounded-full" onClick={onDelete}>
+            <HpxButton variant="destructive" size="sm" className="rounded-full" onClick={onDelete}>
               <Trash2Icon />
               Delete
-            </Button>
-            <Button
+            </HpxButton>
+            <HpxButton
               variant="ghost"
               size="icon-sm"
               className="rounded-full"
@@ -1900,7 +1900,7 @@ function ActionBar({
               onClick={onClear}
             >
               <XIcon />
-            </Button>
+            </HpxButton>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1909,16 +1909,16 @@ function ActionBar({
 }
 
 export {
-  DataTable,
-  type DataTableProps,
-  type DataTableColumn,
-  type DataTableRow,
-  type DataTableStatus,
-  type DataTableHighlight,
-  type DataTableCountUp,
-  type DataTableDrag,
-  type DataTableSelectMark,
-  type DataTableHoverTone,
-  type DataTableRadius,
-  type DataTableAlign,
+  DataTable as HpxDataTable,
+  type DataTableProps as HpxDataTableProps,
+  type DataTableColumn as HpxDataTableColumn,
+  type DataTableRow as HpxDataTableRow,
+  type DataTableStatus as HpxDataTableStatus,
+  type DataTableHighlight as HpxDataTableHighlight,
+  type DataTableCountUp as HpxDataTableCountUp,
+  type DataTableDrag as HpxDataTableDrag,
+  type DataTableSelectMark as HpxDataTableSelectMark,
+  type DataTableHoverTone as HpxDataTableHoverTone,
+  type DataTableRadius as HpxDataTableRadius,
+  type DataTableAlign as HpxDataTableAlign,
 }

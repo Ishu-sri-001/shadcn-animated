@@ -1,4 +1,4 @@
-import { MenubarDemo } from "./menubar-demo"
+import { HpxMenubarDemo } from "./menubar-demo"
 
 export default function MenubarPage() {
   return (
@@ -11,7 +11,7 @@ export default function MenubarPage() {
         </p>
       </div>
 
-      <MenubarDemo />
+      <HpxMenubarDemo />
     </div>
   )
 }

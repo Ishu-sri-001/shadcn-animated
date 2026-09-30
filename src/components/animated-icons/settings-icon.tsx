@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface SettingsIconHandle {
+export interface HpxSettingsIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface SettingsIconProps extends Omit<
   color?: string
 }
 
-const SettingsIcon = forwardRef<SettingsIconHandle, SettingsIconProps>(
+const SettingsIcon = forwardRef<HpxSettingsIconHandle, SettingsIconProps>(
   (
     {
       onMouseEnter,
@@ -147,7 +147,7 @@ const SettingsIcon = forwardRef<SettingsIconHandle, SettingsIconProps>(
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="lucide lucide-settings-icon lucide-settings"
+           
           >
             <m.g variants={groupSpin} initial="normal" animate={controls}>
               <g>
@@ -226,4 +226,4 @@ const SettingsIcon = forwardRef<SettingsIconHandle, SettingsIconProps>(
 )
 
 SettingsIcon.displayName = "SettingsIcon"
-export { SettingsIcon }
+export { SettingsIcon as HpxSettingsIcon }

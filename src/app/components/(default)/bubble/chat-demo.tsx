@@ -4,28 +4,28 @@ import * as React from "react"
 import { ArrowUpIcon, MessageSquarePlusIcon, XIcon } from "lucide-react"
 import { AnimatePresence } from "motion/react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Bubble,
-  BubbleContent,
-  BubbleGroup,
-  BubbleReactions,
-  BubbleStatus,
-  BubbleSuggestion,
-  BubbleSuggestions,
-  BubbleText,
-  BubbleThread,
-  type BubbleStatusValue,
+  HpxBubble,
+  HpxBubbleContent,
+  HpxBubbleGroup,
+  HpxBubbleReactions,
+  HpxBubbleStatus,
+  HpxBubbleSuggestion,
+  HpxBubbleSuggestions,
+  HpxBubbleText,
+  HpxBubbleThread,
+  type HpxBubbleStatusValue,
 } from "@/components/ui/bubble"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import { HpxButton } from "@/components/ui/button"
+import { HpxCheckbox } from "@/components/ui/checkbox"
+import { HpxLabel } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  HpxSelect,
+  HpxSelectContent,
+  HpxSelectItem,
+  HpxSelectTrigger,
+  HpxSelectValue,
 } from "@/components/ui/select"
 
 const variants = [
@@ -45,7 +45,7 @@ type Message = {
   time: string
   at: number
   variant?: Variant
-  status?: BubbleStatusValue
+  status?: HpxBubbleStatusValue
   reactions: Record<string, number>
   mine?: string[]
   typing?: boolean
@@ -111,7 +111,7 @@ const controls = {
   readMore: { group: "Interaction", type: "checkbox", label: "Read more", value: true },
 
   joined: { group: "Grouping", type: "checkbox", label: "Joined corners", value: false },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 const FAIL_CHANCE = 0.25
 
@@ -135,8 +135,8 @@ function groupMessages(messages: Message[]) {
   return groups
 }
 
-export function ChatDemo() {
-  const panel = useControls(controls)
+export function HpxChatDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   const [messages, setMessages] = React.useState<Message[]>(seed)
@@ -282,7 +282,7 @@ export function ChatDemo() {
     const total = Object.values(message.reactions).reduce((sum, n) => sum + n, 0)
     const showStatus = values.status && mine && (failed || message.id === lastMine?.id)
     return (
-      <Bubble
+      <HpxBubble
         key={message.id}
         align={mine ? "end" : "start"}
         variant={failed ? "destructive" : mine ? (message.variant ?? "default") : "muted"}
@@ -303,13 +303,13 @@ export function ChatDemo() {
         picker={values.picker}
         magnify={values.magnify}
       >
-        <BubbleContent typing={message.typing} grow={message.stream} layoutId={message.layoutId}>
+        <HpxBubbleContent typing={message.typing} grow={message.stream} layoutId={message.layoutId}>
           {message.replyTo && (
             <span className="line-clamp-1 border-l-2 border-current/40 px-2 text-xs opacity-80">
               {message.replyTo}
             </span>
           )}
-          <BubbleText
+          <HpxBubbleText
             text={message.text}
             time={message.time}
             stream={message.stream}
@@ -320,10 +320,10 @@ export function ChatDemo() {
             }}
             collapsible={values.readMore}
           />
-        </BubbleContent>
+        </HpxBubbleContent>
         <AnimatePresence initial={false}>
           {total > 0 && (
-            <BubbleReactions
+            <HpxBubbleReactions
               key="reactions"
               align={mine ? "end" : "start"}
               pop={values.pop}
@@ -333,11 +333,11 @@ export function ChatDemo() {
               {Object.keys(message.reactions).map((emoji) => (
                 <span key={emoji}>{emoji}</span>
               ))}
-            </BubbleReactions>
+            </HpxBubbleReactions>
           )}
         </AnimatePresence>
         {showStatus && message.status && (
-          <BubbleStatus
+          <HpxBubbleStatus
             status={message.status}
             onRetry={() => {
               update(message.id, { status: "sending" })
@@ -346,7 +346,7 @@ export function ChatDemo() {
             }}
           />
         )}
-      </Bubble>
+      </HpxBubble>
     )
   }
 
@@ -357,42 +357,42 @@ export function ChatDemo() {
           Send a message, double-click or hover a bubble to react, swipe one to reply.
         </h2>
         <div className="flex shrink-0 items-center gap-4">
-          <Label className="text-sm font-normal text-muted-foreground">
-            <Checkbox checked={autoReply} onCheckedChange={setAutoReply} />
+          <HpxLabel className="text-sm font-normal text-muted-foreground">
+            <HpxCheckbox checked={autoReply} onCheckedChange={setAutoReply} />
             Auto reply
-          </Label>
-          <Button variant="outline" size="sm" onClick={simulateIncoming}>
+          </HpxLabel>
+          <HpxButton variant="outline" size="sm" onClick={simulateIncoming}>
             <MessageSquarePlusIcon />
             Receive messages
-          </Button>
+          </HpxButton>
         </div>
       </div>
       <div className="flex h-[75vh] flex-col overflow-hidden rounded-lg border max-md:mx-[calc(50%-46vw)]">
-        <BubbleThread className="min-h-0 flex-1 px-6 py-6 max-md:px-4">
+        <HpxBubbleThread className="min-h-0 flex-1 px-6 py-6 max-md:px-4">
           {groupMessages(messages).map((group) => (
-            <BubbleGroup key={group.id} joined={values.joined}>
+            <HpxBubbleGroup key={group.id} joined={values.joined}>
               {group.messages.map(renderMessage)}
-            </BubbleGroup>
+            </HpxBubbleGroup>
           ))}
           <AnimatePresence mode="popLayout">
             {values.suggestions && suggestions && (
-              <BubbleSuggestions key={suggestions.id}>
+              <HpxBubbleSuggestions key={suggestions.id}>
                 {suggestions.texts.map((text, i) => {
                   const layoutId = `${suggestions.id}-${i}`
                   return (
-                    <BubbleSuggestion
+                    <HpxBubbleSuggestion
                       key={text}
                       layoutId={layoutId}
                       onClick={() => send(text, { layoutId })}
                     >
                       {text}
-                    </BubbleSuggestion>
+                    </HpxBubbleSuggestion>
                   )
                 })}
-              </BubbleSuggestions>
+              </HpxBubbleSuggestions>
             )}
           </AnimatePresence>
-        </BubbleThread>
+        </HpxBubbleThread>
 
         <form
           onSubmit={(event) => {
@@ -409,7 +409,7 @@ export function ChatDemo() {
               <span className="line-clamp-1 text-muted-foreground">
                 Replying to: <span className="text-foreground">{replyTo.text}</span>
               </span>
-              <Button
+              <HpxButton
                 type="button"
                 variant="ghost"
                 size="icon-xs"
@@ -417,7 +417,7 @@ export function ChatDemo() {
                 onClick={() => setReplyTo(null)}
               >
                 <XIcon />
-              </Button>
+              </HpxButton>
             </div>
           )}
          
@@ -436,30 +436,30 @@ export function ChatDemo() {
               aria-label="Message"
               className="max-h-24 min-h-8 w-full max-md:flex-1 min-w-0 resize-none rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-base leading-snug transition-colors outline-none field-sizing-content placeholder:text-muted-foreground focus-visible:border-primary md:text-sm dark:bg-input/30"
             />
-            <Select
+            <HpxSelect
               items={variants}
               value={variant}
               onValueChange={(value) => value && setVariant(value as Variant)}
             >
-              <SelectTrigger aria-label="Bubble variant" className="w-32 shrink-0 max-md:order-last max-md:w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+              <HpxSelectTrigger aria-label="Bubble variant" className="w-32 shrink-0 max-md:order-last max-md:w-full">
+                <HpxSelectValue />
+              </HpxSelectTrigger>
+              <HpxSelectContent>
                 {variants.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <HpxSelectItem key={option.value} value={option.value}>
                     {option.label}
-                  </SelectItem>
+                  </HpxSelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            <Button type="submit" size="icon" aria-label="Send" disabled={!draft.trim()}>
+              </HpxSelectContent>
+            </HpxSelect>
+            <HpxButton type="submit" size="icon" aria-label="Send" disabled={!draft.trim()}>
               <ArrowUpIcon />
-            </Button>
+            </HpxButton>
           </div>
         </form>
       </div>
 
-      <ControlsPanel title="Bubble" {...panel} />
+      <HpxControlsPanel title="Bubble" {...panel} />
     </section>
   )
 }

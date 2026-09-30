@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
-import { staggerIn } from "@/lib/stagger-in"
+import { hpxStaggerIn } from "@/lib/stagger-in"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 
@@ -73,7 +73,7 @@ function Skeleton({
 
   return (
     <div
-      data-slot="skeleton"
+      data-hpx-slot="skeleton"
       data-animation={kind}
       className={cn(
         "relative overflow-hidden bg-muted",
@@ -127,7 +127,7 @@ function SkeletonSwap({
       let row: Element = node
       while (row.children.length === 1) row = row.children[0]
       row.setAttribute("data-skeleton-row", "")
-      const stop = staggerIn(node, "[data-skeleton-row] > *", {
+      const stop = hpxStaggerIn(node, "[data-skeleton-row] > *", {
         gap: stagger,
         delay: 0,
         distance: swap === "rise" ? 8 : 0,
@@ -199,9 +199,9 @@ function SkeletonText({
   )
 }
 
-export { ROUNDED as SKELETON_ROUNDED, Skeleton, SkeletonGroup, SkeletonSwap, SkeletonText }
+export { ROUNDED as HPX_SKELETON_ROUNDED, Skeleton as HpxSkeleton, SkeletonGroup as HpxSkeletonGroup, SkeletonSwap as HpxSkeletonSwap, SkeletonText as HpxSkeletonText }
 export type {
-  SkeletonAnimation,
-  SkeletonRounded,
-  SkeletonSwap as SkeletonSwapKind,
+  SkeletonAnimation as HpxSkeletonAnimation,
+  SkeletonRounded as HpxSkeletonRounded,
+  SkeletonSwap as HpxSkeletonSwapKind,
 }

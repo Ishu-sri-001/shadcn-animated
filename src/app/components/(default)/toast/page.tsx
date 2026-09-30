@@ -1,17 +1,17 @@
 "use client"
 
 import {
-  ControlsPanel,
-  useControls,
-  type ControlSchema,
+  HpxControlsPanel,
+  useHpxControls,
+  type HpxControlSchema,
 } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
+import { HpxButton } from "@/components/ui/button"
 import {
-  Toaster,
-  toast,
-  toastOrigin,
-  type ToastPosition,
-  type ToastRounded,
+  HpxToaster,
+  hpxToast,
+  hpxToastOrigin,
+  type HpxToastPosition,
+  type HpxToastRounded,
 } from "@/components/ui/toast"
 
 const messages = {
@@ -177,16 +177,16 @@ const controls = {
       { label: "Top centre", value: "top-center" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 export default function ToastPage() {
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   const showToast = (trigger: HTMLElement) => {
     const common = {
       timeout: values.timeout * 1000,
-      data: { origin: toastOrigin(trigger) },
+      data: { origin: hpxToastOrigin(trigger) },
     }
     const text = (message: { title: string; description: string }) => ({
       title: message.title,
@@ -194,7 +194,7 @@ export default function ToastPage() {
     })
 
     if (values.variant === "loading") {
-      toast.promise(roast(), {
+      hpxToast.promise(roast(), {
         loading: {
           ...common,
           ...text({
@@ -224,7 +224,7 @@ export default function ToastPage() {
     }
 
     const variant = values.variant as keyof typeof messages
-    const id = toast.add({
+    const id = hpxToast.add({
       ...common,
       type: variant === "default" ? undefined : variant,
       ...text(messages[variant]),
@@ -232,7 +232,7 @@ export default function ToastPage() {
         ? {
             children: "Undo",
             onClick: () =>
-              toast.update(id, {
+              hpxToast.update(id, {
                 type: "success",
                 title: "Change undone",
                 description: values.showDescription
@@ -247,7 +247,7 @@ export default function ToastPage() {
   }
 
   return (
-    <Toaster
+    <HpxToaster
       springy={values.springy}
       fromTrigger={values.fromTrigger}
       contentFade={values.contentFade}
@@ -258,8 +258,8 @@ export default function ToastPage() {
       timerBar={values.timerBar}
       glass={values.glass}
       accentEdge={values.accentEdge}
-      rounded={values.rounded as ToastRounded}
-      position={values.position as ToastPosition}
+      rounded={values.rounded as HpxToastRounded}
+      position={values.position as HpxToastPosition}
     >
       <div className="mx-auto w-full max-w-2xl">
         <h1 className="text-2xl font-semibold">Toast</h1>
@@ -267,17 +267,17 @@ export default function ToastPage() {
           Brief messages that stack in the corner and can be swiped away.
         </p>
         <div className="mt-6 flex min-h-48 items-center justify-center">
-          <Button
+          <HpxButton
             variant="outline"
             onClick={(event) => showToast(event.currentTarget)}
             className='text-xl py-5 px-8'
           >
             Show toast
-          </Button>
+          </HpxButton>
         </div>
       </div>
 
-      <ControlsPanel title="Toast" {...panel} />
-    </Toaster>
+      <HpxControlsPanel title="Toast" {...panel} />
+    </HpxToaster>
   )
 }

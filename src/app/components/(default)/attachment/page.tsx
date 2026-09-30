@@ -1,7 +1,7 @@
-import { Separator } from "@/components/ui/separator"
+import { HpxSeparator } from "@/components/ui/separator"
 
-import { NotesDemo } from "./notes-demo"
-import { UploadDemo } from "./upload-demo"
+import { HpxNotesDemo } from "./notes-demo"
+import { HpxUploadDemo } from "./upload-demo"
 
 export default function AttachmentPage() {
   return (
@@ -13,11 +13,11 @@ export default function AttachmentPage() {
         </p>
       </div>
 
-      <UploadDemo />
+      <HpxUploadDemo />
 
-      <Separator className='my-10 bg-foreground/30' />
+      <HpxSeparator className='my-10 bg-foreground/30' />
 
-      <NotesDemo />
+      <HpxNotesDemo />
     </div>
   )
 }

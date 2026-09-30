@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { animate, AnimatePresence, motion, MotionConfig, Reorder, useReducedMotion } from "motion/react"
 
 type RadioVariant = "default" | "card"
@@ -93,7 +93,7 @@ function RadioGroup({
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (!groupRef.current) return
     const radios = Array.from(
-      groupRef.current.querySelectorAll<HTMLButtonElement>("[data-slot=radio-control]:not(:disabled)")
+      groupRef.current.querySelectorAll<HTMLButtonElement>("[data-hpx-slot=radio-control]:not(:disabled)")
     )
     const index = radios.indexOf(document.activeElement as HTMLButtonElement)
     if (index === -1) return
@@ -133,7 +133,7 @@ function RadioGroup({
           ref={groupRef}
           role="radiogroup"
           aria-label={ariaLabel}
-          data-slot="radio-group"
+          data-hpx-slot="radio-group"
           onKeyDown={onKeyDown}
           className={cn("isolate grid w-full gap-3", className)}
         >
@@ -216,12 +216,12 @@ function RadioItem({
   )
 
   const rootProps = {
-    "data-slot": "radio-item",
+    "data-hpx-slot": "radio-item",
     "data-value": value,
     "data-checked": checked || undefined,
     "data-disabled": disabled || undefined,
     className: cn(
-      "group/radio relative flex cursor-pointer gap-3 text-lg select-none [--radio-accent:var(--primary)] [--radio-on-accent:var(--primary-foreground)] data-disabled:cursor-not-allowed",
+      "group/radio relative flex cursor-pointer gap-3 text-lg select-none [--radio-accent:var(--primary)] [--radio-on-accent:var(--primary-foreground)] hpx-disabled:cursor-not-allowed",
       description !== undefined ? "items-start" : "items-center",
       !showControl &&
         "rounded-md has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:ring-offset-4 has-[:focus-visible]:ring-offset-background",
@@ -346,7 +346,7 @@ function RadioItem({
 
         <button
           type="button"
-          data-slot="radio-control"
+          data-hpx-slot="radio-control"
           role="radio"
           aria-checked={checked}
           disabled={disabled}
@@ -393,4 +393,4 @@ function RadioItem({
   )
 }
 
-export { RadioGroup, RadioGroupItem, type RadioVariant, type RadioCardFill, type RadioAppearance }
+export { RadioGroup as HpxRadioGroup, RadioGroupItem as HpxRadioGroupItem, type RadioVariant as HpxRadioVariant, type RadioCardFill as HpxRadioCardFill, type RadioAppearance as HpxRadioAppearance }

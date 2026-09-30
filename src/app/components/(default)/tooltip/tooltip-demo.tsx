@@ -2,17 +2,17 @@
 
 import { Archive, Copy, Pencil, Share2, Trash2 } from "lucide-react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  FloatingTooltip,
-  FloatingTooltipProvider,
-  type FloatingTooltipAppear,
-  type FloatingTooltipChange,
-  type FloatingTooltipFollow,
-  type FloatingTooltipOffset,
-  type FloatingTooltipRounded,
-  type FloatingTooltipSide,
-  type FloatingTooltipVariant,
+  HpxFloatingTooltip,
+  HpxFloatingTooltipProvider,
+  type HpxFloatingTooltipAppear,
+  type HpxFloatingTooltipChange,
+  type HpxFloatingTooltipFollow,
+  type HpxFloatingTooltipOffset,
+  type HpxFloatingTooltipRounded,
+  type HpxFloatingTooltipSide,
+  type HpxFloatingTooltipVariant,
 } from "@/components/ui/floating-tooltip"
 
 // Short and long text, so the box visibly reshapes as you move along
@@ -155,49 +155,49 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function TooltipDemo() {
-  const panel = useControls(controls)
+export function HpxTooltipDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[50vh] items-center justify-center rounded-lg border px-4 py-8">
-        <FloatingTooltipProvider
-          variant={values.variant as FloatingTooltipVariant}
-          rounded={values.rounded as FloatingTooltipRounded}
-          follow={values.follow as FloatingTooltipFollow}
-          side={values.side as FloatingTooltipSide}
-          offset={values.offset as FloatingTooltipOffset}
-          change={values.change as FloatingTooltipChange}
+        <HpxFloatingTooltipProvider
+          variant={values.variant as HpxFloatingTooltipVariant}
+          rounded={values.rounded as HpxFloatingTooltipRounded}
+          follow={values.follow as HpxFloatingTooltipFollow}
+          side={values.side as HpxFloatingTooltipSide}
+          offset={values.offset as HpxFloatingTooltipOffset}
+          change={values.change as HpxFloatingTooltipChange}
           duration={values.duration}
           bounce={values.bounce}
           elastic={values.elastic}
           stretch={values.stretch}
           tilt={values.tilt}
           stiffness={values.stiffness}
-          appear={values.appear as FloatingTooltipAppear}
+          appear={values.appear as HpxFloatingTooltipAppear}
           closeDelay={values.closeDelay}
         >
           <div className="flex flex-wrap items-center justify-center gap-3">
             {actions.map(({ label, Icon, content, description }) => (
-              <FloatingTooltip key={label} content={content} description={description}>
+              <HpxFloatingTooltip key={label} content={content} description={description}>
                 <button className="flex items-center gap-2 rounded-lg border bg-background px-5 py-3 text-base font-medium transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
                   <Icon className="size-4" />
                   <span>{label}</span>
                 </button>
-              </FloatingTooltip>
+              </HpxFloatingTooltip>
             ))}
           </div>
-        </FloatingTooltipProvider>
+        </HpxFloatingTooltipProvider>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: move the pointer across the buttons (on a touch screen, tap one). Set &quot;When it changes&quot; to a Morph option to see one tooltip
         stay put while its box reshapes and the text slides, fades or rolls the way you moved.
       </p>
 
-      <ControlsPanel title="Tooltip" {...panel} />
+      <HpxControlsPanel title="Tooltip" {...panel} />
     </div>
   )
 }

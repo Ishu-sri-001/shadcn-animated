@@ -17,7 +17,7 @@ import {
   type HTMLAttributes,
 } from "react"
 
-export interface CalendarIconHandle {
+export interface HpxCalendarIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -38,7 +38,7 @@ interface CalendarIconProps extends Omit<
   color?: string
 }
 
-const CalendarIcon = forwardRef<CalendarIconHandle, CalendarIconProps>(
+const CalendarIcon = forwardRef<HpxCalendarIconHandle, CalendarIconProps>(
   (
     {
       onMouseEnter,
@@ -168,4 +168,4 @@ const CalendarIcon = forwardRef<CalendarIconHandle, CalendarIconProps>(
 )
 
 CalendarIcon.displayName = "CalendarIcon"
-export { CalendarIcon }
+export { CalendarIcon as HpxCalendarIcon }

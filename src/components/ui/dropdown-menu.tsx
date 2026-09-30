@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import gsap from "gsap"
 import {
   AnimatePresence,
@@ -248,7 +248,7 @@ function DropdownMenu({
     <DropdownMenuContext.Provider value={context}>
       <MotionConfig reducedMotion="user">
         <MenuPrimitive.Root
-          data-slot="dropdown-menu"
+          data-hpx-slot="dropdown-menu"
           open={open}
           onOpenChange={(next, details) => {
             // Keep the popup mounted so Motion can play the exit, then unmount in `onExitComplete`.
@@ -270,7 +270,7 @@ function DropdownMenu({
 }
 
 function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
-  return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+  return <MenuPrimitive.Portal data-hpx-slot="dropdown-menu-portal" {...props} />
 }
 
 const TriggerContext = React.createContext({ animateValue: true })
@@ -335,7 +335,7 @@ function DropdownMenuTrigger({
   return (
     <TriggerContext.Provider value={{ animateValue }}>
       <MenuPrimitive.Trigger
-        data-slot="dropdown-menu-trigger"
+        data-hpx-slot="dropdown-menu-trigger"
         ref={(node: HTMLElement | null) => {
           triggerRef.current = node
           if (typeof ref === "function") ref(node as HTMLButtonElement)
@@ -457,7 +457,7 @@ function DropdownMenuTriggerIcon({
   if (icon === "chevron") {
     return (
       <MorphChevron
-        data-slot="dropdown-menu-trigger-icon"
+        data-hpx-slot="dropdown-menu-trigger-icon"
         open={open}
         duration={preset.iconDuration}
         className={cn("size-4", className)}
@@ -467,7 +467,7 @@ function DropdownMenuTriggerIcon({
 
   return (
     <MorphPlus
-      data-slot="dropdown-menu-trigger-icon"
+      data-hpx-slot="dropdown-menu-trigger-icon"
       open={open}
       className={cn("size-5", className)}
     />
@@ -606,7 +606,7 @@ function unscaledRect(el: Element) {
   )
 }
 
-const MORPH_ITEMS = '[data-slot="dropdown-menu-label"], [data-slot$="-item"]'
+const MORPH_ITEMS = '[data-hpx-slot="dropdown-menu-label"], [data-hpx-slot$="-item"]'
 
 /**
  * The morph panel, animated with GSAP. The trigger itself grows: its bottom padding tweens down
@@ -754,7 +754,7 @@ function DropdownMenuContent({
         sideOffset={morph ? ({ anchor }) => -anchor.height : sideOffset}
       >
         <MenuPrimitive.Popup
-          data-slot="dropdown-menu-content"
+          data-hpx-slot="dropdown-menu-content"
           className={cn(
             "z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
             clipsHeight && "overflow-hidden",
@@ -797,7 +797,7 @@ function DropdownMenuContent({
 }
 
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
-  return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+  return <MenuPrimitive.Group data-hpx-slot="dropdown-menu-group" {...props} />
 }
 
 function DropdownMenuLabel({
@@ -811,7 +811,7 @@ function DropdownMenuLabel({
 
   return (
     <MenuPrimitive.GroupLabel
-      data-slot="dropdown-menu-label"
+      data-hpx-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
         "px-1.5 py-1 text-sm font-medium text-muted-foreground data-inset:pl-7",
@@ -886,7 +886,7 @@ function MotionItem({
 }
 
 const itemBase =
-  "relative isolate flex cursor-default items-center gap-1.5 rounded-md text-base outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+  "relative isolate flex cursor-default items-center gap-1.5 rounded-md text-base outline-hidden select-none hpx-disabled:pointer-events-none hpx-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 
 /** The hovered item is always primary; Motion draws the background for `slide` and `fill`. */
 const HIGHLIGHT_FILL: Record<DropdownMenuHighlightColor, string> = {
@@ -936,7 +936,7 @@ function DropdownMenuItem({
 
   return (
     <MenuPrimitive.Item
-      data-slot="dropdown-menu-item"
+      data-hpx-slot="dropdown-menu-item"
       data-inset={inset}
       data-variant={variant}
       className={cn(
@@ -954,7 +954,7 @@ function DropdownMenuItem({
 }
 
 function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
-  return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />
+  return <MenuPrimitive.SubmenuRoot data-hpx-slot="dropdown-menu-sub" {...props} />
 }
 
 function DropdownMenuSubTrigger({
@@ -969,7 +969,7 @@ function DropdownMenuSubTrigger({
 
   return (
     <MenuPrimitive.SubmenuTrigger
-      data-slot="dropdown-menu-sub-trigger"
+      data-hpx-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
         itemBase,
@@ -1018,9 +1018,9 @@ function DropdownMenuSubContent({
         sideOffset={sideOffset}
       >
         <MenuPrimitive.Popup
-          data-slot="dropdown-menu-sub-content"
+          data-hpx-slot="dropdown-menu-sub-content"
           className={cn(
-            "z-50 max-h-(--available-height) w-auto min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "z-50 max-h-(--available-height) w-auto min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 hpx-open:animate-in hpx-open:fade-in-0 hpx-open:zoom-in-95 hpx-closed:animate-out hpx-closed:fade-out-0 hpx-closed:zoom-out-95",
             className
           )}
           {...props}
@@ -1065,7 +1065,7 @@ function DropdownMenuCheckboxItem({
 
   return (
     <MenuPrimitive.CheckboxItem
-      data-slot="dropdown-menu-checkbox-item"
+      data-hpx-slot="dropdown-menu-checkbox-item"
       data-inset={inset}
       data-indicator="check"
       className={cn(
@@ -1079,7 +1079,7 @@ function DropdownMenuCheckboxItem({
         <MotionItem itemProps={itemProps} highlighted={state.highlighted}>
           <span
             aria-hidden
-            data-slot="dropdown-menu-checkbox-item-indicator"
+            data-hpx-slot="dropdown-menu-checkbox-item-indicator"
             className="pointer-events-none absolute right-2 flex size-4 items-center justify-center"
           >
             <DrawnCheck checked={state.checked} />
@@ -1096,7 +1096,7 @@ function DropdownMenuCheckboxItem({
 function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   return (
     <MenuPrimitive.RadioGroup
-      data-slot="dropdown-menu-radio-group"
+      data-hpx-slot="dropdown-menu-radio-group"
       {...props}
     />
   )
@@ -1119,7 +1119,7 @@ function RadioIndicator({ checked }: { checked: boolean }) {
   return (
     <span
       aria-hidden
-      data-slot="dropdown-menu-radio-item-indicator"
+      data-hpx-slot="dropdown-menu-radio-item-indicator"
       className="pointer-events-none absolute right-2 flex size-4 items-center justify-center"
     >
       {indicator === "dot" ? (
@@ -1153,7 +1153,7 @@ function DropdownMenuRadioItem({
 
   return (
     <MenuPrimitive.RadioItem
-      data-slot="dropdown-menu-radio-item"
+      data-hpx-slot="dropdown-menu-radio-item"
       data-inset={inset}
       data-indicator={context.indicator}
       closeOnClick={!context.delayCloseOnSelect}
@@ -1226,7 +1226,7 @@ function DropdownMenuItemDescription({ className, ...props }: React.ComponentPro
 
   return (
     <span
-      data-slot="dropdown-menu-item-description"
+      data-hpx-slot="dropdown-menu-item-description"
       className={cn("block text-sm text-muted-foreground", className)}
       {...props}
     />
@@ -1239,7 +1239,7 @@ function DropdownMenuSeparator({
 }: MenuPrimitive.Separator.Props) {
   return (
     <MenuPrimitive.Separator
-      data-slot="dropdown-menu-separator"
+      data-hpx-slot="dropdown-menu-separator"
       className={cn("-mx-1 my-1 h-px bg-border", className)}
       {...props}
     />
@@ -1252,7 +1252,7 @@ function DropdownMenuShortcut({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="dropdown-menu-shortcut"
+      data-hpx-slot="dropdown-menu-shortcut"
       className={cn(
         "ml-auto text-xs tracking-widest text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground",
         className
@@ -1263,37 +1263,37 @@ function DropdownMenuShortcut({
 }
 
 export {
-  DropdownMenu,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
-  DropdownMenuTriggerIcon,
-  MorphChevron,
-  MorphPlus,
-  DrawnCheck,
-  DropdownMenuValue,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-  DropdownMenuItemTitle,
-  DropdownMenuItemDescription,
-  DropdownMenuCheckboxItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
+  DropdownMenu as HpxDropdownMenu,
+  DropdownMenuPortal as HpxDropdownMenuPortal,
+  DropdownMenuTrigger as HpxDropdownMenuTrigger,
+  DropdownMenuTriggerIcon as HpxDropdownMenuTriggerIcon,
+  MorphChevron as HpxMorphChevron,
+  MorphPlus as HpxMorphPlus,
+  DrawnCheck as HpxDrawnCheck,
+  DropdownMenuValue as HpxDropdownMenuValue,
+  DropdownMenuContent as HpxDropdownMenuContent,
+  DropdownMenuGroup as HpxDropdownMenuGroup,
+  DropdownMenuLabel as HpxDropdownMenuLabel,
+  DropdownMenuItem as HpxDropdownMenuItem,
+  DropdownMenuItemTitle as HpxDropdownMenuItemTitle,
+  DropdownMenuItemDescription as HpxDropdownMenuItemDescription,
+  DropdownMenuCheckboxItem as HpxDropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup as HpxDropdownMenuRadioGroup,
+  DropdownMenuRadioItem as HpxDropdownMenuRadioItem,
+  DropdownMenuSeparator as HpxDropdownMenuSeparator,
+  DropdownMenuShortcut as HpxDropdownMenuShortcut,
+  DropdownMenuSub as HpxDropdownMenuSub,
+  DropdownMenuSubTrigger as HpxDropdownMenuSubTrigger,
+  DropdownMenuSubContent as HpxDropdownMenuSubContent,
   // For components built on the menu, like the menubar.
-  useDropdownMenu,
-  panelVariants,
-  itemVariants,
-  unscaledRect,
+  useDropdownMenu as useHpxDropdownMenu,
+  panelVariants as hpxPanelVariants,
+  itemVariants as hpxItemVariants,
+  unscaledRect as hpxUnscaledRect,
 }
 export type {
-  DropdownMenuAnimation,
-  DropdownMenuHighlight,
-  DropdownMenuHighlightColor,
-  DropdownMenuIndicator,
+  DropdownMenuAnimation as HpxDropdownMenuAnimation,
+  DropdownMenuHighlight as HpxDropdownMenuHighlight,
+  DropdownMenuHighlightColor as HpxDropdownMenuHighlightColor,
+  DropdownMenuIndicator as HpxDropdownMenuIndicator,
 }

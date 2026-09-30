@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   animate,
   AnimatePresence,
@@ -231,7 +231,7 @@ function CheckboxGroup({
     <MotionConfig reducedMotion="user">
       <CheckboxOptionsContext.Provider value={options}>
         <CheckboxGroupContext.Provider value={context}>
-          <div data-slot="checkbox-group" className="flex flex-col gap-8">
+          <div data-hpx-slot="checkbox-group" className="flex flex-col gap-8">
             {(selectAll || deselectAll || counter) && (
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-8 max-md:gap-6">
@@ -433,13 +433,13 @@ function CheckboxItem({
 
   const rootProps = {
     ref: root,
-    "data-slot": "checkbox-item",
+    "data-hpx-slot": "checkbox-item",
     "data-value": value,
     "data-checked": checked || undefined,
     "data-indeterminate": mixed || undefined,
     "data-disabled": disabled || undefined,
     className: cn(
-      "group/checkbox relative flex cursor-pointer gap-3 text-lg select-none [--checkbox-accent:var(--primary)] [--checkbox-on-accent:var(--primary-foreground)] data-disabled:cursor-not-allowed",
+      "group/checkbox relative flex cursor-pointer gap-3 text-lg select-none [--checkbox-accent:var(--primary)] [--checkbox-on-accent:var(--primary-foreground)] hpx-disabled:cursor-not-allowed",
       description !== undefined ? "items-start" : "items-center",
       !showControl &&
         "rounded-md has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:ring-offset-4 has-[:focus-visible]:ring-offset-background",
@@ -599,7 +599,7 @@ function CheckboxItem({
 
         <button
           type="button"
-          data-slot="checkbox-control"
+          data-hpx-slot="checkbox-control"
           role="checkbox"
           aria-checked={mixed ? "mixed" : checked}
           disabled={disabled}
@@ -666,11 +666,11 @@ function RollingDigit({ digit }: { digit: number }) {
 }
 
 export {
-  CheckboxGroup,
-  CheckboxItem,
-  type CheckboxVariant,
-  type CheckboxCardFill,
-  type CheckboxAppearance,
-  type CheckboxMark,
-  type CheckboxRadius,
+  CheckboxGroup as HpxCheckboxGroup,
+  CheckboxItem as HpxCheckboxItem,
+  type CheckboxVariant as HpxCheckboxVariant,
+  type CheckboxCardFill as HpxCheckboxCardFill,
+  type CheckboxAppearance as HpxCheckboxAppearance,
+  type CheckboxMark as HpxCheckboxMark,
+  type CheckboxRadius as HpxCheckboxRadius,
 }

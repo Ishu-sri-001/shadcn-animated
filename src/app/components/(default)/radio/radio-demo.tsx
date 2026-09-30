@@ -2,13 +2,13 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  RadioGroup,
-  RadioGroupItem,
-  type RadioAppearance,
-  type RadioCardFill,
-  type RadioVariant,
+  HpxRadioGroup,
+  HpxRadioGroupItem,
+  type HpxRadioAppearance,
+  type HpxRadioCardFill,
+  type HpxRadioVariant,
 } from "@/components/ui/radio-group"
 
 const shipping = [
@@ -61,10 +61,10 @@ const controls = {
 
   reorder: { group: "Group", type: "checkbox", label: "Drag to reorder", value: false },
   colorful: { group: "Group", type: "checkbox", label: "Colour per option", value: false },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function RadioDemo() {
-  const panel = useControls(controls)
+export function HpxRadioDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const { variant, cardFill, appearance, colorful, ...groupOptions } = values
   const cards = variant === "card"
@@ -76,11 +76,11 @@ export function RadioDemo() {
         Single select · {cards ? "Cards" : "Inline"}
       </h2>
       <div className="rounded-lg border p-6 max-md:p-4">
-        <RadioGroup
+        <HpxRadioGroup
           {...groupOptions}
-          variant={variant as RadioVariant}
-          cardFill={cardFill as RadioCardFill}
-          appearance={appearance as RadioAppearance}
+          variant={variant as HpxRadioVariant}
+          cardFill={cardFill as HpxRadioCardFill}
+          appearance={appearance as HpxRadioAppearance}
           value={choice}
           onValueChange={setChoice}
           aria-label="Delivery"
@@ -89,7 +89,7 @@ export function RadioDemo() {
           }
         >
           {shipping.map((option) => (
-            <RadioGroupItem
+            <HpxRadioGroupItem
               key={option.value}
               value={option.value}
               label={option.value}
@@ -98,13 +98,13 @@ export function RadioDemo() {
               accent={colorful ? option.accent : undefined}
             />
           ))}
-        </RadioGroup>
+        </HpxRadioGroup>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: focus the group with Tab, then use the arrow keys, Home and End.
       </p>
 
-      <ControlsPanel title="Radio" {...panel} />
+      <HpxControlsPanel title="Radio" {...panel} />
     </section>
   )
 }

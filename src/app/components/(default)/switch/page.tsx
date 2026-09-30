@@ -1,4 +1,4 @@
-import { SwitchDemo } from "./switch-demo"
+import { HpxSwitchDemo } from "./switch-demo"
 
 export default function SwitchPage() {
   return (
@@ -10,7 +10,7 @@ export default function SwitchPage() {
         </p>
       </div>
 
-      <SwitchDemo />
+      <HpxSwitchDemo />
     </div>
   )
 }

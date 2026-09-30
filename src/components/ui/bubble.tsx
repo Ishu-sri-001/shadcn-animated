@@ -4,7 +4,7 @@ import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { ClockIcon, ReplyIcon, RotateCwIcon } from "lucide-react"
 import {
   animate,
@@ -71,7 +71,7 @@ function BubbleThread({ className, children, ...props }: React.ComponentProps<"d
         <motion.div
           ref={scroller}
           layoutScroll
-          data-slot="bubble-thread"
+          data-hpx-slot="bubble-thread"
           className={cn("overflow-y-auto overscroll-contain", className)}
           {...(props as HTMLMotionProps<"div">)}
         >
@@ -85,11 +85,11 @@ function BubbleThread({ className, children, ...props }: React.ComponentProps<"d
 }
 
 const joinedCorners = cn(
-  "gap-0.5 [&_[data-slot=bubble-content]]:transition-[border-radius] [&_[data-slot=bubble-content]]:duration-300",
-  "[&>[data-align=start]:not(:first-child)>[data-slot=bubble-content]]:rounded-tl-sm",
-  "[&>[data-align=start]:not(:last-child)>[data-slot=bubble-content]]:rounded-bl-sm",
-  "[&>[data-align=end]:not(:first-child)>[data-slot=bubble-content]]:rounded-tr-sm",
-  "[&>[data-align=end]:not(:last-child)>[data-slot=bubble-content]]:rounded-br-sm"
+  "gap-0.5 [&_[data-hpx-slot=bubble-content]]:transition-[border-radius] [&_[data-hpx-slot=bubble-content]]:duration-300",
+  "[&>[data-align=start]:not(:first-child)>[data-hpx-slot=bubble-content]]:rounded-tl-sm",
+  "[&>[data-align=start]:not(:last-child)>[data-hpx-slot=bubble-content]]:rounded-bl-sm",
+  "[&>[data-align=end]:not(:first-child)>[data-hpx-slot=bubble-content]]:rounded-tr-sm",
+  "[&>[data-align=end]:not(:last-child)>[data-hpx-slot=bubble-content]]:rounded-br-sm"
 )
 
 function BubbleGroup({
@@ -103,7 +103,7 @@ function BubbleGroup({
 
   return (
     <motion.div
-      data-slot="bubble-group"
+      data-hpx-slot="bubble-group"
       layout={inThread ? "position" : undefined}
       transition={{ layout: spring }}
       className={cn("flex min-w-0 flex-col gap-2", joined && joinedCorners, className)}
@@ -118,19 +118,19 @@ const bubbleVariants = cva(
     variants: {
       variant: {
         default:
-          "*:data-[slot=bubble-content]:bg-primary *:data-[slot=bubble-content]:text-primary-foreground [&>[data-slot=bubble-content]:is(button,a):hover]:bg-primary/80",
+          "*:data-[hpx-slot=bubble-content]:bg-primary *:data-[hpx-slot=bubble-content]:text-primary-foreground [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-primary/80",
         secondary:
-          "*:data-[slot=bubble-content]:bg-secondary *:data-[slot=bubble-content]:text-secondary-foreground [&>[data-slot=bubble-content]:is(button,a):hover]:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]",
+          "*:data-[hpx-slot=bubble-content]:bg-secondary *:data-[hpx-slot=bubble-content]:text-secondary-foreground [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]",
         muted:
-          "*:data-[slot=bubble-content]:bg-muted [&>[data-slot=bubble-content]:is(button,a):hover]:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]",
+          "*:data-[hpx-slot=bubble-content]:bg-muted [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]",
         tinted:
-          "*:data-[slot=bubble-content]:bg-[oklch(from_var(--primary)_0.93_calc(c*0.4)_h)] *:data-[slot=bubble-content]:text-foreground dark:*:data-[slot=bubble-content]:bg-[oklch(from_var(--primary)_0.3_calc(c*0.4)_h)] [&>[data-slot=bubble-content]:is(button,a):hover]:bg-[oklch(from_var(--primary)_0.88_calc(c*0.5)_h)] dark:[&>[data-slot=bubble-content]:is(button,a):hover]:bg-[oklch(from_var(--primary)_0.35_calc(c*0.5)_h)]",
+          "*:data-[hpx-slot=bubble-content]:bg-[oklch(from_var(--primary)_0.93_calc(c*0.4)_h)] *:data-[hpx-slot=bubble-content]:text-foreground dark:*:data-[hpx-slot=bubble-content]:bg-[oklch(from_var(--primary)_0.3_calc(c*0.4)_h)] [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-[oklch(from_var(--primary)_0.88_calc(c*0.5)_h)] dark:[&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-[oklch(from_var(--primary)_0.35_calc(c*0.5)_h)]",
         outline:
-          "*:data-[slot=bubble-content]:border-border *:data-[slot=bubble-content]:bg-background [&>[data-slot=bubble-content]:is(button,a):hover]:bg-muted [&>[data-slot=bubble-content]:is(button,a):hover]:text-foreground dark:[&>[data-slot=bubble-content]:is(button,a):hover]:bg-input/30",
+          "*:data-[hpx-slot=bubble-content]:border-border *:data-[hpx-slot=bubble-content]:bg-background [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-muted [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:text-foreground dark:[&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-input/30",
         ghost:
-          "border-none *:data-[slot=bubble-content]:rounded-none *:data-[slot=bubble-content]:bg-transparent *:data-[slot=bubble-content]:p-0 [&>[data-slot=bubble-content]:is(button,a):hover]:bg-muted [&>[data-slot=bubble-content]:is(button,a):hover]:text-foreground dark:[&>[data-slot=bubble-content]:is(button,a):hover]:bg-muted/50",
+          "border-none *:data-[hpx-slot=bubble-content]:rounded-none *:data-[hpx-slot=bubble-content]:bg-transparent *:data-[hpx-slot=bubble-content]:p-0 [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-muted [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:text-foreground dark:[&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-muted/50",
         destructive:
-          "*:data-[slot=bubble-content]:bg-destructive/10 *:data-[slot=bubble-content]:text-destructive dark:*:data-[slot=bubble-content]:bg-destructive/20 [&>[data-slot=bubble-content]:is(button,a):hover]:bg-destructive/20 dark:[&>[data-slot=bubble-content]:is(button,a):hover]:bg-destructive/30",
+          "*:data-[hpx-slot=bubble-content]:bg-destructive/10 *:data-[hpx-slot=bubble-content]:text-destructive dark:*:data-[hpx-slot=bubble-content]:bg-destructive/20 [&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-destructive/20 dark:[&>[data-hpx-slot=bubble-content]:is(button,a):hover]:bg-destructive/30",
       },
     },
     defaultVariants: {
@@ -229,7 +229,7 @@ function Bubble({
 
   const openPicker = () => {
     const el = node.current
-    const thread = el?.closest("[data-slot=bubble-thread]")
+    const thread = el?.closest("[data-hpx-slot=bubble-thread]")
     if (el && thread) {
       const room = el.getBoundingClientRect().top - thread.getBoundingClientRect().top
       const needed = 3.25 * parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -242,7 +242,7 @@ function Bubble({
   const flyFrom = React.useRef(enterFrom)
   React.useLayoutEffect(() => {
     const from = flyFrom.current
-    const content = node.current?.querySelector<HTMLElement>(":scope > [data-slot=bubble-content]")
+    const content = node.current?.querySelector<HTMLElement>(":scope > [data-hpx-slot=bubble-content]")
     if (!from || !content || reduceMotion) return
     const rect = content.getBoundingClientRect()
     const computed = getComputedStyle(content)
@@ -307,15 +307,15 @@ function Bubble({
   return (
     <motion.div
       ref={setRef}
-      data-slot="bubble"
+      data-hpx-slot="bubble"
       data-variant={variant}
       data-align={align}
       className={cn(
         bubbleVariants({ variant }),
-        "has-data-[slot=bubble-reactions]:z-10",
+        "has-data-[hpx-slot=bubble-reactions]:z-10",
         (pickerOpen || bursts.length > 0) && "z-20",
         lift &&
-          "*:data-[slot=bubble-content]:transition-shadow *:data-[slot=bubble-content]:duration-300 hover:*:data-[slot=bubble-content]:shadow-md",
+          "*:data-[hpx-slot=bubble-content]:transition-shadow *:data-[hpx-slot=bubble-content]:duration-300 hover:*:data-[hpx-slot=bubble-content]:shadow-md",
         className
       )}
       style={{ ...style, x, originX: align === "end" ? 1 : 0, originY: 1 }}
@@ -437,7 +437,7 @@ function Bubble({
 }
 
 function isOverText(event: React.PointerEvent<HTMLElement>) {
-  const content = event.currentTarget.querySelector("[data-slot=bubble-content]")
+  const content = event.currentTarget.querySelector("[data-hpx-slot=bubble-content]")
   if (!content) return false
   const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT)
   const range = document.createRange()
@@ -716,7 +716,7 @@ function BubbleText({
   const clampHeight = `${lines * 1.625}em`
 
   return (
-    <div data-slot="bubble-text" className={cn("flex flex-col gap-1", className)}>
+    <div data-hpx-slot="bubble-text" className={cn("flex flex-col gap-1", className)}>
       <motion.div
         initial={false}
         animate={{ height: collapsed ? clampHeight : "auto" }}
@@ -752,7 +752,7 @@ function BubbleText({
                 {time}
               </span>
               <span
-                data-slot="bubble-time"
+                data-hpx-slot="bubble-time"
                 className="absolute right-0 bottom-0.5 text-xs leading-none whitespace-nowrap opacity-60"
               >
                 {time}
@@ -778,7 +778,7 @@ function BubbleText({
             {expanded ? "Show less" : "Show more"}
           </button>
           {time !== undefined && (
-            <span data-slot="bubble-time" className="text-xs leading-none whitespace-nowrap opacity-60">
+            <span data-hpx-slot="bubble-time" className="text-xs leading-none whitespace-nowrap opacity-60">
               {time}
             </span>
           )}
@@ -843,7 +843,7 @@ function BubbleReactions({
   const pill = (
     <motion.div
       ref={node}
-      data-slot="bubble-reactions"
+      data-hpx-slot="bubble-reactions"
       data-align={align}
       data-side={side}
       className={cn(bubbleReactionsVariants({ side, align }), className)}
@@ -943,7 +943,7 @@ function BubbleStatus({
 
   return (
     <div
-      data-slot="bubble-status"
+      data-hpx-slot="bubble-status"
       className={cn(
         "flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground group-data-[align=end]/bubble:justify-end",
         "w-0 min-w-full",
@@ -1016,7 +1016,7 @@ function BubbleSuggestions({
 }) {
   return (
     <motion.div
-      data-slot="bubble-suggestions"
+      data-hpx-slot="bubble-suggestions"
       className={cn("flex flex-wrap justify-end gap-2", className)}
       initial="hidden"
       animate="visible"
@@ -1034,7 +1034,7 @@ function BubbleSuggestion({ className, ...props }: HTMLMotionProps<"button">) {
   return (
     <motion.button
       type="button"
-      data-slot="bubble-suggestion"
+      data-hpx-slot="bubble-suggestion"
       variants={{
         hidden: { opacity: 0, y: 8, scale: 0.9 },
         visible: { opacity: 1, y: 0, scale: 1, transition: spring },
@@ -1051,14 +1051,14 @@ function BubbleSuggestion({ className, ...props }: HTMLMotionProps<"button">) {
 }
 
 export {
-  BubbleThread,
-  BubbleGroup,
-  Bubble,
-  BubbleContent,
-  BubbleText,
-  BubbleReactions,
-  BubbleStatus,
-  BubbleSuggestions,
-  BubbleSuggestion,
-  type BubbleStatusValue,
+  BubbleThread as HpxBubbleThread,
+  BubbleGroup as HpxBubbleGroup,
+  Bubble as HpxBubble,
+  BubbleContent as HpxBubbleContent,
+  BubbleText as HpxBubbleText,
+  BubbleReactions as HpxBubbleReactions,
+  BubbleStatus as HpxBubbleStatus,
+  BubbleSuggestions as HpxBubbleSuggestions,
+  BubbleSuggestion as HpxBubbleSuggestion,
+  type BubbleStatusValue as HpxBubbleStatusValue,
 }

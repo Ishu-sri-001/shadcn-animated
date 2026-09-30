@@ -2,15 +2,15 @@
 
 import * as React from "react"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  CheckboxGroup,
-  CheckboxItem,
-  type CheckboxAppearance,
-  type CheckboxMark,
-  type CheckboxRadius,
-  type CheckboxCardFill,
-  type CheckboxVariant,
+  HpxCheckboxGroup,
+  HpxCheckboxItem,
+  type HpxCheckboxAppearance,
+  type HpxCheckboxMark,
+  type HpxCheckboxRadius,
+  type HpxCheckboxCardFill,
+  type HpxCheckboxVariant,
 } from "@/components/ui/checkbox-group"
 
 const toppings = [
@@ -122,10 +122,10 @@ const controls = {
   },
   reorder: { group: "Multiple select", type: "checkbox", label: "Drag to reorder", value: false },
   colorful: { group: "Multiple select", type: "checkbox", label: "Colour per option", value: false },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function CheckboxDemo() {
-  const panel = useControls(controls)
+export function HpxCheckboxDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const { variant, cardFill, mark, appearance, radius, colorful, min, max, ...groupOptions } =
     values
@@ -140,15 +140,15 @@ export function CheckboxDemo() {
           Group · {cards ? "Cards" : "Inline"}
         </h2>
         <div className="rounded-lg border p-6 max-md:p-4">
-          <CheckboxGroup
+          <HpxCheckboxGroup
             {...groupOptions}
             min={Number(min)}
             max={max === "any" ? undefined : Number(max)}
-            variant={variant as CheckboxVariant}
-            cardFill={cardFill as CheckboxCardFill}
-            mark={mark as CheckboxMark}
-            appearance={appearance as CheckboxAppearance}
-            radius={radius as CheckboxRadius}
+            variant={variant as HpxCheckboxVariant}
+            cardFill={cardFill as HpxCheckboxCardFill}
+            mark={mark as HpxCheckboxMark}
+            appearance={appearance as HpxCheckboxAppearance}
+            radius={radius as HpxCheckboxRadius}
             value={picks}
             onValueChange={setPicks}
             aria-label="Toppings"
@@ -157,7 +157,7 @@ export function CheckboxDemo() {
             }
           >
             {toppings.map((topping) => (
-              <CheckboxItem
+              <HpxCheckboxItem
                 key={topping.value}
                 value={topping.value}
                 label={topping.value}
@@ -166,18 +166,18 @@ export function CheckboxDemo() {
                 accent={colorful ? topping.accent : undefined}
               />
             ))}
-          </CheckboxGroup>
+          </HpxCheckboxGroup>
         </div>
       </div>
 
       <div className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">Standalone</h2>
         <div className="rounded-lg border p-6 max-md:p-4">
-          <CheckboxItem label="I agree to the terms" checked={terms} onCheckedChange={setTerms} />
+          <HpxCheckboxItem label="I agree to the terms" checked={terms} onCheckedChange={setTerms} />
         </div>
       </div>
 
-      <ControlsPanel title="Checkbox" {...panel} />
+      <HpxControlsPanel title="Checkbox" {...panel} />
     </section>
   )
 }

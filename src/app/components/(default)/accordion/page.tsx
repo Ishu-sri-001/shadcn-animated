@@ -1,11 +1,11 @@
 "use client"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  HpxAccordion,
+  HpxAccordionContent,
+  HpxAccordionItem,
+  HpxAccordionTrigger,
 } from "@/components/ui/accordion"
 
 const faqs = [
@@ -137,10 +137,10 @@ const controls = {
       { label: "Chevron", value: "chevron" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 export default function AccordionPage() {
-  const panel = useControls(controls)
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
@@ -150,7 +150,7 @@ export default function AccordionPage() {
         Expandable sections that reveal their answers with a staggered fade.
       </p>
       <div className="mt-6 flex min-h-48 items-center justify-center">
-        <Accordion
+        <HpxAccordion
           className="w-full"
           multiple={values.multiple}
           openOnHover={values.openOnHover}
@@ -162,30 +162,30 @@ export default function AccordionPage() {
           stagger={values.stagger}
         >
           {faqs.map((faq, i) => (
-            <AccordionItem
+            <HpxAccordionItem
               key={faq.question}
               value={`item-${i + 1}`}
               line={values.line}
               fill={values.fill ? (values.fillColor as "muted" | "primary") : false}
               rounded={values.rounded}
             >
-              <AccordionTrigger
+              <HpxAccordionTrigger
                 icon={values.icon as "plus" | "chevron"}
                 className="text-[1.5vw] max-[1025px]:text-[2.5vw] max-md:text-[4.5vw]"
               >
                 {faq.question}
-              </AccordionTrigger>
-              <AccordionContent>
+              </HpxAccordionTrigger>
+              <HpxAccordionContent>
                 {faq.answer.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
-              </AccordionContent>
-            </AccordionItem>
+              </HpxAccordionContent>
+            </HpxAccordionItem>
           ))}
-        </Accordion>
+        </HpxAccordion>
       </div>
 
-      <ControlsPanel title="Accordion" {...panel} />
+      <HpxControlsPanel title="Accordion" {...panel} />
     </div>
   )
 }

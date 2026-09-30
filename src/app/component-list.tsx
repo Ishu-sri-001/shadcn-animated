@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ArrowUpRightIcon } from "lucide-react"
 import { motion, MotionConfig, stagger, type Variants } from "motion/react"
 
-import type { RegistryItem } from "@/components/registry"
+import type { HpxRegistryItem } from "@/components/registry"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const easeOutCubic = [0.33, 1, 0.68, 1] as const
@@ -29,7 +29,7 @@ const draw: Variants = {
 }
 
 /** The component index: rows reveal in a stagger, and one highlight glides to the hovered row. */
-export function ComponentList({ items }: { items: RegistryItem[] }) {
+export function HpxComponentList({ items }: { items: HpxRegistryItem[] }) {
   const [active, setActive] = React.useState<string | null>(null)
 
   return (
@@ -74,7 +74,7 @@ function Row({
   active,
   onActivate,
 }: {
-  item: RegistryItem
+  item: HpxRegistryItem
   index: number
   active: boolean
   onActivate: () => void

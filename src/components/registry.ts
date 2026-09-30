@@ -1,10 +1,10 @@
-export type RegistryItem = {
+export type HpxRegistryItem = {
   slug: string
   name: string
   description: string
 }
 
-export const registry: RegistryItem[] = [
+export const registry: HpxRegistryItem[] = [
   {
     slug: "accordion",
     name: "Accordion",

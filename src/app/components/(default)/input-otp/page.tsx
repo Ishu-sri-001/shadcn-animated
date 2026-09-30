@@ -1,4 +1,4 @@
-import { InputOTPDemo } from "./input-otp-demo"
+import { HpxInputOTPDemo } from "./input-otp-demo"
 
 export default function InputOTPPage() {
   return (
@@ -10,7 +10,7 @@ export default function InputOTPPage() {
         </p>
       </div>
 
-      <InputOTPDemo />
+      <HpxInputOTPDemo />
     </div>
   )
 }

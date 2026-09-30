@@ -1,22 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { ChevronDownIcon, RotateCcwIcon } from "lucide-react"
 import { motion, useDragControls } from "motion/react"
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { HpxButton } from "@/components/ui/button"
+import { HpxCheckbox } from "@/components/ui/checkbox"
+import { HpxInput } from "@/components/ui/input"
+import { HpxLabel } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  HpxSelect,
+  HpxSelectContent,
+  HpxSelectItem,
+  HpxSelectTrigger,
+  HpxSelectValue,
 } from "@/components/ui/select"
-import { ControlsSlider } from "@/components/controls-slider"
+import { HpxControlsSlider } from "@/components/controls-slider"
 
 type ControlState = Record<string, string | number | boolean>
 
@@ -27,9 +27,9 @@ type BaseControl = {
   disabled?: (values: ControlState) => boolean
 }
 
-export type CheckboxControl = BaseControl & { type: "checkbox"; value: boolean }
+export type HpxCheckboxControl = BaseControl & { type: "checkbox"; value: boolean }
 
-export type SliderControl = BaseControl & {
+export type HpxSliderControl = BaseControl & {
   type: "slider"
   value: number
   min: number
@@ -38,27 +38,27 @@ export type SliderControl = BaseControl & {
   unit?: string
 }
 
-export type SelectControl = BaseControl & {
+export type HpxSelectControl = BaseControl & {
   type: "select"
   value: string
   options: { label: string; value: string }[]
 }
 
-export type TextControl = BaseControl & { type: "text"; value: string; placeholder?: string }
+export type HpxTextControl = BaseControl & { type: "text"; value: string; placeholder?: string }
 
-export type Control = CheckboxControl | SliderControl | SelectControl | TextControl
+export type HpxControl = HpxCheckboxControl | HpxSliderControl | HpxSelectControl | HpxTextControl
 
-export type ControlSchema = Record<string, Control>
+export type HpxControlSchema = Record<string, HpxControl>
 
-export type ControlValues<S extends ControlSchema> = { [K in keyof S]: S[K]["value"] }
+export type HpxControlValues<S extends HpxControlSchema> = { [K in keyof S]: S[K]["value"] }
 
-function defaultsOf<S extends ControlSchema>(schema: S) {
+function defaultsOf<S extends HpxControlSchema>(schema: S) {
   return Object.fromEntries(
     Object.entries(schema).map(([key, control]) => [key, control.value])
-  ) as ControlValues<S>
+  ) as HpxControlValues<S>
 }
 
-export function useControls<S extends ControlSchema>(schema: S) {
+export function useHpxControls<S extends HpxControlSchema>(schema: S) {
   const [values, setValues] = React.useState(() => defaultsOf(schema))
 
   const set = React.useCallback(
@@ -71,16 +71,16 @@ export function useControls<S extends ControlSchema>(schema: S) {
   return { schema, values, set, reset }
 }
 
-type ControlsPanelProps<S extends ControlSchema> = {
+type ControlsPanelProps<S extends HpxControlSchema> = {
   schema: S
-  values: ControlValues<S>
+  values: HpxControlValues<S>
   set: <K extends keyof S>(key: K, value: S[K]["value"]) => void
   reset?: () => void
   title?: string
   className?: string
 }
 
-export function ControlsPanel<S extends ControlSchema>({
+export function HpxControlsPanel<S extends HpxControlSchema>({
   schema,
   values,
   set,
@@ -89,7 +89,7 @@ export function ControlsPanel<S extends ControlSchema>({
   className,
 }: ControlsPanelProps<S>) {
   const [open, setOpen] = React.useState(true)
-  const entries = Object.entries(schema) as [keyof S & string, Control][]
+  const entries = Object.entries(schema) as [keyof S & string, HpxControl][]
   const dragControls = useDragControls()
   const bounds = React.useRef<HTMLDivElement>(null)
 
@@ -118,11 +118,11 @@ export function ControlsPanel<S extends ControlSchema>({
           <span className="font-medium">{title}</span>
           <div className="flex items-center gap-1">
             {reset && (
-              <Button variant="ghost" size="icon-xs" aria-label="Reset controls" onClick={reset}>
+              <HpxButton variant="ghost" size="icon-xs" aria-label="Reset controls" onClick={reset}>
                 <RotateCcwIcon />
-              </Button>
+              </HpxButton>
             )}
-            <Button
+            <HpxButton
               variant="ghost"
               size="icon-xs"
               aria-label={open ? "Collapse controls" : "Expand controls"}
@@ -137,7 +137,7 @@ export function ControlsPanel<S extends ControlSchema>({
               >
                 <ChevronDownIcon />
               </motion.span>
-            </Button>
+            </HpxButton>
           </div>
         </div>
 
@@ -177,25 +177,25 @@ function ControlRow({
   onChange,
 }: {
   id: string
-  control: Control
+  control: HpxControl
   disabled: boolean
-  value: Control["value"]
-  onChange: (value: Control["value"]) => void
+  value: HpxControl["value"]
+  onChange: (value: HpxControl["value"]) => void
 }) {
   const label = (
-    <Label
+    <HpxLabel
       htmlFor={id}
       className={cn("text-muted-foreground transition-opacity", disabled && "opacity-40")}
     >
       {control.label}
-    </Label>
+    </HpxLabel>
   )
 
   if (control.type === "checkbox") {
     return (
       <div className="flex items-center justify-between gap-3">
         {label}
-        <Checkbox id={id} disabled={disabled} checked={value as boolean} onCheckedChange={(c) => onChange(c)} />
+        <HpxCheckbox id={id} disabled={disabled} checked={value as boolean} onCheckedChange={(c) => onChange(c)} />
       </div>
     )
   }
@@ -204,7 +204,7 @@ function ControlRow({
     return (
       <div className="flex flex-col gap-2">
         {label}
-        <Input
+        <HpxInput
           id={id}
           value={value as string}
           disabled={disabled}
@@ -227,7 +227,7 @@ function ControlRow({
             {control.unit}
           </span>
         </div>
-        <ControlsSlider
+        <HpxControlsSlider
           id={id}
           disabled={disabled}
           min={control.min}
@@ -243,23 +243,23 @@ function ControlRow({
   return (
     <div className="flex items-center justify-between gap-3">
       {label}
-      <Select
+      <HpxSelect
         items={control.options}
         value={value as string}
         disabled={disabled}
         onValueChange={(v) => v !== null && onChange(v)}
       >
-        <SelectTrigger id={id} size="sm" className="w-[55%]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="w-auto min-w-(--anchor-width)">
+        <HpxSelectTrigger id={id} size="sm" className="w-[55%]">
+          <HpxSelectValue />
+        </HpxSelectTrigger>
+        <HpxSelectContent className="w-auto min-w-(--anchor-width)">
           {control.options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <HpxSelectItem key={option.value} value={option.value}>
               {option.label}
-            </SelectItem>
+            </HpxSelectItem>
           ))}
-        </SelectContent>
-      </Select>
+        </HpxSelectContent>
+      </HpxSelect>
     </div>
   )
 }

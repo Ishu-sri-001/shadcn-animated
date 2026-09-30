@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   AnimatePresence,
   animate,
@@ -55,33 +55,33 @@ type SliderMotion = {
 // Full class names so Tailwind can see them; px sizes the bar thumb to fit inside
 const THICKNESS: Record<SliderThickness, { rest: string; drag: string; px: number }> = {
   "0.5": {
-    rest: "data-horizontal:h-0.5 data-vertical:w-0.5",
-    drag: "data-dragging:data-horizontal:h-0.5 data-dragging:data-vertical:w-0.5",
+    rest: "hpx-horizontal:h-0.5 hpx-vertical:w-0.5",
+    drag: "data-dragging:hpx-horizontal:h-0.5 data-dragging:hpx-vertical:w-0.5",
     px: 2,
   },
   "1": {
-    rest: "data-horizontal:h-1 data-vertical:w-1",
-    drag: "data-dragging:data-horizontal:h-1 data-dragging:data-vertical:w-1",
+    rest: "hpx-horizontal:h-1 hpx-vertical:w-1",
+    drag: "data-dragging:hpx-horizontal:h-1 data-dragging:hpx-vertical:w-1",
     px: 4,
   },
   "1.5": {
-    rest: "data-horizontal:h-1.5 data-vertical:w-1.5",
-    drag: "data-dragging:data-horizontal:h-1.5 data-dragging:data-vertical:w-1.5",
+    rest: "hpx-horizontal:h-1.5 hpx-vertical:w-1.5",
+    drag: "data-dragging:hpx-horizontal:h-1.5 data-dragging:hpx-vertical:w-1.5",
     px: 6,
   },
   "2.5": {
-    rest: "data-horizontal:h-2.5 data-vertical:w-2.5",
-    drag: "data-dragging:data-horizontal:h-2.5 data-dragging:data-vertical:w-2.5",
+    rest: "hpx-horizontal:h-2.5 hpx-vertical:w-2.5",
+    drag: "data-dragging:hpx-horizontal:h-2.5 data-dragging:hpx-vertical:w-2.5",
     px: 10,
   },
   "4": {
-    rest: "data-horizontal:h-4 data-vertical:w-4",
-    drag: "data-dragging:data-horizontal:h-4 data-dragging:data-vertical:w-4",
+    rest: "hpx-horizontal:h-4 hpx-vertical:w-4",
+    drag: "data-dragging:hpx-horizontal:h-4 data-dragging:hpx-vertical:w-4",
     px: 16,
   },
   "13": {
-    rest: "data-horizontal:h-13 data-vertical:w-13",
-    drag: "data-dragging:data-horizontal:h-13 data-dragging:data-vertical:w-13",
+    rest: "hpx-horizontal:h-13 hpx-vertical:w-13",
+    drag: "data-dragging:hpx-horizontal:h-13 data-dragging:hpx-vertical:w-13",
     px: 52,
   },
 }
@@ -196,7 +196,7 @@ function Ticks({
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0 flex items-center justify-between data-vertical:flex-col"
+      className="pointer-events-none absolute inset-0 flex items-center justify-between hpx-vertical:flex-col"
     >
       {Array.from({ length: count + 1 }, (_, i) => (
         <span
@@ -459,8 +459,8 @@ function Slider({
     <SliderContext.Provider value={context}>
       <MotionConfig reducedMotion="user">
       <SliderPrimitive.Root
-        className={cn("data-horizontal:w-full data-vertical:h-full", className)}
-        data-slot="slider"
+        className={cn("hpx-horizontal:w-full hpx-vertical:h-full", className)}
+        data-hpx-slot="slider"
         defaultValue={defaultValue}
         value={value}
         min={min}
@@ -476,16 +476,16 @@ function Slider({
         <SliderPrimitive.Control
           ref={controlRef}
           className={cn(
-            "group/control relative flex w-full cursor-pointer touch-none items-center select-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
+            "group/control relative flex w-full cursor-pointer touch-none items-center select-none hpx-disabled:cursor-not-allowed hpx-disabled:opacity-50 hpx-vertical:h-full hpx-vertical:min-h-40 hpx-vertical:w-auto hpx-vertical:flex-col",
             // A tall hit area, so the rail is easy to grab and never shifts the layout as it grows
-            options.thicken !== "none" && "data-horizontal:min-h-20"
+            options.thicken !== "none" && "hpx-horizontal:min-h-20"
           )}
         >
           <SliderPrimitive.Track
-            data-slot="slider-track"
+            data-hpx-slot="slider-track"
             className={cn(
               // Min size keeps the springy shrink from dipping below the resting size
-              "relative grow overflow-hidden bg-foreground/30 select-none data-horizontal:min-h-px data-horizontal:w-full data-vertical:h-full data-vertical:min-w-px",
+              "relative grow overflow-hidden bg-foreground/30 select-none hpx-horizontal:min-h-px hpx-horizontal:w-full hpx-vertical:h-full hpx-vertical:min-w-px",
               GROW,
               RADIUS[options.radius],
               "group-has-focus-visible/control:ring-2 group-has-focus-visible/control:ring-ring/60 group-has-focus-visible/control:ring-offset-2 group-has-focus-visible/control:ring-offset-background",
@@ -540,10 +540,10 @@ function Slider({
               />
             )}
             <SliderPrimitive.Indicator
-              data-slot="slider-range"
+              data-hpx-slot="slider-range"
               className={cn(
                 // Percent height ignores the track min size, so repeat it
-                "bg-foreground select-none data-horizontal:h-full data-horizontal:min-h-px data-vertical:w-full data-vertical:min-w-px",
+                "bg-foreground select-none hpx-horizontal:h-full hpx-horizontal:min-h-px hpx-vertical:w-full hpx-vertical:min-w-px",
                 RADIUS[options.radius]
               )}
               render={(indicatorProps, state) => (
@@ -653,7 +653,7 @@ function SliderThumb({ index }: { index: number }) {
 
   return (
     <SliderPrimitive.Thumb
-      data-slot="slider-thumb"
+      data-hpx-slot="slider-thumb"
       index={index}
       // Screen readers announce the formatted value (e.g. "18°C"), not the bare number
       getAriaValueText={
@@ -884,5 +884,5 @@ function SliderThumbElement({
   )
 }
 
-export { Slider, RollingNumber }
-export type { SliderRadius, SliderLabels, SliderThicken, SliderEdgeVariant, SliderThickness, SliderEdgePress, SliderMarks, SliderBubble, SliderEdgeSize }
+export { Slider as HpxSlider, RollingNumber as HpxRollingNumber }
+export type { SliderRadius as HpxSliderRadius, SliderLabels as HpxSliderLabels, SliderThicken as HpxSliderThicken, SliderEdgeVariant as HpxSliderEdgeVariant, SliderThickness as HpxSliderThickness, SliderEdgePress as HpxSliderEdgePress, SliderMarks as HpxSliderMarks, SliderBubble as HpxSliderBubble, SliderEdgeSize as HpxSliderEdgeSize }

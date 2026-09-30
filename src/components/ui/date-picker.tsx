@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   addMonths,
   addYears,
@@ -19,26 +19,26 @@ import {
 import { animate, useAnimate } from "motion/react"
 
 import {
-  CalendarRangeIcon,
-  type CalendarRangeIconHandle,
+  HpxCalendarRangeIcon,
+  type HpxCalendarRangeIconHandle,
 } from "@/components/animated-icons/calendar-range-icon"
-import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { useHpxPrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
+import { HpxButton } from "@/components/ui/button"
+import { HpxCalendar } from "@/components/ui/calendar"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  HpxPopover,
+  HpxPopoverContent,
+  HpxPopoverTrigger,
 } from "@/components/ui/popover"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  HpxSelect,
+  HpxSelectContent,
+  HpxSelectItem,
+  HpxSelectTrigger,
+  HpxSelectValue,
 } from "@/components/ui/select"
 
-type CalendarProps = React.ComponentProps<typeof Calendar>
+type CalendarProps = React.ComponentProps<typeof HpxCalendar>
 
 function SlidingChevron({
   className,
@@ -118,7 +118,7 @@ function useHoverSquare(
   { item, keepIn }: { item: string; keepIn: string },
   { transition, duration, bounce }: HoverStyle
 ) {
-  const reduceMotion = usePrefersReducedMotion()
+  const reduceMotion = useHpxPrefersReducedMotion()
   const [square, animateSquare] = useAnimate<HTMLDivElement>()
   const shown = React.useRef(false)
   const current = React.useRef<HTMLElement | null>(null)
@@ -228,8 +228,8 @@ function AnimatedDropdown({
   const [hoverSquare, hover] = useHoverSquare(
     list,
     {
-      item: '[data-slot="select-item"]',
-      keepIn: '[data-slot="select-content"]',
+      item: '[data-hpx-slot="select-item"]',
+      keepIn: '[data-hpx-slot="select-content"]',
     },
     hoverStyle
   )
@@ -242,7 +242,7 @@ function AnimatedDropdown({
   )
 
   return (
-    <Select
+    <HpxSelect
       items={options.map((option) => ({
         value: String(option.value),
         label: option.label,
@@ -273,13 +273,13 @@ function AnimatedDropdown({
         }
       }}
     >
-      <SelectTrigger
+      <HpxSelectTrigger
         aria-label={ariaLabel}
         className="h-auto! gap-1 border-0 bg-transparent px-1.5 py-1 text-base font-medium shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent [&_svg]:transition-transform [&_svg]:duration-200 data-popup-open:[&_svg]:rotate-180 motion-reduce:[&_svg]:transition-none"
       >
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent
+        <HpxSelectValue />
+      </HpxSelectTrigger>
+      <HpxSelectContent
         ref={list}
         style={
           {
@@ -289,11 +289,11 @@ function AnimatedDropdown({
         onPointerOver={glide ? hover.onPointerOver : undefined}
         onPointerLeave={glide ? hover.onPointerLeave : undefined}
         alignItemWithTrigger={false}
-        className="max-h-64 w-auto min-w-20 p-1.5 duration-200 ease-out data-open:zoom-in-100 data-closed:zoom-out-100 data-[side=bottom]:slide-in-from-top-2 data-closed:data-[side=bottom]:slide-out-to-top-2 data-closed:duration-150 motion-reduce:animate-none!"
+        className="max-h-64 w-auto min-w-20 p-1.5 duration-200 ease-out hpx-open:zoom-in-100 hpx-closed:zoom-out-100 data-[side=bottom]:slide-in-from-top-2 hpx-closed:data-[side=bottom]:slide-out-to-top-2 hpx-closed:duration-150 motion-reduce:animate-none!"
       >
         {glide && <HoverSquare ref={hoverSquare} variant={hoverStyle.variant} />}
         {options.map((option, index) => (
-          <SelectItem
+          <HpxSelectItem
             key={option.value}
             value={String(option.value)}
             disabled={option.disabled}
@@ -309,10 +309,10 @@ function AnimatedDropdown({
             )}
           >
             {option.label}
-          </SelectItem>
+          </HpxSelectItem>
         ))}
-      </SelectContent>
-    </Select>
+      </HpxSelectContent>
+    </HpxSelect>
   )
 }
 
@@ -375,8 +375,8 @@ function DatePicker({
   className?: string
 }) {
   const [open, setOpen] = React.useState(false)
-  const icon = React.useRef<CalendarRangeIconHandle>(null)
-  const reduceMotion = usePrefersReducedMotion()
+  const icon = React.useRef<HpxCalendarRangeIconHandle>(null)
+  const reduceMotion = useHpxPrefersReducedMotion()
 
   const calendarBox = React.useRef<HTMLDivElement>(null)
   const hoverStyle = React.useMemo<HoverStyle>(
@@ -455,7 +455,7 @@ function DatePicker({
 
   return (
     <HoverStyleContext.Provider value={hoverStyle}>
-      <Popover
+      <HpxPopover
         open={open}
         onOpenChange={(next) => {
           setOpen(next)
@@ -466,9 +466,9 @@ function DatePicker({
           }
         }}
       >
-        <PopoverTrigger
+        <HpxPopoverTrigger
           render={
-            <Button
+            <HpxButton
               variant="outline"
               data-empty={!value}
               onPointerEnter={animateTrigger}
@@ -482,7 +482,7 @@ function DatePicker({
             />
           }
         >
-          {showIcon && <CalendarRangeIcon ref={icon} size="1.25em" />}
+          {showIcon && <HpxCalendarRangeIcon ref={icon} size="1.25em" />}
           {rollingLabel ? (
             <span className="relative block overflow-hidden">
               <span className="block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/trigger:-translate-y-full motion-reduce:transition-none">
@@ -498,16 +498,16 @@ function DatePicker({
           ) : (
             <span>{label}</span>
           )}
-        </PopoverTrigger>
-        <PopoverContent
+        </HpxPopoverTrigger>
+        <HpxPopoverContent
           align="start"
           positionerClassName={fromBehind ? "z-40" : undefined}
           className={cn(
             "w-(--anchor-width) p-0",
-            "duration-300 ease-out data-open:zoom-in-100 data-closed:zoom-out-100 data-closed:delay-150 motion-reduce:animate-none!",
+            "duration-300 ease-out hpx-open:zoom-in-100 hpx-closed:zoom-out-100 hpx-closed:delay-150 motion-reduce:animate-none!",
             fromBehind
-              ? "data-[side=bottom]:slide-in-from-top-12 data-closed:data-[side=bottom]:slide-out-to-top-12"
-              : "data-[side=bottom]:slide-in-from-top-4 data-closed:data-[side=bottom]:slide-out-to-top-4"
+              ? "data-[side=bottom]:slide-in-from-top-12 hpx-closed:data-[side=bottom]:slide-out-to-top-12"
+              : "data-[side=bottom]:slide-in-from-top-4 hpx-closed:data-[side=bottom]:slide-out-to-top-4"
           )}
         >
           <div
@@ -520,7 +520,7 @@ function DatePicker({
             onPointerLeave={glide ? dateHover.onPointerLeave : undefined}
           >
             {glide && <HoverSquare ref={dateHoverSquare} variant={hoverVariant} />}
-            <Calendar
+            <HpxCalendar
               mode="single"
               selected={value}
               onSelect={(date) => {
@@ -547,7 +547,7 @@ function DatePicker({
               }
               className={cn(
                 "animate-in fade-in-0 zoom-in-90 duration-300 ease-out delay-150 fill-mode-backwards motion-reduce:animate-none!",
-                "in-data-closed:animate-out in-data-closed:fade-out-0 in-data-closed:zoom-out-100 in-data-closed:duration-150 in-data-closed:delay-0 in-data-closed:fill-mode-forwards motion-reduce:in-data-closed:animate-none",
+                "in-hpx-closed:animate-out in-hpx-closed:fade-out-0 in-hpx-closed:zoom-out-100 in-hpx-closed:duration-150 in-hpx-closed:delay-0 in-hpx-closed:fill-mode-forwards motion-reduce:in-hpx-closed:animate-none",
                 String.raw`[&_.rdp-nav]:pointer-events-none [&_.rdp-nav]:z-10 [&_.rdp-button\_previous]:pointer-events-auto [&_.rdp-button\_next]:pointer-events-auto`,
                 String.raw`[&_.rdp-button\_previous]:overflow-hidden [&_.rdp-button\_previous]:rounded-full [&_.rdp-button\_next]:overflow-hidden [&_.rdp-button\_next]:rounded-full`,
                 String.raw`[&_.rdp-button\_previous]:hover:bg-background [&_.rdp-button\_next]:hover:bg-background dark:[&_.rdp-button\_previous]:hover:bg-input/30 dark:[&_.rdp-button\_next]:hover:bg-input/30`,
@@ -564,10 +564,10 @@ function DatePicker({
               )}
             />
           </div>
-        </PopoverContent>
-      </Popover>
+        </HpxPopoverContent>
+      </HpxPopover>
     </HoverStyleContext.Provider>
   )
 }
 
-export { DatePicker }
+export { DatePicker as HpxDatePicker }

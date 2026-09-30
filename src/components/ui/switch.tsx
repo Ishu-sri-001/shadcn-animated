@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import {
   MotionConfig,
   animate,
@@ -220,7 +220,7 @@ function Switch({
   const control = (
     <SwitchPrimitive.Root
       ref={rootRef as React.Ref<HTMLSpanElement>}
-      data-slot="switch"
+      data-hpx-slot="switch"
       data-variant={variant}
       checked={on}
       disabled={disabled}
@@ -269,7 +269,7 @@ function Switch({
       className={cn(
         "relative inline-flex shrink-0 cursor-pointer items-center outline-none select-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        "hpx-disabled:cursor-not-allowed hpx-disabled:opacity-50",
         canDrag && "touch-none",
         spec.track,
         TRACK_ROUNDED[rounded],
@@ -322,7 +322,7 @@ function Switch({
         </>
       )}
       <SwitchPrimitive.Thumb
-        data-slot="switch-thumb"
+        data-hpx-slot="switch-thumb"
         render={(thumbProps) => (
           <motion.span
             {...(thumbProps as React.ComponentProps<typeof motion.span>)}
@@ -382,5 +382,5 @@ function Switch({
   )
 }
 
-export { Switch }
-export type { SwitchVariant, SwitchSize, SwitchColor, SwitchRounded, SwitchLabelSide }
+export { Switch as HpxSwitch }
+export type { SwitchVariant as HpxSwitchVariant, SwitchSize as HpxSwitchSize, SwitchColor as HpxSwitchColor, SwitchRounded as HpxSwitchRounded, SwitchLabelSide as HpxSwitchLabelSide }

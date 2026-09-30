@@ -2,10 +2,10 @@
 
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
-import { useTriggerHover } from "@/components/ui/hover-effects"
-import { staggerIn } from "@/lib/stagger-in"
+import { useHpxTriggerHover } from "@/components/ui/hover-effects"
+import { hpxStaggerIn } from "@/lib/stagger-in"
 
 type DrawerMotion = {
   /** Spring instead of an eased slide. */
@@ -56,7 +56,7 @@ function springEasing(bounce: number) {
 
 /** Titles and any element marked data-drawer-item stagger in, boxes included. */
 const STAGGER_ITEMS =
-  '[data-slot="drawer-title"], [data-slot="drawer-description"], [data-drawer-item]'
+  '[data-hpx-slot="drawer-title"], [data-hpx-slot="drawer-description"], [data-drawer-item]'
 
 const DrawerContext = React.createContext<DrawerContextProps | null>(null)
 
@@ -125,7 +125,7 @@ function Drawer({
   return (
     <DrawerContext.Provider value={contextValue}>
       <DrawerPrimitive.Root
-        data-slot="drawer"
+        data-hpx-slot="drawer"
         modal={modal}
         snapPoints={snaps}
         swipeDirection={swipeDirection}
@@ -142,10 +142,10 @@ function DrawerTrigger({
   children,
   ...props
 }: DrawerPrimitive.Trigger.Props) {
-  const hover = useTriggerHover(useDrawer())
+  const hover = useHpxTriggerHover(useDrawer())
   return (
     <DrawerPrimitive.Trigger
-      data-slot="drawer-trigger"
+      data-hpx-slot="drawer-trigger"
       onPointerEnter={(event) => {
         onPointerEnter?.(event)
         hover.onPointerEnter(event)
@@ -165,11 +165,11 @@ function DrawerTrigger({
 }
 
 function DrawerPortal({ ...props }: DrawerPrimitive.Portal.Props) {
-  return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />
+  return <DrawerPrimitive.Portal data-hpx-slot="drawer-portal" {...props} />
 }
 
 function DrawerClose({ ...props }: DrawerPrimitive.Close.Props) {
-  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />
+  return <DrawerPrimitive.Close data-hpx-slot="drawer-close" {...props} />
 }
 
 function DrawerOverlay({
@@ -178,7 +178,7 @@ function DrawerOverlay({
 }: DrawerPrimitive.Backdrop.Props) {
   return (
     <DrawerPrimitive.Backdrop
-      data-slot="drawer-overlay"
+      data-hpx-slot="drawer-overlay"
       className={cn(
         "fixed inset-0 z-50 min-h-dvh bg-black/10 opacity-[max(var(--drawer-overlay-min-opacity,0),calc(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] select-none data-ending-style:pointer-events-none data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-snap-points:[--drawer-overlay-min-opacity:0.5] data-starting-style:opacity-0 data-swiping:duration-0 supports-backdrop-filter:backdrop-blur-xs supports-[-webkit-touch-callout:none]:absolute",
         className
@@ -194,7 +194,7 @@ function DrawerSwipeHandle({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="drawer-swipe-handle"
+      data-hpx-slot="drawer-swipe-handle"
       aria-hidden="true"
       className={cn(
         "relative z-10 flex shrink-0 cursor-grab transition-opacity duration-200 group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100 group-data-[swipe-axis=x]/drawer-popup:h-full group-data-[swipe-axis=x]/drawer-popup:w-3 group-data-[swipe-axis=x]/drawer-popup:items-center group-data-[swipe-axis=y]/drawer-popup:h-3 group-data-[swipe-axis=y]/drawer-popup:w-full group-data-[swipe-axis=y]/drawer-popup:justify-center group-data-[swipe-direction=down]/drawer-popup:items-end group-data-[swipe-direction=left]/drawer-popup:order-last group-data-[swipe-direction=left]/drawer-popup:justify-start group-data-[swipe-direction=right]/drawer-popup:justify-end group-data-[swipe-direction=up]/drawer-popup:order-last group-data-[swipe-direction=up]/drawer-popup:items-start after:block after:shrink-0 after:rounded-full after:bg-muted group-data-[swipe-axis=x]/drawer-popup:after:h-24 group-data-[swipe-axis=x]/drawer-popup:after:w-1 group-data-[swipe-axis=y]/drawer-popup:after:h-1 group-data-[swipe-axis=y]/drawer-popup:after:w-24 active:cursor-grabbing",
@@ -234,7 +234,7 @@ function DrawerContent({
       if (!node) return
       const delay = duration * 0.3
       // Fade content in, stagger its items.
-      const content = node.querySelector<HTMLElement>('[data-slot="drawer-content"]')
+      const content = node.querySelector<HTMLElement>('[data-hpx-slot="drawer-content"]')
       if (content && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         content.animate([{ opacity: 0 }, { opacity: 1 }], {
           duration: 350,
@@ -243,24 +243,24 @@ function DrawerContent({
           fill: "backwards",
         })
       }
-      staggerIn(node, STAGGER_ITEMS, { gap: stagger, delay })
+      hpxStaggerIn(node, STAGGER_ITEMS, { gap: stagger, delay })
     },
     [stagger, duration]
   )
 
   return (
-    <DrawerPortal data-slot="drawer-portal">
+    <DrawerPortal data-hpx-slot="drawer-portal">
       {modal === true && (
         <DrawerOverlay data-snap-points={hasSnapPoints ? "" : undefined} />
       )}
       <DrawerPrimitive.Viewport
-        data-slot="drawer-viewport"
+        data-hpx-slot="drawer-viewport"
         data-modal={modal}
         className="pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto"
       >
         <DrawerPrimitive.Popup
           ref={attach}
-          data-slot="drawer-popup"
+          data-hpx-slot="drawer-popup"
           data-swipe-axis={swipeAxis}
           data-snap-points={hasSnapPoints ? "" : undefined}
           style={
@@ -309,7 +309,7 @@ function DrawerContent({
         >
           {showSwipeHandle && <DrawerSwipeHandle />}
           <DrawerPrimitive.Content
-            data-slot="drawer-content"
+            data-hpx-slot="drawer-content"
             className={cn(
               "flex min-h-0 flex-1 flex-col overflow-hidden overscroll-contain rounded-[inherit] transition-opacity duration-300 ease-[cubic-bezier(0.45,1.005,0,1.005)] select-text group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100 group-data-swiping/drawer-popup:select-none"
             )}
@@ -334,7 +334,7 @@ function DrawerIndentBackground({
 }: DrawerPrimitive.IndentBackground.Props) {
   return (
     <DrawerPrimitive.IndentBackground
-      data-slot="drawer-indent-background"
+      data-hpx-slot="drawer-indent-background"
       className={cn("absolute inset-0 -z-10 rounded-[inherit]", className)}
       {...props}
     />
@@ -352,11 +352,11 @@ function DrawerIndent({
 }) {
   return (
     <DrawerPrimitive.Indent
-      data-slot="drawer-indent"
+      data-hpx-slot="drawer-indent"
       className={cn(
         "origin-top transition-[scale,border-radius,translate] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         scale &&
-          "data-active:translate-y-[2vh] data-active:scale-[0.94] data-active:overflow-hidden data-active:rounded-2xl",
+          "hpx-active:translate-y-[2vh] hpx-active:scale-[0.94] hpx-active:overflow-hidden hpx-active:rounded-2xl",
         className
       )}
       {...props}
@@ -367,7 +367,7 @@ function DrawerIndent({
 function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="drawer-header"
+      data-hpx-slot="drawer-header"
       className={cn(
         "flex shrink-0 flex-col gap-1 px-6 py-4 group-data-[swipe-axis=y]/drawer-popup:text-center md:gap-0.5 md:text-left",
         className
@@ -380,7 +380,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
 function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="drawer-footer"
+      data-hpx-slot="drawer-footer"
       className={cn("mt-auto flex shrink-0 flex-col gap-2 px-6 py-4", className)}
       {...props}
     />
@@ -390,7 +390,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
 function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
   return (
     <DrawerPrimitive.Title
-      data-slot="drawer-title"
+      data-hpx-slot="drawer-title"
       className={cn(
         "font-heading text-base font-medium text-foreground",
         className
@@ -406,7 +406,7 @@ function DrawerDescription({
 }: DrawerPrimitive.Description.Props) {
   return (
     <DrawerPrimitive.Description
-      data-slot="drawer-description"
+      data-hpx-slot="drawer-description"
       className={cn("text-sm text-balance text-muted-foreground", className)}
       {...props}
     />
@@ -414,19 +414,19 @@ function DrawerDescription({
 }
 
 export {
-  Drawer,
-  DrawerProvider,
-  DrawerIndent,
-  DrawerIndentBackground,
-  DrawerPortal,
-  DrawerOverlay,
-  DrawerSwipeHandle,
-  DrawerTrigger,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
+  Drawer as HpxDrawer,
+  DrawerProvider as HpxDrawerProvider,
+  DrawerIndent as HpxDrawerIndent,
+  DrawerIndentBackground as HpxDrawerIndentBackground,
+  DrawerPortal as HpxDrawerPortal,
+  DrawerOverlay as HpxDrawerOverlay,
+  DrawerSwipeHandle as HpxDrawerSwipeHandle,
+  DrawerTrigger as HpxDrawerTrigger,
+  DrawerClose as HpxDrawerClose,
+  DrawerContent as HpxDrawerContent,
+  DrawerHeader as HpxDrawerHeader,
+  DrawerFooter as HpxDrawerFooter,
+  DrawerTitle as HpxDrawerTitle,
+  DrawerDescription as HpxDrawerDescription,
 }
-export type { DrawerOpenAnimation }
+export type { DrawerOpenAnimation as HpxDrawerOpenAnimation }

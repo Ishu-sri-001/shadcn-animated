@@ -3,15 +3,15 @@
 import * as React from "react"
 import { ShuffleIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
+import { HpxInput } from "@/components/ui/input"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-  type HoverCardAnimation,
-  type HoverCardRounded,
+  HpxHoverCard,
+  HpxHoverCardContent,
+  HpxHoverCardTrigger,
+  type HpxHoverCardAnimation,
+  type HpxHoverCardRounded,
 } from "@/components/ui/hover-card"
 
 const controls = {
@@ -93,7 +93,7 @@ const controls = {
       { label: "2xl", value: "2xl" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 type LinkPreview = {
   url: string
@@ -236,19 +236,19 @@ const roasts = [
   },
 ]
 
-export function HoverCardDemo() {
-  const panel = useControls(controls)
+export function HpxHoverCardDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
   const { source } = values
   const options = {
-    contentAnimation: values.contentAnimation as HoverCardAnimation,
+    contentAnimation: values.contentAnimation as HpxHoverCardAnimation,
     startScale: values.startScale,
     contentFade: values.contentFade,
     openDelay: values.openDelay,
     closeDelay: values.closeDelay,
     followCursor: values.followCursor,
     underline: values.underline,
-    rounded: values.rounded as HoverCardRounded,
+    rounded: values.rounded as HpxHoverCardRounded,
   }
 
   const draft = values.site
@@ -275,28 +275,28 @@ export function HoverCardDemo() {
   const linkClass = values.underline ? "font-medium" : "font-medium underline underline-offset-4"
 
   const roastLink = (roast: (typeof roasts)[number]) => (
-    <HoverCard {...options}>
-      <HoverCardTrigger href="#" onClick={(event) => event.preventDefault()} className={linkClass}>
+    <HpxHoverCard {...options}>
+      <HpxHoverCardTrigger href="#" onClick={(event) => event.preventDefault()} className={linkClass}>
         {roast.name}
-      </HoverCardTrigger>
-      <HoverCardContent className="flex flex-col gap-2">
+      </HpxHoverCardTrigger>
+      <HpxHoverCardContent className="flex flex-col gap-2">
         <div className={`h-[8vh] rounded-md ${roast.color}`} />
         <span className="font-medium">{roast.name}</span>
         <span className="text-xs text-muted-foreground">{roast.process}</span>
         <span className="text-muted-foreground">{roast.notes}</span>
-      </HoverCardContent>
-    </HoverCard>
+      </HpxHoverCardContent>
+    </HpxHoverCard>
   )
 
   const siteLink = (
-    <HoverCard {...options}>
-      <HoverCardTrigger href={site} target="_blank" rel="noreferrer" className={linkClass}>
+    <HpxHoverCard {...options}>
+      <HpxHoverCardTrigger href={site} target="_blank" rel="noreferrer" className={linkClass}>
         {preview.data?.hostname ?? new URL(site).hostname.replace(/^www\./, "")}
-      </HoverCardTrigger>
-      <HoverCardContent>
+      </HpxHoverCardTrigger>
+      <HpxHoverCardContent>
         <LinkPreviewCard url={site} preview={preview} />
-      </HoverCardContent>
-    </HoverCard>
+      </HpxHoverCardContent>
+    </HpxHoverCard>
   )
 
   return (
@@ -310,17 +310,17 @@ export function HoverCardDemo() {
             if (next) setSite(next)
           }}
         >
-          <Input
+          <HpxInput
             value={draft}
             onChange={(event) => panel.set("site", event.target.value)}
             placeholder="Site name or link"
             aria-label="Website"
             className="h-9"
           />
-          <Button type="button" variant="outline" size="lg" onClick={shuffle}>
+          <HpxButton type="button" variant="outline" size="lg" onClick={shuffle}>
             <ShuffleIcon />
             Random
-          </Button>
+          </HpxButton>
         </form>
       )}
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border px-6 text-sm">
@@ -341,7 +341,7 @@ export function HoverCardDemo() {
           : "Tip: hover a coffee name and hold still, or tap it on a touch screen."}
       </p>
 
-      <ControlsPanel title="Hover Card" {...panel} />
+      <HpxControlsPanel title="Hover Card" {...panel} />
     </div>
   )
 }

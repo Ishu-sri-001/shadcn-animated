@@ -1,38 +1,38 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { z } from "zod"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
 import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldInput,
-  FieldLegend,
-  FieldSet,
-  type FieldErrorAnimation,
-  type FieldLabelStyle,
-  type FieldRounded,
+  HpxField,
+  HpxFieldDescription,
+  HpxFieldError,
+  HpxFieldGroup,
+  HpxFieldInput,
+  HpxFieldLegend,
+  HpxFieldSet,
+  type HpxFieldErrorAnimation,
+  type HpxFieldLabelStyle,
+  type HpxFieldRounded,
 } from "@/components/ui/field"
-import { FillButton } from "@/components/ui/hover-effects"
+import { HpxFillButton } from "@/components/ui/hover-effects"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItemTitle,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-  DropdownMenuTriggerIcon,
-  DropdownMenuValue,
+  HpxDropdownMenu,
+  HpxDropdownMenuContent,
+  HpxDropdownMenuItemTitle,
+  HpxDropdownMenuRadioGroup,
+  HpxDropdownMenuRadioItem,
+  HpxDropdownMenuTrigger,
+  HpxDropdownMenuTriggerIcon,
+  HpxDropdownMenuValue,
 } from "@/components/ui/dropdown-menu"
 
 import { countries } from "./countries"
 
-const selectorRadius: Record<FieldRounded, string> = {
+const selectorRadius: Record<HpxFieldRounded, string> = {
   none: "rounded-none", sm: "rounded-sm", md: "rounded-md",
   lg: "rounded-lg", xl: "rounded-xl", full: "rounded-full",
 }
@@ -83,7 +83,7 @@ const controls = {
     ],
   },
   shakeOnError: { disabled: (v) => !v.validate, group: "Errors", type: "checkbox", label: "Shake on error", value: true },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 /**
  * Fades the form's pieces in one after another when the page loads. A CSS animation, so it
@@ -108,8 +108,8 @@ const addressSchema = z.object({
   note: z.string().max(60, "Keep the note under 60 characters."),
 })
 
-export function FormDemo() {
-  const panel = useControls(controls)
+export function HpxFormDemo() {
+  const panel = useHpxControls(controls)
   const { counter, description, rounded, errorAnimation, labelStyle, validate, ...options } =
     panel.values
 
@@ -159,20 +159,20 @@ export function FormDemo() {
           setSavedId(ok ? Date.now() : null)
         }}
       >
-        <FieldSet>
+        <HpxFieldSet>
           {/* A legend isn't a flex item of its fieldset, so the set's gap doesn't reach it. */}
-          <FieldLegend style={enter(0).style} className={cn("mb-12", enter(0).className)}>
+          <HpxFieldLegend style={enter(0).style} className={cn("mb-12", enter(0).className)}>
             Delivery address
-          </FieldLegend>
-          <FieldGroup
+          </HpxFieldLegend>
+          <HpxFieldGroup
           className=""
             {...options}
-            rounded={rounded as FieldRounded}
-            errorAnimation={errorAnimation as FieldErrorAnimation}
-            labelStyle={labelStyle as FieldLabelStyle}
+            rounded={rounded as HpxFieldRounded}
+            errorAnimation={errorAnimation as HpxFieldErrorAnimation}
+            labelStyle={labelStyle as HpxFieldLabelStyle}
           >
-            <Field invalid={!!errors.name} valid={valid.name} {...enter(1)}>
-              <FieldInput
+            <HpxField invalid={!!errors.name} valid={valid.name} {...enter(1)}>
+              <HpxFieldInput
                 label={validate ? "Name *" : "Name"}
                 required={validate}
                 placeholder={labelStyle === "floating" ? " " : "Sam Rivera"}
@@ -182,10 +182,10 @@ export function FormDemo() {
                 onChange={(event) => setName(event.target.value)}
                 onBlur={() => touch("name")}
               />
-              <FieldError>{errors.name}</FieldError>
-            </Field>
-            <Field invalid={!!errors.email} valid={valid.email} {...enter(2)}>
-              <FieldInput
+              <HpxFieldError>{errors.name}</HpxFieldError>
+            </HpxField>
+            <HpxField invalid={!!errors.email} valid={valid.email} {...enter(2)}>
+              <HpxFieldInput
                 label={validate ? "Email *" : "Email"}
                 required={validate}
                 type="email"
@@ -194,46 +194,46 @@ export function FormDemo() {
                 onChange={(event) => setEmail(event.target.value)}
                 onBlur={() => touch("email")}
               />
-              {description && <FieldDescription className="text-sm">We&apos;ll send tracking here.</FieldDescription>}
-              <FieldError>{errors.email}</FieldError>
-            </Field>
-            <Field {...enter(3)}>
+              {description && <HpxFieldDescription className="text-sm">We&apos;ll send tracking here.</HpxFieldDescription>}
+              <HpxFieldError>{errors.email}</HpxFieldError>
+            </HpxField>
+            <HpxField {...enter(3)}>
               <div className="flex items-end gap-2">
-                <DropdownMenu animation="scale" duration={0.3} delay={0.02} stagger={0} highlight="slide" highlightColor="muted" typeahead>
-                  <DropdownMenuTrigger
+                <HpxDropdownMenu animation="scale" duration={0.3} delay={0.02} stagger={0} highlight="slide" highlightColor="muted" typeahead>
+                  <HpxDropdownMenuTrigger
                     type="button"
                     animateValue
                     aria-label={`Country calling code: ${country.name} ${country.code}`}
                     className={cn(
                       "flex shrink-0 items-center gap-2 border border-input bg-transparent px-2.5 text-sm shadow-xs transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-input/30",
                       labelStyle === "above" ? "h-9" : "h-11",
-                      selectorRadius[rounded as FieldRounded]
+                      selectorRadius[rounded as HpxFieldRounded]
                     )}
                   >
-                    <DropdownMenuValue>{`${country.flag} ${country.code}`}</DropdownMenuValue>
-                    <DropdownMenuTriggerIcon icon="chevron" className="size-3.5 text-muted-foreground" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="max-h-72 w-72 max-w-[calc(100vw-2rem)] p-1.5">
-                    <DropdownMenuRadioGroup aria-label="Country calling code" value={countryId} onValueChange={setCountryId}>
+                    <HpxDropdownMenuValue>{`${country.flag} ${country.code}`}</HpxDropdownMenuValue>
+                    <HpxDropdownMenuTriggerIcon icon="chevron" className="size-3.5 text-muted-foreground" />
+                  </HpxDropdownMenuTrigger>
+                  <HpxDropdownMenuContent align="start" className="max-h-72 w-72 max-w-[calc(100vw-2rem)] p-1.5">
+                    <HpxDropdownMenuRadioGroup aria-label="Country calling code" value={countryId} onValueChange={setCountryId}>
                       {countries.map((item) => (
-                        <DropdownMenuRadioItem key={item.id} value={item.id} label={item.name} className="py-2.5">
+                        <HpxDropdownMenuRadioItem key={item.id} value={item.id} label={item.name} className="py-2.5">
                           <span aria-hidden>{item.flag}</span>
-                          <DropdownMenuItemTitle>{item.name}</DropdownMenuItemTitle>
+                          <HpxDropdownMenuItemTitle>{item.name}</HpxDropdownMenuItemTitle>
                           <span className="ml-auto text-sm tabular-nums text-muted-foreground">{item.code}</span>
-                        </DropdownMenuRadioItem>
+                        </HpxDropdownMenuRadioItem>
                       ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </HpxDropdownMenuRadioGroup>
+                  </HpxDropdownMenuContent>
+                </HpxDropdownMenu>
                 <div className="min-w-0 flex-1">
-                  <FieldInput label="Mobile number (optional)" type="tel" inputMode="tel" autoComplete="tel-national" name="mobile" value={mobile} onChange={(event) => setMobile(event.target.value)} />
+                  <HpxFieldInput label="Mobile number (optional)" type="tel" inputMode="tel" autoComplete="tel-national" name="mobile" value={mobile} onChange={(event) => setMobile(event.target.value)} />
                 </div>
               </div>
               <input type="hidden" name="country" value={country.id} />
               <input type="hidden" name="callingCode" value={country.code} />
-            </Field>
-            <Field invalid={!!errors.postcode} valid={valid.postcode} {...enter(4)}>
-              <FieldInput
+            </HpxField>
+            <HpxField invalid={!!errors.postcode} valid={valid.postcode} {...enter(4)}>
+              <HpxFieldInput
                 label={validate ? "Postcode *" : "Postcode"}
                 required={validate}
                 placeholder={labelStyle === "floating" ? " " : "BS1 4DJ"}
@@ -241,10 +241,10 @@ export function FormDemo() {
                 onChange={(event) => setPostcode(event.target.value)}
                 onBlur={() => touch("postcode")}
               />
-              <FieldError>{errors.postcode}</FieldError>
-            </Field>
-            <Field {...enter(5)}>
-              <FieldInput
+              <HpxFieldError>{errors.postcode}</HpxFieldError>
+            </HpxField>
+            <HpxField {...enter(5)}>
+              <HpxFieldInput
                 label="Note for the courier"
                 placeholder={labelStyle === "floating" ? " " : "Leave it by the blue door"}
                 value={note}
@@ -252,13 +252,13 @@ export function FormDemo() {
                 counter={counter}
                 onChange={(event) => setNote(event.target.value)}
               />
-            </Field>
-          </FieldGroup>
-        </FieldSet>
+            </HpxField>
+          </HpxFieldGroup>
+        </HpxFieldSet>
         <div style={enter(6).style} className={cn("flex items-center gap-4", enter(6).className)}>
-          <FillButton type="submit" className="h-auto px-5 py-2.5 text-base">
+          <HpxFillButton type="submit" className="h-auto px-5 py-2.5 text-base">
             Save address
-          </FillButton>
+          </HpxFillButton>
           <AnimatePresence mode="wait">
             {savedId !== null && (
               <motion.p
@@ -297,7 +297,7 @@ export function FormDemo() {
         Tip: turn on &quot;Check required fields&quot;, then press Save with the form empty to see the errors.
       </p>
 
-      <ControlsPanel title="Form" {...panel} />
+      <HpxControlsPanel title="Form" {...panel} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { TooltipDemo } from "./tooltip-demo"
+import { HpxTooltipDemo } from "./tooltip-demo"
 
 export default function TooltipPage() {
   return (
@@ -11,7 +11,7 @@ export default function TooltipPage() {
         </p>
       </div>
 
-      <TooltipDemo />
+      <HpxTooltipDemo />
     </div>
   )
 }

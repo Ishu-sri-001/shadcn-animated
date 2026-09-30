@@ -1,21 +1,21 @@
 "use client"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerIndent,
-  DrawerProvider,
-  DrawerTitle,
-  DrawerTrigger,
-  type DrawerOpenAnimation,
+  HpxDrawer,
+  HpxDrawerClose,
+  HpxDrawerContent,
+  HpxDrawerDescription,
+  HpxDrawerFooter,
+  HpxDrawerHeader,
+  HpxDrawerIndent,
+  HpxDrawerProvider,
+  HpxDrawerTitle,
+  HpxDrawerTrigger,
+  type HpxDrawerOpenAnimation,
 } from "@/components/ui/drawer"
-import { RollText } from "@/components/ui/hover-effects"
+import { HpxRollText } from "@/components/ui/hover-effects"
 
 const roasts = [
   { name: "Ethiopia Guji", notes: "Jasmine, peach, black tea" },
@@ -78,17 +78,17 @@ const controls = {
   },
   swipeTilt: { group: "Motion", type: "checkbox", label: "Tilt while swiping", value: false },
   scaleBackground: { group: "Motion", type: "checkbox", label: "Shrink page behind", value: true },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function DrawerDemo() {
-  const panel = useControls(controls)
+export function HpxDrawerDemo() {
+  const panel = useHpxControls(controls)
   const { side, scaleBackground, openAnimation, ...options } = panel.values
   const direction = SIDES[side as keyof typeof SIDES]
 
   return (
-    <DrawerProvider>
+    <HpxDrawerProvider>
       <div className="relative isolate rounded-2xl">
-        <DrawerIndent scale={scaleBackground} className="flex flex-col gap-6 py-2">
+        <HpxDrawerIndent scale={scaleBackground} className="flex flex-col gap-6 py-2">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-semibold">Drawer</h1>
             <p className="text-sm text-muted-foreground">
@@ -97,31 +97,31 @@ export function DrawerDemo() {
           </div>
 
           <div className="flex min-h-[40vh] items-center justify-center rounded-lg border">
-            <Drawer
+            <HpxDrawer
               key={side}
               {...options}
               swipeDirection={direction}
-              openAnimation={openAnimation as DrawerOpenAnimation}
+              openAnimation={openAnimation as HpxDrawerOpenAnimation}
             >
-              <DrawerTrigger
+              <HpxDrawerTrigger
                 className="h-auto px-5 py-2.5 text-lg"
-                render={<Button variant="outline" />}
+                render={<HpxButton variant="outline" />}
               >
                 Choose a roast
-              </DrawerTrigger>
-              <DrawerContent>
+              </HpxDrawerTrigger>
+              <HpxDrawerContent>
                 <div className="flex w-full flex-1 flex-col">
-                  <DrawerHeader>
-                    <DrawerTitle>Next box</DrawerTitle>
-                    <DrawerDescription>Pick the roast for Friday&apos;s delivery.</DrawerDescription>
-                  </DrawerHeader>
+                  <HpxDrawerHeader>
+                    <HpxDrawerTitle>Next box</HpxDrawerTitle>
+                    <HpxDrawerDescription>Pick the roast for Friday&apos;s delivery.</HpxDrawerDescription>
+                  </HpxDrawerHeader>
                   <div className="flex flex-col gap-3 px-6 py-2">
                     {roasts.map((roast) => (
-                      <DrawerClose
+                      <HpxDrawerClose
                         key={roast.name}
                         render={
                           // Hover leaves the background alone; the text rolls, like the trigger.
-                          <Button
+                          <HpxButton
                             variant="outline"
                             data-drawer-item
                             className="group/roll h-auto justify-between py-3 transition-[color,background-color,border-color] hover:bg-background hover:text-foreground dark:hover:bg-input/30"
@@ -129,18 +129,18 @@ export function DrawerDemo() {
                         }
                       >
                         <span className="font-medium">
-                          <RollText>{roast.name}</RollText>
+                          <HpxRollText>{roast.name}</HpxRollText>
                         </span>
                         <span className="text-muted-foreground">
-                          <RollText>{roast.notes}</RollText>
+                          <HpxRollText>{roast.notes}</HpxRollText>
                         </span>
-                      </DrawerClose>
+                      </HpxDrawerClose>
                     ))}
                   </div>
-                  <DrawerFooter>
-                    <DrawerClose
+                  <HpxDrawerFooter>
+                    <HpxDrawerClose
                       render={
-                        <Button
+                        <HpxButton
                           variant="ghost"
                           data-drawer-item
                           className="group/line transition-[color,background-color] hover:bg-transparent dark:hover:bg-transparent"
@@ -151,19 +151,19 @@ export function DrawerDemo() {
                       <span className="relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out group-hover/line:after:origin-left group-hover/line:after:scale-x-100 group-focus-visible/line:after:origin-left group-focus-visible/line:after:scale-x-100 motion-reduce:after:transition-none">
                         Close
                       </span>
-                    </DrawerClose>
-                  </DrawerFooter>
+                    </HpxDrawerClose>
+                  </HpxDrawerFooter>
                 </div>
-              </DrawerContent>
-            </Drawer>
+              </HpxDrawerContent>
+            </HpxDrawer>
           </div>
           <p className="text-sm text-muted-foreground">
             Tip: drag the drawer back towards its edge to close it.
           </p>
-        </DrawerIndent>
+        </HpxDrawerIndent>
       </div>
 
-      <ControlsPanel title="Drawer" {...panel} />
-    </DrawerProvider>
+      <HpxControlsPanel title="Drawer" {...panel} />
+    </HpxDrawerProvider>
   )
 }

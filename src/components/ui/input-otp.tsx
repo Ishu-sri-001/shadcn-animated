@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { MinusIcon } from "lucide-react"
 import {
@@ -238,7 +238,7 @@ function InputOTP({
       <MotionConfig reducedMotion="user">
         <div ref={box} className="relative w-fit">
           <OTPInput
-            data-slot="input-otp"
+            data-hpx-slot="input-otp"
             value={value}
             maxLength={maxLength}
             // Phones show the number pad only when numbers are all that's allowed
@@ -254,7 +254,7 @@ function InputOTP({
               onChange?.(next)
             }}
             containerClassName={cn(
-              "cn-input-otp flex items-center has-disabled:opacity-50",
+              "hpx-input-otp flex items-center has-disabled:opacity-50",
               !joined && "gap-2 max-md:gap-1.5",
               containerClassName
             )}
@@ -304,7 +304,7 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   const { joined } = React.useContext(InputOTPMotionContext)
   return (
     <div
-      data-slot="input-otp-group"
+      data-hpx-slot="input-otp-group"
       className={cn("flex items-center", !joined && "gap-2 max-md:gap-1.5", className)}
       {...props}
     />
@@ -332,7 +332,7 @@ function InputOTPSlot({
 
   return (
     <motion.div
-      data-slot="input-otp-slot"
+      data-hpx-slot="input-otp-slot"
       data-active={isActive}
       aria-invalid={options.invalid || undefined}
       animate={waved ? { scale: [1, 1.1, 1] } : { scale: 1 }}
@@ -408,7 +408,7 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   if (joined) return null
   return (
     <div
-      data-slot="input-otp-separator"
+      data-hpx-slot="input-otp-separator"
       className="flex items-center [&_svg:not([class*='size-'])]:size-4"
       role="separator"
       {...props}
@@ -418,5 +418,5 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   )
 }
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
-export type { InputOTPAllow, InputOTPCharAnimation, InputOTPRounded, InputOTPSize }
+export { InputOTP as HpxInputOTP, InputOTPGroup as HpxInputOTPGroup, InputOTPSlot as HpxInputOTPSlot, InputOTPSeparator as HpxInputOTPSeparator }
+export type { InputOTPAllow as HpxInputOTPAllow, InputOTPCharAnimation as HpxInputOTPCharAnimation, InputOTPRounded as HpxInputOTPRounded, InputOTPSize as HpxInputOTPSize }

@@ -3,11 +3,11 @@
 import * as React from "react"
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react"
 
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
+import { HpxLabel } from "@/components/ui/label"
+import { HpxSeparator } from "@/components/ui/separator"
 
 type FieldRounded = "none" | "sm" | "md" | "lg" | "xl" | "full"
 type FieldErrorAnimation = "slide" | "fade" | "none"
@@ -52,9 +52,9 @@ const easeOut = [0.22, 1, 0.36, 1] as const
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
     <fieldset
-      data-slot="field-set"
+      data-hpx-slot="field-set"
       className={cn(
-        "flex flex-col gap-4 has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
+        "flex flex-col gap-4 has-[>[data-hpx-slot=checkbox-group]]:gap-3 has-[>[data-hpx-slot=radio-group]]:gap-3",
         className
       )}
       {...props}
@@ -69,7 +69,7 @@ function FieldLegend({
 }: React.ComponentProps<"legend"> & { variant?: "legend" | "label" }) {
   return (
     <legend
-      data-slot="field-legend"
+      data-hpx-slot="field-legend"
       data-variant={variant}
       className={cn(
         "mb-1.5 font-medium data-[variant=label]:text-base data-[variant=legend]:text-lg",
@@ -97,9 +97,9 @@ function FieldGroup({
   return (
     <FieldMotionContext.Provider value={options}>
       <div
-        data-slot="field-group"
+        data-hpx-slot="field-group"
         className={cn(
-          "group/field-group @container/field-group flex w-full flex-col gap-5 data-[slot=checkbox-group]:gap-3 *:data-[slot=field-group]:gap-4",
+          "group/field-group @container/field-group flex w-full flex-col gap-5 data-[hpx-slot=checkbox-group]:gap-3 *:data-[hpx-slot=field-group]:gap-4",
           className
         )}
         {...props}
@@ -115,9 +115,9 @@ const fieldVariants = cva(
       orientation: {
         vertical: "flex-col *:w-full [&>.sr-only]:w-auto",
         horizontal:
-          "flex-row items-center has-[>[data-slot=field-content]]:items-start *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+          "flex-row items-center has-[>[data-hpx-slot=field-content]]:items-start *:data-[hpx-slot=field-label]:flex-auto has-[>[data-hpx-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         responsive:
-          "flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:*:data-[slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+          "flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-hpx-slot=field-content]]:items-start @md/field-group:*:data-[hpx-slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-hpx-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
       },
     },
     defaultVariants: {
@@ -144,7 +144,7 @@ function Field({
     <FieldStateContext.Provider value={state}>
       <div
         role="group"
-        data-slot="field"
+        data-hpx-slot="field"
         data-orientation={orientation}
         data-invalid={invalid || undefined}
         className={cn(fieldVariants({ orientation }), className)}
@@ -243,7 +243,7 @@ function FieldInput({
       )}
       <div
         ref={box}
-        data-slot="field-input"
+        data-hpx-slot="field-input"
         className={cn(
           "relative flex items-center gap-2 border border-input bg-transparent px-2.5 transition-colors has-aria-invalid:border-destructive dark:bg-input/30",
           // Plain border, no glow.
@@ -255,7 +255,7 @@ function FieldInput({
       >
         <input
           id={id}
-          data-slot="input"
+          data-hpx-slot="input"
           aria-invalid={invalid || undefined}
           value={text}
           maxLength={maxLength}
@@ -278,7 +278,7 @@ function FieldInput({
         {floating && (
           <label
             htmlFor={id}
-            data-slot="field-label"
+            data-hpx-slot="field-label"
             className={cn(
               // Rises onto the border when filled.
               "pointer-events-none absolute top-1/2 left-1.5 origin-left -translate-y-1/2 rounded-sm px-1 text-base leading-none text-muted-foreground transition-[top,scale,color,background-color] duration-200 ease-out motion-reduce:transition-none",
@@ -292,7 +292,7 @@ function FieldInput({
         {inside && (
           <label
             htmlFor={id}
-            data-slot="field-label"
+            data-hpx-slot="field-label"
             className={cn(
               // Fades out once there's text.
               "pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-base text-muted-foreground transition-opacity duration-200 ease-out peer-not-placeholder-shown:opacity-0 motion-reduce:transition-none",
@@ -347,7 +347,7 @@ function FieldInput({
 function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="field-content"
+      data-hpx-slot="field-content"
       className={cn(
         "group/field-content flex flex-1 flex-col gap-0.5 leading-snug",
         className
@@ -360,13 +360,13 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
 function FieldLabel({
   className,
   ...props
-}: React.ComponentProps<typeof Label>) {
+}: React.ComponentProps<typeof HpxLabel>) {
   return (
-    <Label
-      data-slot="field-label"
+    <HpxLabel
+      data-hpx-slot="field-label"
       className={cn(
-        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-data-checked:border-primary/30 has-data-checked:bg-primary/5 has-[>[data-slot=field]]:rounded-lg has-[>[data-slot=field]]:border has-[>[data-slot=field]]:not-has-[:disabled,[data-disabled]]:hover:bg-muted/50 has-[>[data-slot=field]]:has-[:focus-visible]:border-ring has-[>[data-slot=field]]:has-[:focus-visible]:ring-3 has-[>[data-slot=field]]:has-[:focus-visible]:ring-ring/50 *:data-[slot=field]:p-2.5 dark:has-data-checked:border-primary/20 dark:has-data-checked:bg-primary/10",
-        "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
+        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-hpx-checked:border-primary/30 has-hpx-checked:bg-primary/5 has-[>[data-hpx-slot=field]]:rounded-lg has-[>[data-hpx-slot=field]]:border has-[>[data-hpx-slot=field]]:not-has-[:disabled,[data-disabled]]:hover:bg-muted/50 has-[>[data-hpx-slot=field]]:has-[:focus-visible]:border-ring has-[>[data-hpx-slot=field]]:has-[:focus-visible]:ring-3 has-[>[data-hpx-slot=field]]:has-[:focus-visible]:ring-ring/50 *:data-[hpx-slot=field]:p-2.5 dark:has-hpx-checked:border-primary/20 dark:has-hpx-checked:bg-primary/10",
+        "has-[>[data-hpx-slot=field]]:w-full has-[>[data-hpx-slot=field]]:flex-col",
         className
       )}
       {...props}
@@ -377,7 +377,7 @@ function FieldLabel({
 function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="field-label"
+      data-hpx-slot="field-label"
       className={cn(
         "flex w-fit items-center gap-2 text-sm font-medium group-data-[disabled=true]/field:opacity-50",
         className
@@ -390,9 +390,9 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
 function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
-      data-slot="field-description"
+      data-hpx-slot="field-description"
       className={cn(
-        "text-left text-base leading-normal font-normal text-muted-foreground group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
+        "text-left text-base leading-normal font-normal text-muted-foreground group-has-hpx-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
         "last:mt-0 nth-last-2:-mt-1",
         "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
@@ -411,7 +411,7 @@ function FieldSeparator({
 }) {
   return (
     <div
-      data-slot="field-separator"
+      data-hpx-slot="field-separator"
       data-content={!!children}
       className={cn(
         "relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
@@ -419,11 +419,11 @@ function FieldSeparator({
       )}
       {...props}
     >
-      <Separator className="absolute inset-0 top-1/2" />
+      <HpxSeparator className="absolute inset-0 top-1/2" />
       {children && (
         <span
           className="relative mx-auto block w-fit bg-background px-2 text-muted-foreground"
-          data-slot="field-separator-content"
+          data-hpx-slot="field-separator-content"
         >
           {children}
         </span>
@@ -473,7 +473,7 @@ function FieldError({
   const error = (
     <div
       role="alert"
-      data-slot="field-error"
+      data-hpx-slot="field-error"
       className={cn("text-xs font-normal text-destructive", className)}
       {...props}
     >
@@ -504,16 +504,16 @@ function FieldError({
 }
 
 export {
-  Field,
-  FieldLabel,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-  FieldContent,
-  FieldTitle,
-  FieldInput,
+  Field as HpxField,
+  FieldLabel as HpxFieldLabel,
+  FieldDescription as HpxFieldDescription,
+  FieldError as HpxFieldError,
+  FieldGroup as HpxFieldGroup,
+  FieldLegend as HpxFieldLegend,
+  FieldSeparator as HpxFieldSeparator,
+  FieldSet as HpxFieldSet,
+  FieldContent as HpxFieldContent,
+  FieldTitle as HpxFieldTitle,
+  FieldInput as HpxFieldInput,
 }
-export type { FieldErrorAnimation, FieldLabelStyle, FieldRounded }
+export type { FieldErrorAnimation as HpxFieldErrorAnimation, FieldLabelStyle as HpxFieldLabelStyle, FieldRounded as HpxFieldRounded }

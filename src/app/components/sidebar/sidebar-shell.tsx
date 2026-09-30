@@ -3,44 +3,44 @@
 import * as React from "react"
 import Link from "next/link"
 import { CheckIcon } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 
-import { CalendarIcon } from "@/components/animated-icons/calendar-icon"
-import { CoffeeIcon } from "@/components/animated-icons/coffee-icon"
-import { DropletsIcon } from "@/components/animated-icons/droplets-icon"
-import { FolderIcon } from "@/components/animated-icons/folder-icon"
-import { HouseIcon } from "@/components/animated-icons/house-icon"
-import { InboxIcon } from "@/components/animated-icons/inbox-icon"
-import { SearchIcon } from "@/components/animated-icons/search-icon"
-import { SettingsIcon } from "@/components/animated-icons/settings-icon"
-import { UtensilsIcon } from "@/components/animated-icons/utensils-icon"
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { MorphChevron } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { HpxCalendarIcon } from "@/components/animated-icons/calendar-icon"
+import { HpxCoffeeIcon } from "@/components/animated-icons/coffee-icon"
+import { HpxDropletsIcon } from "@/components/animated-icons/droplets-icon"
+import { HpxFolderIcon } from "@/components/animated-icons/folder-icon"
+import { HpxHouseIcon } from "@/components/animated-icons/house-icon"
+import { HpxInboxIcon } from "@/components/animated-icons/inbox-icon"
+import { HpxSearchIcon } from "@/components/animated-icons/search-icon"
+import { HpxSettingsIcon } from "@/components/animated-icons/settings-icon"
+import { HpxUtensilsIcon } from "@/components/animated-icons/utensils-icon"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxMorphChevron } from "@/components/ui/dropdown-menu"
+import { HpxPopover, HpxPopoverContent, HpxPopoverTrigger } from "@/components/ui/popover"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGlideHighlight,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarTrigger,
-  useGlide,
-  type SidebarItemRadius,
+  HpxSidebar,
+  HpxSidebarContent,
+  HpxSidebarFooter,
+  HpxSidebarGlideHighlight,
+  HpxSidebarGroup,
+  HpxSidebarGroupContent,
+  HpxSidebarHeader,
+  HpxSidebarInset,
+  HpxSidebarMenu,
+  HpxSidebarMenuBadge,
+  HpxSidebarMenuButton,
+  HpxSidebarMenuItem,
+  HpxSidebarMenuSub,
+  HpxSidebarMenuSubButton,
+  HpxSidebarMenuSubItem,
+  HpxSidebarProvider,
+  HpxSidebarRail,
+  HpxSidebarTrigger,
+  useHpxGlide,
+  type HpxSidebarItemRadius,
 } from "@/components/ui/sidebar"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { HpxTooltipProvider } from "@/components/ui/tooltip"
 
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.2 } as const
 
@@ -103,11 +103,11 @@ const controls = {
   spinTrigger: { group: "Header", type: "checkbox", label: "Spin toggle on hover", value: false },
   breadcrumb: { group: "Header", type: "checkbox", label: "Breadcrumb bar", value: true },
   scaleContent: { group: "Page", type: "checkbox", label: "Scale with fade", value: true },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
 const InboxContext = React.createContext<{ receive: () => void } | null>(null)
 
-export function useInbox() {
+export function useHpxInbox() {
   const inbox = React.useContext(InboxContext)
   if (!inbox) throw new Error("useInbox must be used within SidebarShell.")
   return inbox
@@ -119,7 +119,7 @@ const ActivePageContext = React.createContext<{
   scaleContent: boolean
 } | null>(null)
 
-export function useActivePage() {
+export function useHpxActivePage() {
   const active = React.useContext(ActivePageContext)
   if (!active) throw new Error("useActivePage must be used within SidebarShell.")
   return active
@@ -139,20 +139,20 @@ function NavButton({
   icon: Icon,
   children,
   ...props
-}: React.ComponentProps<typeof SidebarMenuButton> & { icon: AnimatedIcon }) {
+}: React.ComponentProps<typeof HpxSidebarMenuButton> & { icon: AnimatedIcon }) {
   const { icon, handlers } = useIconTrigger()
   return (
-    <SidebarMenuButton {...handlers} {...props}>
+    <HpxSidebarMenuButton {...handlers} {...props}>
       <Icon ref={icon} size={ICON_SIZE} />
       {children}
-    </SidebarMenuButton>
+    </HpxSidebarMenuButton>
   )
 }
 
 const teams: { name: string; plan: string; icon: AnimatedIcon }[] = [
-  { name: "Bean & Co.", plan: "Roastery", icon: CoffeeIcon },
-  { name: "Leaf House", plan: "Tea room", icon: DropletsIcon },
-  { name: "Crumb", plan: "Bakery", icon: UtensilsIcon },
+  { name: "Bean & Co.", plan: "Roastery", icon: HpxCoffeeIcon },
+  { name: "Leaf House", plan: "Tea room", icon: HpxDropletsIcon },
+  { name: "Crumb", plan: "Bakery", icon: HpxUtensilsIcon },
 ]
 
 type Team = (typeof teams)[number]
@@ -233,9 +233,9 @@ function TeamIdentity({ team, iconRef }: { team: Team; iconRef?: React.Ref<IconH
 }
 
 const noFill =
-  "active:bg-transparent active:text-sidebar-foreground data-open:hover:bg-transparent data-open:hover:text-sidebar-foreground"
+  "active:bg-transparent active:text-sidebar-foreground hpx-open:hover:bg-transparent hpx-open:hover:text-sidebar-foreground"
 const mutedFill =
-  "hover:bg-sidebar-accent active:bg-sidebar-accent active:text-sidebar-foreground data-open:bg-sidebar-accent data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-foreground"
+  "hover:bg-sidebar-accent active:bg-sidebar-accent active:text-sidebar-foreground hpx-open:bg-sidebar-accent hpx-open:hover:bg-sidebar-accent hpx-open:hover:text-sidebar-foreground"
 
 function TeamHeader({ switcher }: { switcher: boolean }) {
   const [team, setTeam] = React.useState<Team>(teams[0])
@@ -245,18 +245,18 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
     container: glideList,
     box: glideBox,
     handlers: glideHandlers,
-  } = useGlide<HTMLDivElement>("[data-team-option]")
+  } = useHpxGlide<HTMLDivElement>("[data-team-option]")
 
   const content = (
     <>
       <TeamIdentity team={team} iconRef={icon} />
-      {switcher && <MorphChevron open={open} className="size-3.5!" />}
+      {switcher && <HpxMorphChevron open={open} className="size-3.5!" />}
     </>
   )
 
   if (!switcher) {
     return (
-      <SidebarMenuButton
+      <HpxSidebarMenuButton
         size="lg"
         tooltip={team.name}
         data-no-glide
@@ -264,18 +264,18 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
         {...handlers}
       >
         {content}
-      </SidebarMenuButton>
+      </HpxSidebarMenuButton>
     )
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={<SidebarMenuButton size="lg" data-no-glide className={mutedFill} {...handlers} />}
+    <HpxPopover open={open} onOpenChange={setOpen}>
+      <HpxPopoverTrigger
+        render={<HpxSidebarMenuButton size="lg" data-no-glide className={mutedFill} {...handlers} />}
       >
         {content}
-      </PopoverTrigger>
-      <PopoverContent
+      </HpxPopoverTrigger>
+      <HpxPopoverContent
         align="start"
         side="bottom"
         sideOffset={6}
@@ -284,7 +284,7 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
       >
         <span className="px-2 py-1 text-xs text-muted-foreground">Teams</span>
         <div ref={glideList} className="relative isolate flex flex-col gap-1" {...glideHandlers}>
-          <SidebarGlideHighlight box={glideBox} className="bg-muted" />
+          <HpxSidebarGlideHighlight box={glideBox} className="bg-muted" />
           {teams.map((t, i) => (
             <TeamOption
               key={t.name}
@@ -298,8 +298,8 @@ function TeamHeader({ switcher }: { switcher: boolean }) {
             />
           ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      </HpxPopoverContent>
+    </HpxPopover>
   )
 }
 
@@ -343,7 +343,7 @@ function HeaderSearch() {
         }}
         className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
       >
-        <SearchIcon ref={icon} size={ICON_SIZE} />
+        <HpxSearchIcon ref={icon} size={ICON_SIZE} />
       </button>
       <input
         ref={input}
@@ -387,15 +387,15 @@ function Breadcrumb({ page }: { page: string }) {
 }
 
 const nav = [
-  { title: "Home", icon: HouseIcon },
-  { title: "Inbox", icon: InboxIcon },
-  { title: "Calendar", icon: CalendarIcon },
+  { title: "Home", icon: HpxHouseIcon },
+  { title: "Inbox", icon: HpxInboxIcon },
+  { title: "Calendar", icon: HpxCalendarIcon },
 ]
 
 const projects = ["Saturday roast", "Oat milk supplier", "New cups"]
 
-export function SidebarShell({ children }: { children: React.ReactNode }) {
-  const panel = useControls(controls)
+export function HpxSidebarShell({ children }: { children: React.ReactNode }) {
+  const panel = useHpxControls(controls)
   const {
     teamSwitcher,
     breadcrumb,
@@ -420,29 +420,29 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
   return (
     <InboxContext.Provider value={inbox}>
       <ActivePageContext.Provider value={{ page: active, unread, scaleContent }}>
-        <TooltipProvider>
-          <SidebarProvider
+        <HpxTooltipProvider>
+          <HpxSidebarProvider
             className="min-h-[calc(100svh-3.5rem)]"
             activeIndicator={activeIndicator as "bar" | "dot" | "none"}
             highlightTone={highlightTone as "primary" | "muted"}
-            itemRadius={itemRadius as SidebarItemRadius}
+            itemRadius={itemRadius as HpxSidebarItemRadius}
             {...options}
           >
-            <Sidebar collapsible="icon" className="z-60">
-              <SidebarHeader>
-                <SidebarMenu>
-                  <SidebarMenuItem>
+            <HpxSidebar collapsible="icon" className="z-60">
+              <HpxSidebarHeader>
+                <HpxSidebarMenu>
+                  <HpxSidebarMenuItem>
                     <TeamHeader switcher={teamSwitcher} />
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarHeader>
+                  </HpxSidebarMenuItem>
+                </HpxSidebarMenu>
+              </HpxSidebarHeader>
 
-              <SidebarContent>
-                <SidebarGroup label="Platform">
-                  <SidebarGroupContent>
-                    <SidebarMenu>
+              <HpxSidebarContent>
+                <HpxSidebarGroup label="Platform">
+                  <HpxSidebarGroupContent>
+                    <HpxSidebarMenu>
                       {nav.map((item) => (
-                        <SidebarMenuItem key={item.title}>
+                        <HpxSidebarMenuItem key={item.title}>
                           <NavButton
                             icon={item.icon}
                             isActive={active === item.title}
@@ -454,86 +454,86 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                           {item.title === "Inbox" && (
                             <AnimatePresence>
                               {unread > 0 && (
-                                <SidebarMenuBadge key="badge">{unread}</SidebarMenuBadge>
+                                <HpxSidebarMenuBadge key="badge">{unread}</HpxSidebarMenuBadge>
                               )}
                             </AnimatePresence>
                           )}
-                        </SidebarMenuItem>
+                        </HpxSidebarMenuItem>
                       ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
+                    </HpxSidebarMenu>
+                  </HpxSidebarGroupContent>
+                </HpxSidebarGroup>
 
-                <SidebarGroup label="Projects">
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      <SidebarMenuItem>
+                <HpxSidebarGroup label="Projects">
+                  <HpxSidebarGroupContent>
+                    <HpxSidebarMenu>
+                      <HpxSidebarMenuItem>
                         <NavButton
-                          icon={FolderIcon}
+                          icon={HpxFolderIcon}
                           tooltip="Projects"
                           aria-expanded={projectsOpen}
                           onClick={() => setProjectsOpen((o) => !o)}
                         >
                           <span className="flex-1">Projects</span>
-                          <MorphChevron open={projectsOpen} className="size-3.5!" />
+                          <HpxMorphChevron open={projectsOpen} className="size-3.5!" />
                         </NavButton>
-                        <SidebarMenuSub open={projectsOpen}>
+                        <HpxSidebarMenuSub open={projectsOpen}>
                           {projects.map((project) => (
-                            <SidebarMenuSubItem key={project}>
-                              <SidebarMenuSubButton
+                            <HpxSidebarMenuSubItem key={project}>
+                              <HpxSidebarMenuSubButton
                                 isActive={active === project}
                                 onClick={() => go(project)}
                               >
                                 <span>{project}</span>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
+                              </HpxSidebarMenuSubButton>
+                            </HpxSidebarMenuSubItem>
                           ))}
-                        </SidebarMenuSub>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
+                        </HpxSidebarMenuSub>
+                      </HpxSidebarMenuItem>
+                    </HpxSidebarMenu>
+                  </HpxSidebarGroupContent>
+                </HpxSidebarGroup>
+              </HpxSidebarContent>
 
-              <SidebarFooter>
-                <SidebarMenu>
-                  <SidebarMenuItem>
+              <HpxSidebarFooter>
+                <HpxSidebarMenu>
+                  <HpxSidebarMenuItem>
                     <NavButton
-                      icon={SettingsIcon}
+                      icon={HpxSettingsIcon}
                       isActive={active === "Settings"}
                       tooltip="Settings"
                       onClick={() => go("Settings")}
                     >
                       <span>Settings</span>
                     </NavButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarFooter>
-              <SidebarRail />
-            </Sidebar>
+                  </HpxSidebarMenuItem>
+                </HpxSidebarMenu>
+              </HpxSidebarFooter>
+              <HpxSidebarRail />
+            </HpxSidebar>
 
-            <SidebarInset>
+            <HpxSidebarInset>
               {breadcrumb ? (
                 <header className="sticky top-14 z-10 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur">
                   <div className="flex min-w-0 items-center gap-2">
-                    <SidebarTrigger />
+                    <HpxSidebarTrigger />
                     <Breadcrumb page={active} />
                   </div>
                   <HeaderSearch />
                 </header>
               ) : (
                 <div className="sticky top-14 z-10 h-0">
-                  <SidebarTrigger className="m-3 border bg-background shadow-xs" />
+                  <HpxSidebarTrigger className="m-3 border bg-background shadow-xs" />
                 </div>
               )}
               <div className="flex w-full flex-1 flex-col px-[3vw] py-8 max-[1025px]:px-[4vw] max-md:px-4">
                 {children}
               </div>
-            </SidebarInset>
-          </SidebarProvider>
-        </TooltipProvider>
+            </HpxSidebarInset>
+          </HpxSidebarProvider>
+        </HpxTooltipProvider>
 
-        <ControlsPanel title="Sidebar" {...panel} />
+        <HpxControlsPanel title="Sidebar" {...panel} />
       </ActivePageContext.Provider>
     </InboxContext.Provider>
   )

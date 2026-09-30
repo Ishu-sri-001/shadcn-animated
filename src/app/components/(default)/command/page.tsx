@@ -1,4 +1,4 @@
-import { CommandDemo } from "./command-demo"
+import { HpxCommandDemo } from "./command-demo"
 
 export default function CommandPage() {
   return (
@@ -10,7 +10,7 @@ export default function CommandPage() {
         </p>
       </div>
 
-      <CommandDemo />
+      <HpxCommandDemo />
     </div>
   )
 }

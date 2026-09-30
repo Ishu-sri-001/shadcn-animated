@@ -1,4 +1,4 @@
-import { SkeletonDemo } from "./skeleton-demo"
+import { HpxSkeletonDemo } from "./skeleton-demo"
 
 export default function SkeletonPage() {
   return (
@@ -11,7 +11,7 @@ export default function SkeletonPage() {
         </p>
       </div>
 
-      <SkeletonDemo />
+      <HpxSkeletonDemo />
     </div>
   )
 }

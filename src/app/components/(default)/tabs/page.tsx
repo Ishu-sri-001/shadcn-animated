@@ -1,4 +1,4 @@
-import { TabsDemo } from "./tabs-demo"
+import { HpxTabsDemo } from "./tabs-demo"
 
 export default function TabsPage() {
   return (
@@ -10,7 +10,7 @@ export default function TabsPage() {
         </p>
       </div>
 
-      <TabsDemo />
+      <HpxTabsDemo />
     </div>
   )
 }

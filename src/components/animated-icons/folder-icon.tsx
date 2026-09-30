@@ -16,7 +16,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from "react"
-export interface FolderIconHandle {
+export interface HpxFolderIconHandle {
   startAnimation: () => void
   stopAnimation: () => void
 }
@@ -37,7 +37,7 @@ interface FolderIconProps extends Omit<
   color?: string
 }
 
-const FolderIcon = forwardRef<FolderIconHandle, FolderIconProps>(
+const FolderIcon = forwardRef<HpxFolderIconHandle, FolderIconProps>(
   (
     {
       onMouseEnter,
@@ -135,4 +135,4 @@ const FolderIcon = forwardRef<FolderIconHandle, FolderIconProps>(
 )
 
 FolderIcon.displayName = "FolderIcon"
-export { FolderIcon }
+export { FolderIcon as HpxFolderIcon }

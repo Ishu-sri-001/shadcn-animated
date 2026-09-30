@@ -5,23 +5,23 @@ import { FileTextIcon, PlusIcon, XIcon } from "lucide-react"
 import { AnimatePresence } from "motion/react"
 
 import {
-  Attachment,
-  AttachmentAction,
-  AttachmentActions,
-  AttachmentContent,
-  AttachmentDescription,
-  AttachmentGroup,
-  AttachmentMedia,
-  AttachmentTitle,
+  HpxAttachment,
+  HpxAttachmentAction,
+  HpxAttachmentActions,
+  HpxAttachmentContent,
+  HpxAttachmentDescription,
+  HpxAttachmentGroup,
+  HpxAttachmentMedia,
+  HpxAttachmentTitle,
 } from "@/components/ui/attachment"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { HpxButton } from "@/components/ui/button"
+import { HpxInput } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  HpxSelect,
+  HpxSelectContent,
+  HpxSelectItem,
+  HpxSelectTrigger,
+  HpxSelectValue,
 } from "@/components/ui/select"
 
 type Size = "default" | "sm" | "xs"
@@ -34,7 +34,7 @@ const sizes: { label: string; value: Size }[] = [
 
 type Note = { id: number; text: string; size: Size }
 
-export function NotesDemo() {
+export function HpxNotesDemo() {
   const [notes, setNotes] = React.useState<Note[]>([
     { id: 1, text: "Confirm Monday's roast dates", size: "default" },
   ])
@@ -60,7 +60,7 @@ export function NotesDemo() {
         </p>
       </div>
       <form onSubmit={addNote} className="flex items-center gap-2 max-md:flex-wrap">
-        <Input
+        <HpxInput
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder="Write a note…"
@@ -68,29 +68,29 @@ export function NotesDemo() {
           maxLength={120}
           className="flex-1 max-md:basis-full"
         />
-        <Select
+        <HpxSelect
           items={sizes}
           value={size}
           onValueChange={(value) => value && setSize(value as Size)}
         >
-          <SelectTrigger aria-label="Note size" className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
+          <HpxSelectTrigger aria-label="Note size" className="w-32">
+            <HpxSelectValue />
+          </HpxSelectTrigger>
+          <HpxSelectContent>
             {sizes.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <HpxSelectItem key={option.value} value={option.value}>
                 {option.label}
-              </SelectItem>
+              </HpxSelectItem>
             ))}
-          </SelectContent>
-        </Select>
-        <Button type="submit" disabled={!text.trim()}>
+          </HpxSelectContent>
+        </HpxSelect>
+        <HpxButton type="submit" disabled={!text.trim()}>
           <PlusIcon />
           Add note
-        </Button>
+        </HpxButton>
       </form>
       <div className="flex min-h-24 flex-col justify-center rounded-lg border p-6 max-md:p-4">
-        <AttachmentGroup
+        <HpxAttachmentGroup
           wrap
           className="items-center"
           values={notes.map((note) => note.id)}
@@ -101,28 +101,28 @@ export function NotesDemo() {
           <AnimatePresence initial={false} mode="popLayout">
             {notes.map((note) => {
               return (
-                <Attachment key={note.id} value={note.id} size={note.size} title={note.text}>
-                  <AttachmentMedia>
+                <HpxAttachment key={note.id} value={note.id} size={note.size} title={note.text}>
+                  <HpxAttachmentMedia>
                     <FileTextIcon />
-                  </AttachmentMedia>
-                  <AttachmentContent>
-                    <AttachmentTitle>{note.text}</AttachmentTitle>
-                    <AttachmentDescription>Size: {note.size}</AttachmentDescription>
-                  </AttachmentContent>
-                  <AttachmentActions>
-                    <AttachmentAction
+                  </HpxAttachmentMedia>
+                  <HpxAttachmentContent>
+                    <HpxAttachmentTitle>{note.text}</HpxAttachmentTitle>
+                    <HpxAttachmentDescription>Size: {note.size}</HpxAttachmentDescription>
+                  </HpxAttachmentContent>
+                  <HpxAttachmentActions>
+                    <HpxAttachmentAction
                       reveal
                       aria-label={`Remove note: ${note.text}`}
                       onClick={() => setNotes((current) => current.filter((n) => n.id !== note.id))}
                     >
                       <XIcon />
-                    </AttachmentAction>
-                  </AttachmentActions>
-                </Attachment>
+                    </HpxAttachmentAction>
+                  </HpxAttachmentActions>
+                </HpxAttachment>
               )
             })}
           </AnimatePresence>
-        </AttachmentGroup>
+        </HpxAttachmentGroup>
         {notes.length === 0 && (
           <p className="text-sm text-muted-foreground">No notes yet. Write one above.</p>
         )}

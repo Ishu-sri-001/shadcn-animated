@@ -1,20 +1,20 @@
 "use client"
 
-import { ControlsPanel, useControls, type ControlSchema } from "@/components/controls-panel"
-import { Button } from "@/components/ui/button"
+import { HpxControlsPanel, useHpxControls, type HpxControlSchema } from "@/components/controls-panel"
+import { HpxButton } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogButton,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  type DialogBackdrop,
-  type DialogExit,
-  type DialogRounded,
+  HpxDialog,
+  HpxDialogButton,
+  HpxDialogClose,
+  HpxDialogContent,
+  HpxDialogDescription,
+  HpxDialogFooter,
+  HpxDialogHeader,
+  HpxDialogTitle,
+  HpxDialogTrigger,
+  type HpxDialogBackdrop,
+  type HpxDialogExit,
+  type HpxDialogRounded,
 } from "@/components/ui/dialog"
 
 const controls = {
@@ -79,42 +79,42 @@ const controls = {
       { label: "3xl", value: "3xl" },
     ],
   },
-} satisfies ControlSchema
+} satisfies HpxControlSchema
 
-export function DialogDemo() {
-  const panel = useControls(controls)
+export function HpxDialogDemo() {
+  const panel = useHpxControls(controls)
   const { values } = panel
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border">
-        <Dialog
+        <HpxDialog
           {...values}
-          backdrop={values.backdrop as DialogBackdrop}
-          exit={values.exit as DialogExit}
-          rounded={values.rounded as DialogRounded}
+          backdrop={values.backdrop as HpxDialogBackdrop}
+          exit={values.exit as HpxDialogExit}
+          rounded={values.rounded as HpxDialogRounded}
         >
-          <DialogTrigger className="h-auto px-5 py-2.5 text-lg" render={<Button variant="outline" />}>Pause subscription</DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Pause your subscription?</DialogTitle>
-              <DialogDescription>
+          <HpxDialogTrigger className="h-auto px-5 py-2.5 text-lg" render={<HpxButton variant="outline" />}>Pause subscription</HpxDialogTrigger>
+          <HpxDialogContent>
+            <HpxDialogHeader>
+              <HpxDialogTitle>Pause your subscription?</HpxDialogTitle>
+              <HpxDialogDescription>
                 We&apos;ll skip your next two boxes. You can resume any time before Thursday noon
                 and your next delivery goes out as usual.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose render={<DialogButton />}>Keep it</DialogClose>
-              <DialogClose render={<DialogButton />}>Pause</DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              </HpxDialogDescription>
+            </HpxDialogHeader>
+            <HpxDialogFooter>
+              <HpxDialogClose render={<HpxDialogButton />}>Keep it</HpxDialogClose>
+              <HpxDialogClose render={<HpxDialogButton />}>Pause</HpxDialogClose>
+            </HpxDialogFooter>
+          </HpxDialogContent>
+        </HpxDialog>
       </div>
       <p className="text-sm text-muted-foreground">
         Tip: turn off &quot;Click outside closes&quot;, then click the backdrop.
       </p>
 
-      <ControlsPanel title="Dialog" {...panel} />
+      <HpxControlsPanel title="Dialog" {...panel} />
     </div>
   )
 }
