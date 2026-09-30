@@ -31,7 +31,7 @@ const LINE_TEXT =
   "relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out group-hover/line:after:origin-left group-hover/line:after:scale-x-100 group-focus-visible/line:after:origin-left group-focus-visible/line:after:scale-x-100 motion-reduce:after:transition-none"
 
 const controls = {
-  allow: {
+  allowedCharacters: {
     group: "Input",
     type: "select",
     label: "Allowed characters",
@@ -44,7 +44,7 @@ const controls = {
     ],
   },
 
-  glide: { group: "Typing", type: "checkbox", label: "Ring glides between boxes", value: true },
+  glideRing: { group: "Typing", type: "checkbox", label: "Glide ring", value: true },
   charAnimation: {
     group: "Typing",
     type: "select",
@@ -69,7 +69,7 @@ const controls = {
     unit: "s",
   },
 
-  shakeOnError: { group: "Result", type: "checkbox", label: "Shake when wrong", value: true },
+  shakeOnError: { group: "Result", type: "checkbox", label: "Shake on error", value: true },
   successWave: { group: "Result", type: "checkbox", label: "Green wave when right", value: true },
 
   boxSize: {
@@ -106,15 +106,15 @@ const controls = {
 export function HpxInputOTPDemo() {
   const panel = useHpxControls(controls)
   const { values } = panel
-  const allow = values.allow as HpxInputOTPAllow
-  const CODE = CODES[allow]
+  const allowedCharacters = values.allowedCharacters as HpxInputOTPAllow
+  const CODE = CODES[allowedCharacters]
   const [code, setCode] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
 
   // A new kind of input starts over
-  const [lastAllow, setLastAllow] = React.useState(allow)
-  if (lastAllow !== allow) {
-    setLastAllow(allow)
+  const [lastAllow, setLastAllow] = React.useState(allowedCharacters)
+  if (lastAllow !== allowedCharacters) {
+    setLastAllow(allowedCharacters)
     setCode("")
     setError(null)
   }
@@ -135,12 +135,12 @@ export function HpxInputOTPDemo() {
           maxLength={CODE.length}
           value={code}
           onChange={change}
-          allow={allow}
+          allowedCharacters={allowedCharacters}
           onReject={setError}
           invalid={invalid}
           success={success}
           aria-label="Verification code"
-          glide={values.glide}
+          glideRing={values.glideRing}
           charAnimation={values.charAnimation as HpxInputOTPCharAnimation}
           pasteStagger={values.pasteStagger}
           shakeOnError={values.shakeOnError}

@@ -21,7 +21,7 @@ type InputOTPAllow = "numbers" | "letters" | "symbols" | "mixed"
 
 type InputOTPMotion = {
   /** One ring glides between boxes. */
-  glide: boolean
+  glideRing: boolean
   charAnimation: InputOTPCharAnimation
   /** Paste fill gap, in seconds. */
   pasteStagger: number
@@ -90,10 +90,10 @@ const RULE: Record<InputOTPAllow, string> = {
 }
 
 /** Why a character was turned away, in words people can act on. */
-function rejectMessage(char: string, allow: InputOTPAllow, pasted: boolean) {
+function rejectMessage(char: string, allowedCharacters: InputOTPAllow, pasted: boolean) {
   if (/\s/u.test(char)) return pasted ? "The pasted code has a space in it. Spaces aren't allowed." : "Spaces aren't allowed."
   const what = pasted ? `The pasted code has "${char}", which isn't allowed here.` : `"${char}" isn't allowed here.`
-  return `${what} ${RULE[allow]}`
+  return `${what} ${RULE[allowedCharacters]}`
 }
 
 /** How long rejected boxes stay red, ms. */
@@ -118,7 +118,7 @@ const InputOTPMotionContext = React.createContext<
     pasteFrom: number | null
   }
 >({
-  glide: true,
+  glideRing: true,
   charAnimation: "pop",
   pasteStagger: 0.05,
   shakeOnError: true,
@@ -140,7 +140,7 @@ function InputOTP({
   maxLength,
   invalid = false,
   success = false,
-  glide = true,
+  glideRing = true,
   charAnimation = "pop",
   pasteStagger = 0.05,
   shakeOnError = true,
@@ -148,14 +148,14 @@ function InputOTP({
   boxSize = "8",
   rounded = "lg",
   joined = false,
-  allow = "mixed",
+  allowedCharacters = "mixed",
   onReject,
   ...props
 }: React.ComponentProps<typeof OTPInput> &
   Partial<InputOTPMotion> & {
     containerClassName?: string
     /** Which characters the code accepts. Anything else is blocked and reported. */
-    allow?: InputOTPAllow
+    allowedCharacters?: InputOTPAllow
     /** Called with a ready-to-show message when a typed or pasted character is blocked. */
     onReject?: (message: string, char: string) => void
     /** Wrong code: red boxes, shake. */
@@ -194,7 +194,7 @@ function InputOTP({
   const flashTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
   React.useEffect(() => () => clearTimeout(flashTimer.current), [])
   const reject = (char: string, pasted: boolean) => {
-    onReject?.(rejectMessage(char, allow, pasted), char)
+    onReject?.(rejectMessage(char, allowedCharacters, pasted), char)
     shake()
     setRejecting(true)
     clearTimeout(flashTimer.current)
@@ -203,7 +203,7 @@ function InputOTP({
 
   const context = React.useMemo(
     () => ({
-      glide,
+      glideRing,
       charAnimation,
       pasteStagger,
       shakeOnError,
@@ -217,7 +217,7 @@ function InputOTP({
       pasteFrom,
     }),
     [
-      glide,
+      glideRing,
       charAnimation,
       pasteStagger,
       shakeOnError,
@@ -242,10 +242,10 @@ function InputOTP({
             value={value}
             maxLength={maxLength}
             // Phones show the number pad only when numbers are all that's allowed
-            inputMode={allow === "numbers" ? "numeric" : "text"}
+            inputMode={allowedCharacters === "numbers" ? "numeric" : "text"}
             onChange={(next: string) => {
               // Keep the old value and say why, instead of silently dropping the key
-              const bad = [...next].find((c) => !ALLOWED[allow].test(c))
+              const bad = [...next].find((c) => !ALLOWED[allowedCharacters].test(c))
               if (bad !== undefined) {
                 reject(bad, next.length - value.length > 1)
                 return
@@ -341,7 +341,7 @@ function InputOTPSlot({
       className={cn(
         "relative flex items-center justify-center border-input transition-[color,background-color,border-color,box-shadow] duration-300 outline-none aria-invalid:border-destructive dark:bg-input/30",
         options.joined ? cn("border-y border-r rounded-none", index === 0 && "border-l") : "border",
-        !options.glide &&
+        !options.glideRing &&
           "data-[active=true]:z-10 data-[active=true]:border-foreground data-[active=true]:aria-invalid:border-destructive",
         waved &&
           "border-success bg-success/10 text-success",
@@ -356,7 +356,7 @@ function InputOTPSlot({
       )}
       {...(props as React.ComponentProps<typeof motion.div>)}
     >
-      {options.glide && isActive && (
+      {options.glideRing && isActive && (
         <motion.div
           layoutId={options.ringId}
           aria-hidden

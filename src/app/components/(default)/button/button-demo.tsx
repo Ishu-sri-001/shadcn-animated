@@ -56,11 +56,11 @@ const controls = {
     ],
   },
   underline: { disabled: (v) => v.surface !== "plain" || v.variant === "link", group: "Effect", type: "checkbox", label: "Line under text (plain)", value: true },
-  textRoll: { disabled: (v) => v.variant === "char-stagger" || v.variant === "scramble", group: "Effect", type: "checkbox", label: "Text roll on hover", value: true },
-  shimmer: { disabled: (v) => v.variant === "char-stagger" || v.variant === "scramble", group: "Effect", type: "checkbox", label: "Text shimmer (loops)", value: false },
-  press: { group: "Effect", type: "checkbox", label: "Press effect (scale down)", value: true },
+  rollingText: { disabled: (v) => v.variant === "char-stagger" || v.variant === "scramble", group: "Effect", type: "checkbox", label: "Rolling text", value: true },
+  shimmerText: { disabled: (v) => v.variant === "char-stagger" || v.variant === "scramble", group: "Effect", type: "checkbox", label: "Shimmer text", value: false },
+  pressFeedback: { group: "Effect", type: "checkbox", label: "Press feedback", value: true },
   magnetic: { group: "Effect", type: "checkbox", label: "Magnetic", value: false },
-  loadingState: { group: "State", type: "checkbox", label: "Loading, then success on click", value: false },
+  showLoadingState: { group: "State", type: "checkbox", label: "Show loading state", value: false },
   icon: {
     group: "Icon",
     type: "select",
@@ -113,7 +113,7 @@ const controls = {
     disabled: (v) => v.variant !== "char-stagger",
     group: "Motion",
     type: "slider",
-    label: "Letter stagger",
+    label: "Stagger",
     value: 0.02,
     min: 0,
     max: 0.08,
@@ -127,7 +127,7 @@ export function HpxButtonDemo() {
   const { values } = panel
   const [simulated, setSimulated] = React.useState<HpxAnimatedButtonStatus>("idle")
   const timers = React.useRef<number[]>([])
-  const status = values.loadingState ? simulated : "idle"
+  const status = values.showLoadingState ? simulated : "idle"
 
   React.useEffect(() => {
     const pending = timers.current
@@ -136,7 +136,7 @@ export function HpxButtonDemo() {
 
   // Click: loads for a moment, shows the check, then resets
   const simulate = () => {
-    if (!values.loadingState || simulated !== "idle") return
+    if (!values.showLoadingState || simulated !== "idle") return
     setSimulated("loading")
     timers.current.push(
       window.setTimeout(() => setSimulated("success"), 1500),
@@ -151,13 +151,13 @@ export function HpxButtonDemo() {
           variant={values.variant as HpxAnimatedButtonVariant}
           surface={values.surface as HpxAnimatedButtonSurface}
           tone={values.tone as HpxAnimatedButtonTone}
-          shimmer={values.shimmer}
-          textRoll={values.textRoll}
+          shimmerText={values.shimmerText}
+          rollingText={values.rollingText}
           magnetic={values.magnetic}
-          press={values.press}
+          pressFeedback={values.pressFeedback}
           status={status}
-          loadingText={values.loadingState ? "Loading" : undefined}
-          successText={values.loadingState ? "Success" : undefined}
+          loadingText={values.showLoadingState ? "Loading" : undefined}
+          successText={values.showLoadingState ? "Success" : undefined}
           onClick={simulate}
           iconPosition={values.iconPosition as HpxAnimatedButtonIconPosition}
           underline={values.underline}

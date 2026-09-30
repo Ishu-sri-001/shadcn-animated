@@ -29,22 +29,22 @@ const controls = {
       { label: "Cards", value: "card" },
     ],
   },
-  cardFill: {
+  cardFillColor: {
     disabled: (v) => v.variant === "default",
     group: "Style",
     type: "select",
-    label: "Card fill",
+    label: "Card fill color",
     value: "muted",
     options: [
       { label: "Muted", value: "muted" },
       { label: "Primary", value: "primary" },
     ],
   },
-  showIcon: { group: "Style", type: "checkbox", label: "Show radio", value: true },
+  showIcon: { group: "Style", type: "checkbox", label: "Icon", value: true },
 
-  dotSlide: { disabled: (v) => v.appearance === "full" || !v.showIcon, group: "Choosing", type: "checkbox", label: "Dot slides between", value: false },
-  cardSlide: { disabled: (v) => v.variant === "default", group: "Choosing", type: "checkbox", label: "Card highlight slides between", value: true },
-  bounce: { disabled: (v) => !v.showIcon, group: "Choosing", type: "checkbox", label: "Springy pick", value: true },
+  slideDot: { disabled: (v) => v.appearance === "full" || !v.showIcon, group: "Choosing", type: "checkbox", label: "Slide dot", value: false },
+  slideCard: { disabled: (v) => v.variant === "default", group: "Choosing", type: "checkbox", label: "Slide card", value: true },
+  elastic: { disabled: (v) => !v.showIcon, group: "Choosing", type: "checkbox", label: "Elastic", value: true },
 
   appearance: {
     disabled: (v) => !v.showIcon,
@@ -66,7 +66,7 @@ const controls = {
 export function HpxRadioDemo() {
   const panel = useHpxControls(controls)
   const { values } = panel
-  const { variant, cardFill, appearance, colorful, ...groupOptions } = values
+  const { variant, cardFillColor, appearance, colorful, ...groupOptions } = values
   const cards = variant === "card"
   const [choice, setChoice] = React.useState("Express")
 
@@ -79,7 +79,7 @@ export function HpxRadioDemo() {
         <HpxRadioGroup
           {...groupOptions}
           variant={variant as HpxRadioVariant}
-          cardFill={cardFill as HpxRadioCardFill}
+          cardFillColor={cardFillColor as HpxRadioCardFill}
           appearance={appearance as HpxRadioAppearance}
           value={choice}
           onValueChange={setChoice}

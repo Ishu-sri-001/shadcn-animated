@@ -40,16 +40,16 @@ type ToastPosition =
   | "top-center"
 
 type ToastEffects = {
-  springy: boolean
-  fromTrigger: boolean
-  swipeTilt: boolean
+  elastic: boolean
+  originFromTrigger: boolean
+  tiltOnSwipe: boolean
   morphIcon: boolean
-  timerBar: boolean
+  showTimerBar: boolean
   collapsibleDescription: boolean
-  contentFade: boolean
+  fadeContent: boolean
   /** See-through, blurred background. */
   glass: boolean
-  accentEdge: boolean
+  showAccentEdge: boolean
   rounded: ToastRounded
   pill: boolean
   exitAnimation: "fade" | "slide"
@@ -58,14 +58,14 @@ type ToastEffects = {
 }
 
 const DEFAULT_EFFECTS: ToastEffects = {
-  springy: true,
-  fromTrigger: false,
-  swipeTilt: true,
+  elastic: true,
+  originFromTrigger: false,
+  tiltOnSwipe: true,
   morphIcon: true,
-  timerBar: true,
-  contentFade: true,
+  showTimerBar: true,
+  fadeContent: true,
   collapsibleDescription: true,
-  accentEdge: true,
+  showAccentEdge: true,
   glass: true,
   rounded: "md",
   pill: false,
@@ -229,7 +229,7 @@ function Toast({
   const effects = React.useContext(ToastEffectsContext)
   const root = React.useRef<HTMLDivElement>(null)
   const edge = effects.position.startsWith("top") ? "top" : "bottom"
-  const growFromOrigin = effects.fromTrigger && origin !== undefined
+  const growFromOrigin = effects.originFromTrigger && origin !== undefined
 
   React.useLayoutEffect(() => {
     const el = root.current
@@ -268,7 +268,7 @@ function Toast({
         "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
         "h-(--height)",
         STACK[edge],
-        effects.springy
+        effects.elastic
           ? effects.morphIcon
             ? TRANSITION.springMorph
             : TRANSITION.spring
@@ -284,7 +284,7 @@ function Toast({
           : ENTER_FROM_EDGE[edge],
         EXIT[effects.exitAnimation][edge],
         "data-ending-style:ease-in",
-        effects.swipeTilt ? SWIPE_EXIT_TILT : SWIPE_EXIT_PLAIN,
+        effects.tiltOnSwipe ? SWIPE_EXIT_TILT : SWIPE_EXIT_PLAIN,
         className
       )}
       {...props}
@@ -293,14 +293,14 @@ function Toast({
 }
 
 function ToastContent({ className, ...props }: ToastPrimitive.Content.Props) {
-  const { pill, contentFade } = React.useContext(ToastEffectsContext)
+  const { pill, fadeContent } = React.useContext(ToastEffectsContext)
   return (
     <ToastPrimitive.Content
       data-hpx-slot="toast-content"
       className={cn(
         "flex h-full items-start gap-3 overflow-hidden py-4 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100",
         pill ? "px-6" : "px-4",
-        contentFade &&
+        fadeContent &&
           "animate-in fade-in-0 animation-duration-300 [animation-delay:150ms] fill-mode-backwards motion-reduce:animate-none",
         className
       )}
@@ -552,9 +552,9 @@ function ToastItem({ toastItem }: { toastItem: ToastPrimitive.Root.ToastObject<T
 
   const duration = toastItem.timeout ?? effects.timeout
   const showTimer =
-    effects.timerBar && toastItem.type !== "loading" && duration > 0
+    effects.showTimerBar && toastItem.type !== "loading" && duration > 0
   const accent =
-    effects.accentEdge && toastItem.type && ACCENT[toastItem.type]
+    effects.showAccentEdge && toastItem.type && ACCENT[toastItem.type]
   const collapsible =
     effects.collapsibleDescription && Boolean(toastItem.description)
 
@@ -625,15 +625,15 @@ function Toaster({
   children,
   toastManager = toast,
   timeout = DEFAULT_EFFECTS.timeout,
-  springy = DEFAULT_EFFECTS.springy,
-  fromTrigger = DEFAULT_EFFECTS.fromTrigger,
-  swipeTilt = DEFAULT_EFFECTS.swipeTilt,
+  elastic = DEFAULT_EFFECTS.elastic,
+  originFromTrigger = DEFAULT_EFFECTS.originFromTrigger,
+  tiltOnSwipe = DEFAULT_EFFECTS.tiltOnSwipe,
   morphIcon = DEFAULT_EFFECTS.morphIcon,
-  timerBar = DEFAULT_EFFECTS.timerBar,
-  contentFade = DEFAULT_EFFECTS.contentFade,
+  showTimerBar = DEFAULT_EFFECTS.showTimerBar,
+  fadeContent = DEFAULT_EFFECTS.fadeContent,
   collapsibleDescription = DEFAULT_EFFECTS.collapsibleDescription,
   glass = DEFAULT_EFFECTS.glass,
-  accentEdge = DEFAULT_EFFECTS.accentEdge,
+  showAccentEdge = DEFAULT_EFFECTS.showAccentEdge,
   rounded = DEFAULT_EFFECTS.rounded,
   exitAnimation = DEFAULT_EFFECTS.exitAnimation,
   position = DEFAULT_EFFECTS.position,
@@ -641,14 +641,14 @@ function Toaster({
 }: ToastPrimitive.Provider.Props & Partial<Omit<ToastEffects, "pill">>) {
   const effects = React.useMemo(
     () => ({
-      springy,
-      fromTrigger,
-      swipeTilt,
+      elastic,
+      originFromTrigger,
+      tiltOnSwipe,
       morphIcon,
-      timerBar,
-      contentFade,
+      showTimerBar,
+      fadeContent,
       collapsibleDescription,
-      accentEdge,
+      showAccentEdge,
       glass,
       rounded,
       pill: rounded === "full",
@@ -657,14 +657,14 @@ function Toaster({
       timeout,
     }),
     [
-      springy,
-      fromTrigger,
-      swipeTilt,
+      elastic,
+      originFromTrigger,
+      tiltOnSwipe,
       morphIcon,
-      timerBar,
-      contentFade,
+      showTimerBar,
+      fadeContent,
       collapsibleDescription,
-      accentEdge,
+      showAccentEdge,
       glass,
       rounded,
       exitAnimation,

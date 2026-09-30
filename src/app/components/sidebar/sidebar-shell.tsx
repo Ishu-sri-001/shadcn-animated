@@ -48,20 +48,20 @@ const ICON_SIZE = "1.25rem"
 
 const controls = {
   resizable: { group: "Sidebar", type: "checkbox", label: "Drag edge to resize", value: false },
-  highlightTone: {
+  highlightColor: {
     group: "Active item",
     type: "select",
-    label: "Highlight",
+    label: "Highlight color",
     value: "primary",
     options: [
       { label: "Primary", value: "primary" },
       { label: "Muted", value: "muted" },
     ],
   },
-  itemRadius: {
+  itemRounded: {
     group: "Active item",
     type: "select",
-    label: "Roundness",
+    label: "Item roundness",
     value: "none",
     options: [
       { label: "None", value: "none" },
@@ -73,16 +73,16 @@ const controls = {
       { label: "Full", value: "full" },
     ],
   },
-  slidingHighlight: {
+  slideHighlight: {
     group: "Active item",
     type: "checkbox",
-    label: "Slide to new item",
+    label: "Slide highlight",
     value: true,
   },
   activeIndicator: {
     group: "Active item",
     type: "select",
-    label: "Indicator",
+    label: "Active indicator",
     value: "bar",
     options: [
       { label: "Bar", value: "bar" },
@@ -90,19 +90,19 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  pressSquish: { group: "Interaction", type: "checkbox", label: "Press squish", value: false },
-  textRoll: { group: "Interaction", type: "checkbox", label: "Text roll on hover", value: false },
-  springTooltips: {
+  pressFeedback: { group: "Interaction", type: "checkbox", label: "Press feedback", value: false },
+  rollingText: { group: "Interaction", type: "checkbox", label: "Rolling text", value: false },
+  elasticTooltips: {
     group: "Interaction",
     type: "checkbox",
-    label: "Springy tooltips",
+    label: "Elastic tooltips",
     value: false,
   },
-  rollingBadge: { group: "Badges", type: "checkbox", label: "Rolling badge", value: true },
-  teamSwitcher: { group: "Header", type: "checkbox", label: "Team switcher", value: false },
-  spinTrigger: { group: "Header", type: "checkbox", label: "Spin toggle on hover", value: false },
-  breadcrumb: { group: "Header", type: "checkbox", label: "Breadcrumb bar", value: true },
-  scaleContent: { group: "Page", type: "checkbox", label: "Scale with fade", value: true },
+  rollingNumbers: { group: "Badges", type: "checkbox", label: "Rolling numbers", value: true },
+  showTeamSwitcher: { group: "Header", type: "checkbox", label: "Show team switcher", value: false },
+  spinToggle: { group: "Header", type: "checkbox", label: "Spin toggle", value: false },
+  showBreadcrumb: { group: "Header", type: "checkbox", label: "Show breadcrumb", value: true },
+  scaleContent: { group: "Page", type: "checkbox", label: "Scale content", value: true },
 } satisfies HpxControlSchema
 
 const InboxContext = React.createContext<{ receive: () => void } | null>(null)
@@ -397,11 +397,11 @@ const projects = ["Saturday roast", "Oat milk supplier", "New cups"]
 export function HpxSidebarShell({ children }: { children: React.ReactNode }) {
   const panel = useHpxControls(controls)
   const {
-    teamSwitcher,
-    breadcrumb,
+    showTeamSwitcher,
+    showBreadcrumb,
     activeIndicator,
-    highlightTone,
-    itemRadius,
+    highlightColor,
+    itemRounded,
     scaleContent,
     ...options
   } =
@@ -424,15 +424,15 @@ export function HpxSidebarShell({ children }: { children: React.ReactNode }) {
           <HpxSidebarProvider
             className="min-h-[calc(100svh-3.5rem)]"
             activeIndicator={activeIndicator as "bar" | "dot" | "none"}
-            highlightTone={highlightTone as "primary" | "muted"}
-            itemRadius={itemRadius as HpxSidebarItemRadius}
+            highlightColor={highlightColor as "primary" | "muted"}
+            itemRounded={itemRounded as HpxSidebarItemRadius}
             {...options}
           >
             <HpxSidebar collapsible="icon" className="z-60">
               <HpxSidebarHeader>
                 <HpxSidebarMenu>
                   <HpxSidebarMenuItem>
-                    <TeamHeader switcher={teamSwitcher} />
+                    <TeamHeader switcher={showTeamSwitcher} />
                   </HpxSidebarMenuItem>
                 </HpxSidebarMenu>
               </HpxSidebarHeader>
@@ -513,7 +513,7 @@ export function HpxSidebarShell({ children }: { children: React.ReactNode }) {
             </HpxSidebar>
 
             <HpxSidebarInset>
-              {breadcrumb ? (
+              {showBreadcrumb ? (
                 <header className="sticky top-14 z-10 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur">
                   <div className="flex min-w-0 items-center gap-2">
                     <HpxSidebarTrigger />

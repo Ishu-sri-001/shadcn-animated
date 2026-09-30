@@ -21,7 +21,7 @@ type FieldMotion = {
   /** Shake once when turning invalid. */
   shakeOnError: boolean
   /** Tick draws in when valid. */
-  successTick: boolean
+  showSuccessTick: boolean
   rounded: FieldRounded
 }
 
@@ -38,7 +38,7 @@ const FieldMotionContext = React.createContext<FieldMotion>({
   labelStyle: "floating",
   errorAnimation: "slide",
   shakeOnError: true,
-  successTick: true,
+  showSuccessTick: true,
   rounded: "lg",
 })
 
@@ -86,13 +86,13 @@ function FieldGroup({
   labelStyle = "floating",
   errorAnimation = "slide",
   shakeOnError = true,
-  successTick = true,
+  showSuccessTick = true,
   rounded = "lg",
   ...props
 }: React.ComponentProps<"div"> & Partial<FieldMotion>) {
   const options = React.useMemo(
-    () => ({ labelStyle, errorAnimation, shakeOnError, successTick, rounded }),
-    [labelStyle, errorAnimation, shakeOnError, successTick, rounded]
+    () => ({ labelStyle, errorAnimation, shakeOnError, showSuccessTick, rounded }),
+    [labelStyle, errorAnimation, shakeOnError, showSuccessTick, rounded]
   )
   return (
     <FieldMotionContext.Provider value={options}>
@@ -193,7 +193,7 @@ function RollingText({ text }: { text: string }) {
 /** Input with its animated label. */
 function FieldInput({
   label,
-  counter = false,
+  showCounter = false,
   className,
   id: idProp,
   value,
@@ -205,7 +205,7 @@ function FieldInput({
 }: Omit<React.ComponentProps<"input">, "value" | "defaultValue"> & {
   label: React.ReactNode
   /** Show a character count. */
-  counter?: boolean
+  showCounter?: boolean
   value?: string
   defaultValue?: string
 }) {
@@ -302,7 +302,7 @@ function FieldInput({
             {label}
           </label>
         )}
-        {counter && (
+        {showCounter && (
           <span
             aria-live="polite"
             className={cn(
@@ -314,7 +314,7 @@ function FieldInput({
           </span>
         )}
         <AnimatePresence initial={false}>
-          {options.successTick && valid && !invalid && (
+          {options.showSuccessTick && valid && !invalid && (
             <motion.svg
               key="tick"
               aria-label="Valid"

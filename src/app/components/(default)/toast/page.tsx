@@ -75,10 +75,10 @@ const controls = {
     label: "Collapsible description",
     value: true,
   },
-  withAction: {
+  showAction: {
     group: "Toast",
     type: "checkbox",
-    label: "Undo action",
+    label: "Show action",
     value: false,
   },
   timeout: {
@@ -92,38 +92,38 @@ const controls = {
     unit: "s",
   },
 
-  springy: {
+  elastic: {
     group: "Animation",
     type: "checkbox",
-    label: "Springy entrance",
+    label: "Elastic",
     value: true,
   },
-  fromTrigger: {
+  originFromTrigger: {
     group: "Animation",
     type: "checkbox",
-    label: "Grow from button",
+    label: "Origin from trigger",
     value: false,
   },
-  contentFade: {
+  fadeContent: {
     group: "Animation",
     type: "checkbox",
-    label: "Content fade-in",
+    label: "Fade content",
     value: true,
   },
   exitAnimation: {
     group: "Animation",
     type: "select",
-    label: "Exit",
+    label: "Exit animation",
     value: "fade",
     options: [
       { label: "Fade out", value: "fade" },
       { label: "Slide off", value: "slide" },
     ],
   },
-  swipeTilt: {
+  tiltOnSwipe: {
     group: "Animation",
     type: "checkbox",
-    label: "Swipe tilt",
+    label: "Tilt on swipe",
     value: true,
   },
   morphIcon: {
@@ -132,20 +132,20 @@ const controls = {
     label: "Loading → tick morph",
     value: true,
   },
-  timerBar: {
+  showTimerBar: {
     disabled: (v) => v.timeout === 0 || v.variant === "loading",
     group: "Animation",
     type: "checkbox",
-    label: "Time-left bar",
+    label: "Show timer bar",
     value: true,
   },
 
   glass: { group: "Style", type: "checkbox", label: "Glass", value: true },
-  accentEdge: {
+  showAccentEdge: {
     disabled: (v) => v.variant === "default",
     group: "Style",
     type: "checkbox",
-    label: "Coloured line",
+    label: "Show accent edge",
     value: true,
   },
   rounded: {
@@ -228,7 +228,7 @@ export default function ToastPage() {
       ...common,
       type: variant === "default" ? undefined : variant,
       ...text(messages[variant]),
-      actionProps: values.withAction
+      actionProps: values.showAction
         ? {
             children: "Undo",
             onClick: () =>
@@ -248,16 +248,16 @@ export default function ToastPage() {
 
   return (
     <HpxToaster
-      springy={values.springy}
-      fromTrigger={values.fromTrigger}
-      contentFade={values.contentFade}
+      elastic={values.elastic}
+      originFromTrigger={values.originFromTrigger}
+      fadeContent={values.fadeContent}
       collapsibleDescription={values.collapsibleDescription}
       exitAnimation={values.exitAnimation as "fade" | "slide"}
-      swipeTilt={values.swipeTilt}
+      tiltOnSwipe={values.tiltOnSwipe}
       morphIcon={values.morphIcon}
-      timerBar={values.timerBar}
+      showTimerBar={values.showTimerBar}
       glass={values.glass}
-      accentEdge={values.accentEdge}
+      showAccentEdge={values.showAccentEdge}
       rounded={values.rounded as HpxToastRounded}
       position={values.position as HpxToastPosition}
     >

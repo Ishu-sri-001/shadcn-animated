@@ -88,12 +88,12 @@ function Attachment({
   state = "done",
   size = "default",
   orientation = "horizontal",
-  enter = true,
+  animateEnter = true,
   enterDelay = 0,
   enterFrom,
-  leave = true,
+  animateExit = true,
   borderTrace = true,
-  shake = true,
+  shakeOnError = true,
   fill = false,
   fillDirection = "left-to-right",
   progress = 0,
@@ -106,12 +106,12 @@ function Attachment({
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentVariants> & {
     state?: AttachmentState
-    enter?: boolean
+    animateEnter?: boolean
     enterDelay?: number
     enterFrom?: { x: number; y: number }
-    leave?: boolean
+    animateExit?: boolean
     borderTrace?: boolean
-    shake?: boolean
+    shakeOnError?: boolean
     fill?: boolean
     fillDirection?: "left-to-right" | "bottom-to-top"
     /** 0–100. Drives the upload fill. */
@@ -184,9 +184,9 @@ function Attachment({
   React.useEffect(() => {
     const was = lastState.current
     lastState.current = state
-    if (!shake || reduceMotion || state !== "error" || was === "error") return
+    if (!shakeOnError || reduceMotion || state !== "error" || was === "error") return
     animate(x, [0, -6, 6, -4, 4, -2, 0], { duration: 0.45, ease: "easeOut" })
-  }, [state, shake, reduceMotion, x])
+  }, [state, shakeOnError, reduceMotion, x])
 
   const flying = enterFrom !== undefined
   const filling = fill && (state === "uploading" || state === "processing")
@@ -203,9 +203,9 @@ function Attachment({
       className
     ),
     style: { ...style, x, ...(skewX && { skewX, originY: 1 }) },
-    initial: enter && !flying ? { opacity: 0, scale: 0.8 } : false,
+    initial: animateEnter && !flying ? { opacity: 0, scale: 0.8 } : false,
     animate: { opacity: 1, scale: 1, transition: { ...spring, delay: enterDelay } },
-    exit: leave ? { opacity: 0, scale: 0.8, transition: settle } : undefined,
+    exit: animateExit ? { opacity: 0, scale: 0.8, transition: settle } : undefined,
     transition: { layout: spring },
     ...(props as MotionDivProps),
   }
@@ -223,7 +223,7 @@ function Attachment({
           >
             <motion.span
               className={cn(
-                "absolute inset-0 rounded-none bg-[color-mix(in_oklch,var(--muted),var(--foreground)_8%)]",
+                "absolute inset-0 rounded-none bg-[color-mix(in_oklch,var(--card),var(--foreground)_12%)]",
                 horizontalFill ? "origin-left" : "origin-bottom"
               )}
               initial={horizontalFill ? { scaleX: 0 } : { scaleY: 0 }}
@@ -327,15 +327,15 @@ const attachmentMediaVariants = cva(
 function AttachmentMedia({
   className,
   variant = "icon",
-  zoom = true,
-  develop = true,
+  zoomOnHover = true,
+  blurUntilLoaded = true,
   expandable = true,
   children,
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentMediaVariants> & {
-    zoom?: boolean
-    develop?: boolean
+    zoomOnHover?: boolean
+    blurUntilLoaded?: boolean
     expandable?: boolean
   }) {
   const isImage = variant === "image"
@@ -358,10 +358,10 @@ function AttachmentMedia({
       className={cn(
         attachmentMediaVariants({ variant }),
         isImage &&
-          zoom &&
+          zoomOnHover &&
           cn("*:transition-[opacity,scale,filter] *:duration-500 group-hover/attachment:*:scale-110", springyEase),
         isImage &&
-          develop &&
+          blurUntilLoaded &&
           "transition-opacity duration-700 group-data-[state=processing]/attachment:*:blur-xs group-data-[state=uploading]/attachment:*:blur-sm",
         className
       )}
@@ -522,17 +522,17 @@ function AttachmentContent({
 
 function AttachmentTitle({
   className,
-  shimmer = true,
+  shimmerText = true,
   ...props
 }: React.ComponentProps<"span"> & {
-  shimmer?: boolean
+  shimmerText?: boolean
 }) {
   return (
     <span
       data-hpx-slot="attachment-title"
       className={cn(
         "block max-w-full min-w-0 truncate font-medium",
-        shimmer &&
+        shimmerText &&
           "group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer",
         className
       )}
@@ -561,16 +561,16 @@ function AttachmentDescription({
 function AttachmentProgress({
   className,
   value,
-  rolling = true,
+  rollingNumbers = true,
   ...props
 }: React.ComponentProps<"span"> & {
   /** 0–100. */
   value: number
-  rolling?: boolean
+  rollingNumbers?: boolean
 }) {
   const text = String(Math.round(value))
 
-  if (!rolling) {
+  if (!rollingNumbers) {
     return (
       <span data-hpx-slot="attachment-progress" className={cn("tabular-nums", className)} {...props}>
         {text}%
@@ -630,12 +630,12 @@ function AttachmentAction({
   className,
   variant,
   size = "icon-xs",
-  reveal = false,
+  revealAction = false,
   onClick,
   children,
   ...props
 }: React.ComponentProps<typeof HpxButton> & {
-  reveal?: boolean
+  revealAction?: boolean
 }) {
   const [turns, setTurns] = React.useState(0)
 
@@ -649,7 +649,7 @@ function AttachmentAction({
         setTurns((t) => t + 1)
       }}
       className={cn(
-        reveal &&
+        revealAction &&
           cn(
             "transition-[scale,rotate,opacity,background-color] duration-300 [&_svg]:transition-[rotate,scale] [&_svg]:duration-300 hover:[&_svg]:scale-110 hover:[&_svg]:rotate-90",
             "pointer-fine:scale-50 pointer-fine:-rotate-90 pointer-fine:opacity-0",
@@ -699,7 +699,7 @@ function AttachmentGroup({
   reorder = true,
   values,
   onReorder,
-  tilt = false,
+  tiltOnScroll = false,
   wrap = false,
   style,
   children,
@@ -708,7 +708,7 @@ function AttachmentGroup({
   reorder?: boolean
   values?: (string | number)[]
   onReorder?: (values: (string | number)[]) => void
-  tilt?: boolean
+  tiltOnScroll?: boolean
   wrap?: boolean
 }) {
   const scroller = React.useRef<HTMLDivElement>(null)
@@ -790,7 +790,7 @@ function AttachmentGroup({
   return (
     <MotionConfig reducedMotion="user">
       <AttachmentReorderContext.Provider value={reorderable ? reorderContext : null}>
-        <AttachmentTiltContext.Provider value={tilt ? lean : null}>
+        <AttachmentTiltContext.Provider value={tiltOnScroll ? lean : null}>
           {reorderable ? (
             <Reorder.Group
               as="div"
@@ -813,12 +813,12 @@ function AttachmentGroup({
 function AttachmentDropzone({
   className,
   onFiles,
-  marching = true,
+  animatedBorder = true,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
   onFiles?: (files: File[], point: { x: number; y: number }) => void
-  marching?: boolean
+  animatedBorder?: boolean
 }) {
   const [dragging, setDragging] = React.useState(false)
   const hasFiles = (event: React.DragEvent) => event.dataTransfer.types.includes("Files")
@@ -843,13 +843,13 @@ function AttachmentDropzone({
       }}
       className={cn(
         "relative rounded-lg border transition-colors data-dragging:bg-muted/50",
-        marching ? "data-dragging:border-transparent" : "data-dragging:border-dashed data-dragging:border-primary",
+        animatedBorder ? "data-dragging:border-transparent" : "data-dragging:border-dashed data-dragging:border-primary",
         className
       )}
       {...props}
     >
       {children}
-      <AnimatePresence>{marching && dragging && <MarchingBorder key="border" />}</AnimatePresence>
+      <AnimatePresence>{animatedBorder && dragging && <MarchingBorder key="border" />}</AnimatePresence>
     </div>
   )
 }

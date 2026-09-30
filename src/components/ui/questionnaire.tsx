@@ -30,9 +30,9 @@ type QuestionnaireChoiceColor = "muted" | "primary"
 type QuestionnaireChoiceIndicator = "radio" | "check" | "none"
 
 type QuestionnaireMotion = {
-  content: QuestionnaireContent
+  contentAnimation: QuestionnaireContent
   /** How far the question slides, in vw. */
-  distance: number
+  slideDistance: number
   /** Seconds. */
   duration: number
   bounce: number
@@ -79,8 +79,8 @@ function useSpring(context: QuestionnaireMotion): Transition {
 }
 
 function Questionnaire({
-  content = "slide-x",
-  distance = 20,
+  contentAnimation = "slide-x",
+  slideDistance = 20,
   duration = 0.4,
   bounce = 0.1,
   staggerChoices = true,
@@ -108,11 +108,11 @@ function Questionnaire({
 
   const context = React.useMemo(
     () => ({
-      content, distance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
+      contentAnimation, slideDistance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
       multiple, choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover, item, direction,
     }),
     [
-      content, distance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
+      contentAnimation, slideDistance, duration, bounce, staggerChoices, stagger, progressStyle, showProgress,
       multiple, choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover, item, direction,
     ]
   )
@@ -247,9 +247,9 @@ function QuestionnaireItem({
 
   const context = useQuestionnaire()
   const reduceMotion = useReducedMotion()
-  const still = context.content === "none" || reduceMotion
-  const slideX = context.content === "slide-x" && !reduceMotion
-  const slideY = context.content === "slide-y" && !reduceMotion
+  const still = context.contentAnimation === "none" || reduceMotion
+  const slideX = context.contentAnimation === "slide-x" && !reduceMotion
+  const slideY = context.contentAnimation === "slide-y" && !reduceMotion
   const spring = useSpring(context)
 
   const controls = useAnimationControls()
@@ -273,9 +273,9 @@ function QuestionnaireItem({
 
   const offset = (d: number) => ({
     opacity: still ? 1 : 0,
-    x: slideX ? `${d * context.distance}vw` : "0vw",
-    y: slideY ? `${d * context.distance}vw` : "0vw",
-    scale: context.content === "scale" && !reduceMotion ? 0.94 : 1,
+    x: slideX ? `${d * context.slideDistance}vw` : "0vw",
+    y: slideY ? `${d * context.slideDistance}vw` : "0vw",
+    scale: context.contentAnimation === "scale" && !reduceMotion ? 0.94 : 1,
   })
 
   const variants: Variants = {
@@ -291,7 +291,7 @@ function QuestionnaireItem({
       y: "0vw",
       scale: 1,
       transition: {
-        ...(context.content === "fade" ? { duration: context.duration, ease: fadeEase } : spring),
+        ...(context.contentAnimation === "fade" ? { duration: context.duration, ease: fadeEase } : spring),
         staggerChildren: context.staggerChoices && !reduceMotion ? context.stagger : 0,
         delayChildren: 0.08,
       },
@@ -623,7 +623,6 @@ function useActionHover(
   onPointerEnter?: ActionPointerHandler,
   onPointerLeave?: ActionPointerHandler
 ) {
-  const { duration } = useQuestionnaire()
   const reduceMotion = useReducedMotion()
   const [fill, setFill] = React.useState({ x: 0, y: 0, on: false })
   const solid = variant === "default"
@@ -637,7 +636,7 @@ function useActionHover(
     className: cn(
       solid ? "hover:bg-primary hover:text-foreground" : "hover:bg-background hover:text-primary-foreground dark:hover:bg-input/30",
       "relative isolate h-11 overflow-hidden px-5 text-base focus-visible:ring-0",
-      "hover:border-primary"
+      solid && "border-primary"
     ),
     onPointerEnter: (event: React.PointerEvent<HTMLButtonElement>) => {
       onPointerEnter?.(event)
@@ -658,7 +657,7 @@ function useActionHover(
           style={{ left: fill.x, top: fill.y }}
           initial={false}
           animate={{ scale: fill.on ? 1 : 0 }}
-          transition={{ duration: reduceMotion ? 0 : duration, ease: "easeInOut" }}
+          transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.65, 0, 0.35, 1] }}
         />
         <span className="relative">{children}</span>
       </>

@@ -42,10 +42,10 @@ const tabs = [
 ]
 
 const controls = {
-  indicator: {
+  activeIndicator: {
     group: "Tabs",
     type: "select",
-    label: "Active tab",
+    label: "Active indicator",
     value: "glide",
     options: [
       { label: "Glide pill", value: "glide" },
@@ -54,7 +54,7 @@ const controls = {
     ],
   },
   activeColor: {
-    disabled: (v) => v.indicator !== "glide",
+    disabled: (v) => v.activeIndicator !== "glide",
     group: "Tabs",
     type: "select",
     label: "Active tab colour",
@@ -64,7 +64,7 @@ const controls = {
       { label: "Muted", value: "muted" },
     ],
   },
-  hover: { group: "Tabs", type: "checkbox", label: "Hover highlight", value: false },
+  hoverHighlight: { group: "Tabs", type: "checkbox", label: "Hover highlight", value: false },
   divider: { group: "Tabs", type: "checkbox", label: "Line under tabs", value: true },
   listBorder: { group: "Tabs", type: "checkbox", label: "Border on tabs", value: false },
   panelBorder: { group: "Content", type: "checkbox", label: "Border on content", value: false },
@@ -83,10 +83,10 @@ const controls = {
     ],
   },
 
-  content: {
+  contentAnimation: {
     group: "Content",
     type: "select",
-    label: "Content moves",
+    label: "Content animation",
     value: "slide",
     options: [
       { label: "Slide", value: "slide" },
@@ -94,8 +94,8 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  distance: {
-    disabled: (v) => v.content !== "slide",
+  slideDistance: {
+    disabled: (v) => v.contentAnimation !== "slide",
     group: "Content",
     type: "slider",
     label: "Slide distance",
@@ -108,10 +108,10 @@ const controls = {
   smoothHeight: { group: "Content", type: "checkbox", label: "Smooth panel height", value: true },
 
   fadeDuration: {
-    disabled: (v) => v.content !== "fade",
+    disabled: (v) => v.contentAnimation !== "fade",
     group: "Content",
     type: "slider",
-    label: "Fade in / out time",
+    label: "Fade duration",
     value: 0.35,
     min: 0.1,
     max: 1.2,
@@ -129,7 +129,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
-    disabled: (v) => v.indicator === "fade" && v.content !== "slide",
+    disabled: (v) => v.activeIndicator === "fade" && v.contentAnimation !== "slide",
     group: "Motion",
     type: "slider",
     label: "Bounce",
@@ -150,15 +150,15 @@ export function HpxTabsDemo() {
       <div className="flex min-h-[60vh] flex-col justify-start rounded-lg border px-[4vw] py-8">
         <HpxTabs
           defaultValue="overview"
-          indicator={values.indicator as HpxTabsIndicator}
-          content={values.content as HpxTabsContentMotion}
-          distance={values.distance}
+          activeIndicator={values.activeIndicator as HpxTabsIndicator}
+          contentAnimation={values.contentAnimation as HpxTabsContentMotion}
+          slideDistance={values.slideDistance}
           duration={values.duration}
           fadeDuration={values.fadeDuration}
           bounce={values.bounce}
           activeColor={values.activeColor as HpxTabsActiveColor}
           smoothHeight={values.smoothHeight}
-          hover={values.hover}
+          hoverHighlight={values.hoverHighlight}
           divider={values.divider}
           listBorder={values.listBorder}
           panelBorder={values.panelBorder}

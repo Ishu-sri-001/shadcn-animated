@@ -76,13 +76,13 @@ type DropdownMenuContextValue = {
   stagger: number
   delay: number
   exitFast: boolean
-  highlight: DropdownMenuHighlight
-  highlightColor: DropdownMenuHighlightColor
-  indicator: DropdownMenuIndicator
-  textRoll: boolean
-  delayCloseOnSelect: boolean
+  itemHighlight: DropdownMenuHighlight
+  itemHighlightColor: DropdownMenuHighlightColor
+  selectionIndicator: DropdownMenuIndicator
+  rollingText: boolean
+  closeDelayOnSelect: boolean
   pressFeedback: boolean
-  descriptions: boolean
+  showDescriptions: boolean
   bold: boolean
   typeahead: boolean
   /**
@@ -120,13 +120,13 @@ function DropdownMenu({
   delay = 0.1,
   exitFast = false,
   animation = "collapse",
-  highlight = "slide",
-  highlightColor = "primary",
-  indicator = "check",
-  textRoll = false,
-  delayCloseOnSelect = false,
+  itemHighlight = "slide",
+  itemHighlightColor = "primary",
+  selectionIndicator = "check",
+  rollingText = false,
+  closeDelayOnSelect = false,
   pressFeedback = true,
-  descriptions = false,
+  showDescriptions = false,
   bold = false,
   typeahead = false,
   open: openProp,
@@ -149,19 +149,19 @@ function DropdownMenu({
    * How the hovered item is highlighted: `slide` glides one highlight between items,
    * `fill` fills each item with the primary colour from the top down.
    */
-  highlight?: DropdownMenuHighlight
+  itemHighlight?: DropdownMenuHighlight
   /** The hovered item's fill: the primary colour, or the quieter muted one. */
-  highlightColor?: DropdownMenuHighlightColor
+  itemHighlightColor?: DropdownMenuHighlightColor
   /** How the chosen radio item is marked. */
-  indicator?: DropdownMenuIndicator
+  selectionIndicator?: DropdownMenuIndicator
   /** Item titles roll to a copy of themselves when highlighted. */
-  textRoll?: boolean
+  rollingText?: boolean
   /** Show the tick for a moment after a pick before closing. */
-  delayCloseOnSelect?: boolean
+  closeDelayOnSelect?: boolean
   /** The trigger and items scale down while pressed and spring back on release. */
   pressFeedback?: boolean
   /** Show each item's `DropdownMenuItemDescription`. */
-  descriptions?: boolean
+  showDescriptions?: boolean
   /** Bold item titles and the trigger value. */
   bold?: boolean
   /** Typing a letter jumps to the matching item. */
@@ -206,13 +206,13 @@ function DropdownMenu({
       stagger,
       delay,
       exitFast,
-      highlight,
-      highlightColor,
-      indicator,
-      textRoll,
-      delayCloseOnSelect,
+      itemHighlight,
+      itemHighlightColor,
+      selectionIndicator,
+      rollingText,
+      closeDelayOnSelect,
       pressFeedback,
-      descriptions,
+      showDescriptions,
       bold,
       typeahead,
       activeItem,
@@ -229,13 +229,13 @@ function DropdownMenu({
       stagger,
       delay,
       exitFast,
-      highlight,
-      highlightColor,
-      indicator,
-      textRoll,
-      delayCloseOnSelect,
+      itemHighlight,
+      itemHighlightColor,
+      selectionIndicator,
+      rollingText,
+      closeDelayOnSelect,
       pressFeedback,
-      descriptions,
+      showDescriptions,
       bold,
       typeahead,
       activeItem,
@@ -273,7 +273,7 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
   return <MenuPrimitive.Portal data-hpx-slot="dropdown-menu-portal" {...props} />
 }
 
-const TriggerContext = React.createContext({ animateValue: true })
+const TriggerContext = React.createContext({ rollingValue: true })
 
 type PressState = "rest" | "hover" | "press"
 
@@ -286,7 +286,7 @@ const PRESS_TIMING: Record<PressState, KeyframeAnimationOptions> = {
 }
 
 function DropdownMenuTrigger({
-  animateValue = true,
+  rollingValue = true,
   ref,
   onPointerEnter,
   onPointerDown,
@@ -296,7 +296,7 @@ function DropdownMenuTrigger({
   ...props
 }: MenuPrimitive.Trigger.Props & {
   /** `DropdownMenuValue` rolls to the new value when it changes. */
-  animateValue?: boolean
+  rollingValue?: boolean
 }) {
   const { triggerRef, morphPanelRef, pressFeedback } = useDropdownMenu()
   const pressAnimations = React.useRef<Animation[]>([])
@@ -333,7 +333,7 @@ function DropdownMenuTrigger({
   const release = () => setPress(hovered.current ? "hover" : "rest")
 
   return (
-    <TriggerContext.Provider value={{ animateValue }}>
+    <TriggerContext.Provider value={{ rollingValue }}>
       <MenuPrimitive.Trigger
         data-hpx-slot="dropdown-menu-trigger"
         ref={(node: HTMLElement | null) => {
@@ -482,11 +482,11 @@ function DropdownMenuValue({
   className?: string
   children: string | number
 }) {
-  const { animateValue } = React.useContext(TriggerContext)
+  const { rollingValue } = React.useContext(TriggerContext)
   const { preset, bold } = useDropdownMenu()
   const weight = bold ? "font-semibold" : "font-normal"
 
-  if (!animateValue) return <span className={cn(weight, className)}>{children}</span>
+  if (!rollingValue) return <span className={cn(weight, className)}>{children}</span>
 
   return (
     <span className={cn("relative inline-grid overflow-hidden", weight, className)}>
@@ -838,7 +838,7 @@ function MotionItem({
   const itemId = React.useId()
   const { setActiveItem } = context
   // Highlighting an item (by pointer or keyboard) focuses it, so focus is where the pill moves.
-  const pillHere = context.highlight === "slide" && context.activeItem === itemId
+  const pillHere = context.itemHighlight === "slide" && context.activeItem === itemId
 
   return (
     <motion.div
@@ -853,12 +853,12 @@ function MotionItem({
       whileHover={context.pressFeedback ? { scale: ITEM_PRESS_SCALE } : undefined}
       whileTap={context.pressFeedback ? { scale: ITEM_PRESS_SCALE } : undefined}
     >
-      {context.highlight === "fill" && (
+      {context.itemHighlight === "fill" && (
         <motion.span
           aria-hidden
           className={cn(
             "pointer-events-none absolute inset-0 -z-10 rounded-[inherit]",
-            HIGHLIGHT_FILL[context.highlightColor]
+            HIGHLIGHT_FILL[context.itemHighlightColor]
           )}
           style={{ originY: 0 }}
           initial={false}
@@ -873,12 +873,12 @@ function MotionItem({
           transition={context.preset.glide}
           className={cn(
             "pointer-events-none absolute inset-0 -z-10 rounded-[inherit]",
-            HIGHLIGHT_FILL[context.highlightColor]
+            HIGHLIGHT_FILL[context.itemHighlightColor]
           )}
         />
       )}
       <ItemHighlightContext.Provider value={highlighted || pillHere}>
-        {typeof content === "string" && context.textRoll ? <RollText>{content}</RollText> : content}
+        {typeof content === "string" && context.rollingText ? <RollText>{content}</RollText> : content}
       </ItemHighlightContext.Provider>
       {children}
     </motion.div>
@@ -912,10 +912,10 @@ const HIGHLIGHT_TEXT: Record<"slide" | "other", Record<DropdownMenuHighlightColo
 }
 
 /** Motion draws the fill for `slide` and `fill`; `none` is a plain CSS background. */
-function highlightClasses(highlight: DropdownMenuHighlight, color: DropdownMenuHighlightColor) {
+function highlightClasses(itemHighlight: DropdownMenuHighlight, color: DropdownMenuHighlightColor) {
   return cn(
-    HIGHLIGHT_TEXT[highlight === "slide" ? "slide" : "other"][color],
-    highlight === "none"
+    HIGHLIGHT_TEXT[itemHighlight === "slide" ? "slide" : "other"][color],
+    itemHighlight === "none"
       ? color === "primary"
         ? "focus:bg-primary"
         : "focus:bg-muted"
@@ -932,7 +932,7 @@ function DropdownMenuItem({
   inset?: boolean
   variant?: "default" | "destructive"
 }) {
-  const { highlight, highlightColor } = useDropdownMenu()
+  const { itemHighlight, itemHighlightColor } = useDropdownMenu()
 
   return (
     <MenuPrimitive.Item
@@ -942,7 +942,7 @@ function DropdownMenuItem({
       className={cn(
         itemBase,
         "group/dropdown-menu-item px-1.5 py-1 data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive",
-        highlightClasses(highlight, highlightColor),
+        highlightClasses(itemHighlight, itemHighlightColor),
         className
       )}
       render={(itemProps, state) => (
@@ -976,7 +976,7 @@ function DropdownMenuSubTrigger({
         "group/dropdown-menu-item px-1.5 py-1 text-sm data-inset:pl-7",
         // While its submenu is open and the pill has moved into it, keep a quiet mark here.
         "data-popup-open:not-data-pill:bg-muted",
-        highlightClasses(context.highlight, context.highlightColor),
+        highlightClasses(context.itemHighlight, context.itemHighlightColor),
         className
       )}
       // Drawn by the same item as the rest, so the sliding pill glides onto it too.
@@ -1072,7 +1072,7 @@ function DropdownMenuCheckboxItem({
         itemBase,
         // Room for the tick on the right; see the radio item for why it's keyed on an attribute.
         "py-1 pl-1.5 data-inset:pl-7 data-[indicator=check]:pr-8",
-        highlightClasses(context.highlight, context.highlightColor),
+        highlightClasses(context.itemHighlight, context.itemHighlightColor),
         className
       )}
       render={(itemProps, state) => (
@@ -1103,9 +1103,9 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
 }
 
 function RadioIndicator({ checked }: { checked: boolean }) {
-  const { id, indicator, preset } = useDropdownMenu()
+  const { id, selectionIndicator, preset } = useDropdownMenu()
 
-  if (indicator === "bar") {
+  if (selectionIndicator === "bar") {
     return checked ? (
       <motion.span
         aria-hidden
@@ -1122,7 +1122,7 @@ function RadioIndicator({ checked }: { checked: boolean }) {
       data-hpx-slot="dropdown-menu-radio-item-indicator"
       className="pointer-events-none absolute right-2 flex size-4 items-center justify-center"
     >
-      {indicator === "dot" ? (
+      {selectionIndicator === "dot" ? (
         <motion.span
           className="size-1.5 rounded-full bg-current"
           initial={false}
@@ -1155,11 +1155,11 @@ function DropdownMenuRadioItem({
     <MenuPrimitive.RadioItem
       data-hpx-slot="dropdown-menu-radio-item"
       data-inset={inset}
-      data-indicator={context.indicator}
-      closeOnClick={!context.delayCloseOnSelect}
+      data-indicator={context.selectionIndicator}
+      closeOnClick={!context.closeDelayOnSelect}
       onClick={(event) => {
         onClick?.(event)
-        if (context.delayCloseOnSelect) window.setTimeout(context.close, SELECT_CLOSE_DELAY_MS)
+        if (context.closeDelayOnSelect) window.setTimeout(context.close, SELECT_CLOSE_DELAY_MS)
       }}
       className={cn(
         itemBase,
@@ -1167,7 +1167,7 @@ function DropdownMenuRadioItem({
         // Room for the indicator, keyed on an attribute so it outranks a plain `px-*` passed in
         // (the menubar sizes its items that way): a bar on the left, a tick or dot on the right.
         "data-[indicator=bar]:pl-6 not-data-[indicator=bar]:pr-8",
-        highlightClasses(context.highlight, context.highlightColor),
+        highlightClasses(context.itemHighlight, context.itemHighlightColor),
         className
       )}
       render={(itemProps, state) => (
@@ -1212,17 +1212,17 @@ function RollText({ className, children }: { className?: string; children: React
 
 /** An item's main line. Rolls on highlight when `textRoll` is on. */
 function DropdownMenuItemTitle({ className, children }: { className?: string; children: React.ReactNode }) {
-  const { textRoll, bold } = useDropdownMenu()
+  const { rollingText, bold } = useDropdownMenu()
   const weight = bold ? "font-medium" : "font-normal"
 
-  if (textRoll) return <RollText className={cn(weight, className)}>{children}</RollText>
+  if (rollingText) return <RollText className={cn(weight, className)}>{children}</RollText>
   return <span className={cn("block", weight, className)}>{children}</span>
 }
 
 /** A secondary line under an item's title. */
 function DropdownMenuItemDescription({ className, ...props }: React.ComponentProps<"span">) {
-  const { descriptions } = useDropdownMenu()
-  if (!descriptions) return null
+  const { showDescriptions } = useDropdownMenu()
+  if (!showDescriptions) return null
 
   return (
     <span

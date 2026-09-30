@@ -27,7 +27,7 @@ const roasts = [
 const SIDES = { bottom: "down", top: "up", left: "left", right: "right" } as const
 
 const controls = {
-  textRoll: { group: "Button", type: "checkbox", label: "Text roll on hover", value: true },
+  rollingText: { group: "Button", type: "checkbox", label: "Rolling text", value: true },
   fillOnHover: { group: "Button", type: "checkbox", label: "Fill on hover", value: false },
 
   side: {
@@ -54,7 +54,7 @@ const controls = {
       { label: "Fade", value: "fade" },
     ],
   },
-  springy: { disabled: (v) => v.openAnimation === "fade", group: "Motion", type: "checkbox", label: "Springy", value: true },
+  elastic: { disabled: (v) => v.openAnimation === "fade", group: "Motion", type: "checkbox", label: "Elastic", value: true },
   duration: {
     group: "Motion",
     type: "slider",
@@ -65,18 +65,18 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-  bounce: { disabled: (v) => !v.springy || v.openAnimation === "fade", group: "Motion", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
+  bounce: { disabled: (v) => !v.elastic || v.openAnimation === "fade", group: "Motion", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
   stagger: {
     group: "Motion",
     type: "slider",
-    label: "Item stagger",
+    label: "Stagger",
     value: 0.04,
     min: 0,
     max: 0.15,
     step: 0.01,
     unit: "s",
   },
-  swipeTilt: { group: "Motion", type: "checkbox", label: "Tilt while swiping", value: false },
+  tiltOnSwipe: { group: "Motion", type: "checkbox", label: "Tilt on swipe", value: false },
   scaleBackground: { group: "Motion", type: "checkbox", label: "Shrink page behind", value: true },
 } satisfies HpxControlSchema
 

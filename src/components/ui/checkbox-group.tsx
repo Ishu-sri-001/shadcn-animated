@@ -31,28 +31,28 @@ const shake = [0, -6, 6, -4, 4, -2, 0]
 
 type CheckboxOptions = {
   fill: boolean
-  bounce: boolean
+  elastic: boolean
   strike: boolean
   showIcon: boolean
   /** Filled or outline box. */
   appearance: CheckboxAppearance
   mark: CheckboxMark
-  radius: CheckboxRadius
+  rounded: CheckboxRadius
 }
 
 const defaultOptions: CheckboxOptions = {
   fill: true,
-  bounce: true,
+  elastic: true,
   strike: false,
   showIcon: true,
   appearance: "filled",
   mark: "check",
-  radius: "sm",
+  rounded: "sm",
 }
 
 type CheckboxGroupContextValue = {
   variant: CheckboxVariant
-  cardFill: CheckboxCardFill
+  cardFillColor: CheckboxCardFill
   selected: string[]
   toggle: (value: string, range: boolean) => boolean
   invalid: boolean
@@ -80,12 +80,12 @@ type CheckboxGroupProps = Partial<CheckboxOptions> & {
   defaultValue?: string[]
   onValueChange?: (value: string[]) => void
   variant?: CheckboxVariant
-  cardFill?: CheckboxCardFill
+  cardFillColor?: CheckboxCardFill
   min?: number
   max?: number
-  selectAll?: boolean
-  deselectAll?: boolean
-  counter?: boolean
+  showSelectAll?: boolean
+  showDeselectAll?: boolean
+  showCounter?: boolean
   rangeSelect?: boolean
   reorder?: boolean
   onReorder?: (order: string[]) => void
@@ -99,14 +99,14 @@ function CheckboxGroup({
   children,
   min = 0,
   max,
-  selectAll = true,
-  deselectAll = true,
-  counter = true,
+  showSelectAll = true,
+  showDeselectAll = true,
+  showCounter = true,
   rangeSelect = true,
   reorder = false,
   onReorder,
   variant = "default",
-  cardFill = "muted",
+  cardFillColor = "muted",
   "aria-label": ariaLabel,
   ...optionProps
 }: CheckboxGroupProps) {
@@ -219,7 +219,7 @@ function CheckboxGroup({
   const options: CheckboxOptions = { ...defaultOptions, ...optionProps }
   const context: CheckboxGroupContextValue = {
     variant,
-    cardFill,
+    cardFillColor,
     selected,
     toggle,
     invalid,
@@ -232,15 +232,15 @@ function CheckboxGroup({
       <CheckboxOptionsContext.Provider value={options}>
         <CheckboxGroupContext.Provider value={context}>
           <div data-hpx-slot="checkbox-group" className="flex flex-col gap-8">
-            {(selectAll || deselectAll || counter) && (
+            {(showSelectAll || showDeselectAll || showCounter) && (
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-8 max-md:gap-6">
-                  {selectAll && (
+                  {showSelectAll && (
                     <button type="button" onClick={tickAll} disabled={allTicked} className={toolbarButton}>
                       Select all
                     </button>
                   )}
-                  {deselectAll && (
+                  {showDeselectAll && (
                     <button
                       type="button"
                       onClick={clearAll}
@@ -251,7 +251,7 @@ function CheckboxGroup({
                     </button>
                   )}
                 </div>
-                {counter && (
+                {showCounter && (
                   <span className="text-muted-foreground tabular-nums" aria-live="polite">
                     <RollingNumber value={selected.length} />
                     {max !== undefined && ` of ${max}`} selected
@@ -354,13 +354,13 @@ function CheckboxItem({
   }
 
   React.useEffect(() => {
-    if (pulse === 0 || !options.bounce || reduceMotion || !visual.current) return
+    if (pulse === 0 || !options.elastic || reduceMotion || !visual.current) return
     animate(
       visual.current,
       { scale: [1, 0.7, 1.25, 0.94, 1] },
       { duration: 0.55, times: [0, 0.2, 0.5, 0.75, 1], ease: "easeOut" }
     )
-  }, [pulse, options.bounce, reduceMotion])
+  }, [pulse, options.elastic, reduceMotion])
 
   const toggle = (event: React.MouseEvent) => {
     if (disabled) return
@@ -381,11 +381,11 @@ function CheckboxItem({
   const invalid = group?.invalid && !checked
   const dimmed = disabled || (group?.full && !checked)
   const hasText = label !== undefined || description !== undefined
-  const solid = card && group?.cardFill === "primary"
+  const solid = card && group?.cardFillColor === "primary"
   const onFill = solid && checked
   const showControl = options.showIcon
   const filled = options.appearance === "filled"
-  const cornerRadius = BOX_RADIUS[options.radius]
+  const cornerRadius = BOX_RADIUS[options.rounded]
   const marked = checked || mixed
   const markOnAccent = filled !== onFill
 
@@ -504,7 +504,7 @@ function CheckboxItem({
         className={
           showControl ? cn("relative grid size-6 shrink-0 place-items-center", solid && "z-20") : "sr-only"
         }
-        whileTap={disabled || !options.bounce ? undefined : { scale: 0.85 }}
+        whileTap={disabled || !options.elastic ? undefined : { scale: 0.85 }}
       >
         <span
           aria-hidden

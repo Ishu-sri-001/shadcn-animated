@@ -85,10 +85,10 @@ const controls = {
     step: 0.01,
     unit: "s",
   },
-  highlight: {
+  itemHighlight: {
     group: "Options",
     type: "select",
-    label: "Hover highlight",
+    label: "Item highlight",
     value: "slide",
     options: [
       { label: "Slide", value: "slide" },
@@ -96,10 +96,10 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  indicator: {
+  selectionIndicator: {
     group: "Options",
     type: "select",
-    label: "Indicator",
+    label: "Selection indicator",
     value: "check",
     options: [
       { label: "Check", value: "check" },
@@ -107,9 +107,9 @@ const controls = {
       { label: "Bar", value: "bar" },
     ],
   },
-  descriptions: { group: "Options", type: "checkbox", label: "Item descriptions", value: false },
+  showDescriptions: { group: "Options", type: "checkbox", label: "Descriptions", value: false },
   bold: { group: "Options", type: "checkbox", label: "Bold", value: false },
-  textRoll: { group: "Options", type: "checkbox", label: "Text roll on hover", value: false },
+  rollingText: { group: "Options", type: "checkbox", label: "Rolling text", value: false },
   icon: {
     group: "Trigger",
     type: "select",
@@ -120,13 +120,13 @@ const controls = {
       { label: "Chevron", value: "chevron" },
     ],
   },
-  animateValue: { group: "Trigger", type: "checkbox", label: "Animate value", value: true },
+  rollingValue: { group: "Trigger", type: "checkbox", label: "Rolling value", value: true },
   pressFeedback: { group: "Trigger", type: "checkbox", label: "Press feedback", value: false },
   openOnHover: { group: "Trigger", type: "checkbox", label: "Open on hover", value: false },
-  delayCloseOnSelect: {
+  closeDelayOnSelect: {
     group: "Behaviour",
     type: "checkbox",
-    label: "Delay on close after choosing",
+    label: "Close delay on select",
     value: false,
   },
   typeahead: { group: "Behaviour", type: "checkbox", label: "Type to jump", value: false },
@@ -154,19 +154,19 @@ export default function DropdownMenuPage() {
           duration={values.duration}
           delay={values.delay}
           stagger={values.stagger}
-          highlight={values.highlight as "slide" | "fill" | "none"}
-          indicator={values.indicator as "check" | "dot" | "bar"}
-          descriptions={values.descriptions}
+          itemHighlight={values.itemHighlight as "slide" | "fill" | "none"}
+          selectionIndicator={values.selectionIndicator as "check" | "dot" | "bar"}
+          showDescriptions={values.showDescriptions}
           bold={values.bold}
-          textRoll={values.textRoll}
-          delayCloseOnSelect={values.delayCloseOnSelect}
+          rollingText={values.rollingText}
+          closeDelayOnSelect={values.closeDelayOnSelect}
           pressFeedback={values.pressFeedback}
           typeahead={values.typeahead}
         >
           <HpxDropdownMenuTrigger
             openOnHover={values.openOnHover}
             delay={100}
-            animateValue={values.animateValue}
+            rollingValue={values.rollingValue}
             render={
               <HpxButton
                 variant="outline"

@@ -27,16 +27,16 @@ type SwitchMotion = {
   /** Track colour when on. "primary" follows the theme. */
   color: SwitchColor
   /** With "foreground" colour, use the system green on the apple switch. */
-  green: boolean
+  appleGreen: boolean
   rounded: SwitchRounded
   /** How hard the handle squashes (elastic) or widens (apple) when pressed. */
-  squeeze: number
+  pressSqueeze: number
   /** Travel time of the handle, in seconds. */
   duration: number
   bounce: number
   /** Small I / O marks in the track. */
-  marks: boolean
-  labelSide: SwitchLabelSide
+  showMarks: boolean
+  labelPosition: SwitchLabelSide
 }
 
 // Track and handle sizes. The numbers are what the animation needs; the classes size the track.
@@ -98,13 +98,13 @@ function Switch({
   variant = "elastic",
   size = "xl",
   color = "primary",
-  green = false,
+  appleGreen = false,
   rounded = "full",
-  squeeze = 0.18,
+  pressSqueeze = 0.18,
   duration = 0.35,
   bounce = 0.3,
-  marks = false,
-  labelSide = "right",
+  showMarks = false,
+  labelPosition = "right",
   label,
   className,
   labelClassName,
@@ -171,8 +171,8 @@ function Switch({
     previous.current = on
     animate(x, on ? travel : 0, ok(travelSpring))
     if (variant === "elastic" && !reduceMotion) {
-      animate(scaleX, 1 + squeeze * 0.85, FAST).then(() => animate(scaleX, 1, SNAP))
-      animate(scaleY, 1 - squeeze * 0.65, FAST).then(() => animate(scaleY, 1, SNAP))
+      animate(scaleX, 1 + pressSqueeze * 0.85, FAST).then(() => animate(scaleX, 1, SNAP))
+      animate(scaleY, 1 - pressSqueeze * 0.65, FAST).then(() => animate(scaleY, 1, SNAP))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [on])
@@ -191,15 +191,15 @@ function Switch({
   const press = () => {
     if (reduceMotion) return
     if (variant === "elastic") {
-      animate(scaleX, 1 - squeeze, FAST)
-      animate(scaleY, 1 + squeeze * 0.55, FAST)
+      animate(scaleX, 1 - pressSqueeze, FAST)
+      animate(scaleY, 1 + pressSqueeze * 0.55, FAST)
     } else {
       // The glass swells wider and stands a little taller than the track
-      const cover = Math.min(1, squeeze / 0.2)
+      const cover = Math.min(1, pressSqueeze / 0.2)
       // No bounce, so it lands on its final size and stays exactly that through a drag
       const swell: Transition = { type: "spring", duration: 0.25, bounce: 0 }
       animate(widen, (spec.w * 0.68 - handleW) * cover, swell)
-      animate(lift, handleH * Math.min(0.75, squeeze * 2.8), swell)
+      animate(lift, handleH * Math.min(0.75, pressSqueeze * 2.8), swell)
       animate(glass, 1, FAST)
     }
   }
@@ -216,7 +216,7 @@ function Switch({
 
   const rootRef = React.useRef<HTMLElement>(null)
 
-  const fill = color === "foreground" && variant === "apple" && green ? IOS_GREEN : ON_COLOR[color]
+  const fill = color === "foreground" && variant === "apple" && appleGreen ? IOS_GREEN : ON_COLOR[color]
 
   const control = (
     <SwitchPrimitive.Root
@@ -298,7 +298,7 @@ function Switch({
           )}
         />
       )}
-      {marks && (
+      {showMarks && (
         <>
           <motion.span
             aria-hidden
@@ -364,7 +364,7 @@ function Switch({
       <label
         className={cn(
           "inline-flex cursor-pointer items-center select-none",
-          (labelSide === "top" || labelSide === "bottom") && "flex-col",
+          (labelPosition === "top" || labelPosition === "bottom") && "flex-col",
           spec.label,
           disabled && "cursor-not-allowed opacity-50",
           labelClassName
@@ -376,9 +376,9 @@ function Switch({
           if (!disabled) rootRef.current?.click()
         }}
       >
-        {(labelSide === "left" || labelSide === "top") && <span>{label}</span>}
+        {(labelPosition === "left" || labelPosition === "top") && <span>{label}</span>}
         {control}
-        {(labelSide === "right" || labelSide === "bottom") && <span>{label}</span>}
+        {(labelPosition === "right" || labelPosition === "bottom") && <span>{label}</span>}
       </label>
     </MotionConfig>
   )

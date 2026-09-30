@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/theme-switch"
 
 const controls = {
-  transition: {
+  revealAnimation: {
     group: "Transition",
     type: "select",
-    label: "Reveal",
+    label: "Reveal animation",
     value: "circle",
     options: [
       { label: "Circle from button", value: "circle" },
@@ -29,7 +29,7 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-  iconMotion: {
+  iconAnimation: {
     group: "Button",
     type: "select",
     label: "Icon motion",
@@ -39,7 +39,7 @@ const controls = {
       { label: "Orbit", value: "orbit" },
     ],
   },
-  tooltip: { group: "Button", type: "checkbox", label: "Tooltip", value: true },
+  showTooltip: { group: "Button", type: "checkbox", label: "Tooltip", value: true },
   variant: {
     group: "Button",
     type: "select",
@@ -62,10 +62,10 @@ export function HpxThemeSwitchDemo() {
     <div className="flex flex-col gap-3">
       <div className="flex min-h-[40vh] items-center justify-center rounded-lg border">
         <HpxThemeSwitch
-          transition={values.transition as HpxThemeSwitchVariant}
+          revealAnimation={values.revealAnimation as HpxThemeSwitchVariant}
           duration={values.duration}
-          iconMotion={values.iconMotion as HpxThemeSwitchIconMotion}
-          tooltip={values.tooltip}
+          iconAnimation={values.iconAnimation as HpxThemeSwitchIconMotion}
+          showTooltip={values.showTooltip}
           variant={values.variant as "outline" | "ghost" | "default" | "secondary"}
         />
       </div>

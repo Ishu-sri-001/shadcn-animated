@@ -72,10 +72,10 @@ function Items({ onSelect }: { onSelect?: () => void }) {
 }
 
 const controls = {
-  dropdown: {
+  dropdownAnimation: {
     group: "Dropdown",
     type: "select",
-    label: "Dropdown opens",
+    label: "Dropdown animation",
     value: "morph",
     options: [
       { label: "Morph", value: "morph" },
@@ -84,7 +84,7 @@ const controls = {
     ],
   },
   morphWidth: {
-    disabled: (v) => v.dropdown !== "morph",
+    disabled: (v) => v.dropdownAnimation !== "morph",
     group: "Dropdown",
     type: "slider",
     label: "Morph width",
@@ -98,18 +98,18 @@ const controls = {
     disabled: (v) => !v.staggerItems,
     group: "Palette",
     type: "slider",
-    label: "Content delay",
+    label: "Delay",
     value: 0.15,
     min: 0,
     max: 1,
     step: 0.05,
     unit: "s",
   },
-  fade: { group: "Palette", type: "checkbox", label: "Fade in", value: true },
-  scale: {
+  fadeContent: { group: "Palette", type: "checkbox", label: "Fade content", value: true },
+  startScale: {
     group: "Palette",
     type: "slider",
-    label: "Scale from",
+    label: "Start scale",
     value: 0.75,
     min: 0.5,
     max: 1,
@@ -141,10 +141,10 @@ const controls = {
       { label: "3xl", value: "3xl" },
     ],
   },
-  itemHover: {
+  itemHighlight: {
     group: "Both",
     type: "select",
-    label: "Item hover",
+    label: "Item highlight",
     value: "slide",
     options: [
       { label: "Slide", value: "slide" },
@@ -152,18 +152,18 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  hoverColor: {
-    disabled: (v) => v.itemHover === "none",
+  itemHighlightColor: {
+    disabled: (v) => v.itemHighlight === "none",
     group: "Both",
     type: "select",
-    label: "Hover colour",
+    label: "Item highlight color",
     value: "primary",
     options: [
       { label: "Muted", value: "muted" },
       { label: "Primary", value: "primary" },
     ],
   },
-  iconMotion: { group: "Both", type: "checkbox", label: "Animated search icon", value: true },
+  animateIcon: { group: "Both", type: "checkbox", label: "Animate icon", value: true },
   duration: {
     group: "Both",
     type: "slider",
@@ -175,7 +175,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
-    disabled: (v) => v.dropdown === "fade" && v.itemHover !== "slide",
+    disabled: (v) => v.dropdownAnimation === "fade" && v.itemHighlight !== "slide",
     group: "Both",
     type: "slider",
     label: "Bounce",
@@ -184,13 +184,13 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-  textRoll: { group: "Both", type: "checkbox", label: "Text roll", value: false },
+  rollingText: { group: "Both", type: "checkbox", label: "Rolling text", value: false },
   staggerItems: { group: "Both", type: "checkbox", label: "Stagger items", value: true },
   stagger: {
     disabled: (v) => !v.staggerItems,
     group: "Both",
     type: "slider",
-    label: "Stagger delay",
+    label: "Stagger",
     value: 0.03,
     min: 0,
     max: 0.15,
@@ -210,11 +210,11 @@ export function HpxCommandDemo() {
     bounce: values.bounce,
     staggerItems: values.staggerItems,
     stagger: values.stagger,
-    iconMotion: values.iconMotion,
-    itemHover: values.itemHover as HpxCommandItemHover,
-    hoverColor: values.hoverColor as HpxCommandHoverColor,
+    animateIcon: values.animateIcon,
+    itemHighlight: values.itemHighlight as HpxCommandItemHover,
+    itemHighlightColor: values.itemHighlightColor as HpxCommandHoverColor,
     rounded: values.rounded as HpxCommandRounded,
-    textRoll: values.textRoll,
+    rollingText: values.rollingText,
   }
 
   React.useEffect(() => {
@@ -242,7 +242,7 @@ export function HpxCommandDemo() {
             inputRef={search}
             placeholder="Search commands…"
             hint="/"
-            dropdown={values.dropdown as HpxCommandDropdown}
+            dropdownAnimation={values.dropdownAnimation as HpxCommandDropdown}
             morphWidth={values.morphWidth}
             {...motionProps}
           >
@@ -262,8 +262,8 @@ export function HpxCommandDemo() {
         <HpxCommandDialog
           open={open}
           onOpenChange={setOpen}
-          scale={values.scale}
-          fade={values.fade}
+          startScale={values.startScale}
+          fadeContent={values.fadeContent}
           delay={values.delay}
           backdrop={values.backdrop as HpxCommandBackdrop}
           {...motionProps}

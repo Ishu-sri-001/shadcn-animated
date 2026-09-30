@@ -57,7 +57,7 @@ const controls = {
   multiple: { group: "Accordion", type: "checkbox", label: "Multiple open", value: false },
   openOnHover: { group: "Accordion", type: "checkbox", label: "Open on hover", value: false },
   bordered: { group: "Accordion", type: "checkbox", label: "Border", value: false },
-  gooey: { group: "Accordion", type: "checkbox", label: "Elastic / bouncy", value: false },
+  elastic: { group: "Accordion", type: "checkbox", label: "Elastic", value: false },
   duration: {
     group: "Timing",
     type: "slider",
@@ -69,10 +69,10 @@ const controls = {
     unit: "s",
   },
   bounce: {
-    disabled: (v) => !v.gooey,
+    disabled: (v) => !v.elastic,
     group: "Timing",
     type: "slider",
-    label: "Bounce (elastic)",
+    label: "Bounce",
     value: 0.3,
     min: 0,
     max: 0.8,
@@ -81,7 +81,7 @@ const controls = {
   delay: {
     group: "Timing",
     type: "slider",
-    label: "Content delay",
+    label: "Delay",
     value: 0.2,
     min: 0,
     max: 1,
@@ -114,7 +114,7 @@ const controls = {
     disabled: (v) => !v.fill,
     group: "Item",
     type: "select",
-    label: "Fill roundness",
+    label: "Roundness",
     value: "rounded-none",
     options: [
       { label: "None", value: "rounded-none" },
@@ -126,7 +126,7 @@ const controls = {
       { label: "3xl", value: "rounded-3xl" },
     ],
   },
-  line: { group: "Item", type: "checkbox", label: "Line on hover", value: true },
+  showLine: { group: "Item", type: "checkbox", label: "Show line", value: true },
   icon: {
     group: "Heading",
     type: "select",
@@ -155,7 +155,7 @@ export default function AccordionPage() {
           multiple={values.multiple}
           openOnHover={values.openOnHover}
           bordered={values.bordered}
-          gooey={values.gooey}
+          elastic={values.elastic}
           duration={values.duration}
           bounce={values.bounce}
           delay={values.delay}
@@ -165,7 +165,7 @@ export default function AccordionPage() {
             <HpxAccordionItem
               key={faq.question}
               value={`item-${i + 1}`}
-              line={values.line}
+              showLine={values.showLine}
               fill={values.fill ? (values.fillColor as "muted" | "primary") : false}
               rounded={values.rounded}
             >

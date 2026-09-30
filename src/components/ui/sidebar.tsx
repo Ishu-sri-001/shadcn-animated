@@ -61,15 +61,15 @@ const ITEM_RADIUS: Record<SidebarItemRadius, string> = {
 
 type SidebarOptions = {
   resizable: boolean
-  slidingHighlight: boolean
+  slideHighlight: boolean
   activeIndicator: "bar" | "dot" | "none"
-  pressSquish: boolean
-  spinTrigger: boolean
-  textRoll: boolean
-  springTooltips: boolean
-  rollingBadge: boolean
-  highlightTone: "primary" | "muted"
-  itemRadius: SidebarItemRadius
+  pressFeedback: boolean
+  spinToggle: boolean
+  rollingText: boolean
+  elasticTooltips: boolean
+  rollingNumbers: boolean
+  highlightColor: "primary" | "muted"
+  itemRounded: SidebarItemRadius
 }
 
 type SidebarContextProps = SidebarOptions & {
@@ -101,15 +101,15 @@ function SidebarProvider({
   open: openProp,
   onOpenChange: setOpenProp,
   resizable = false,
-  slidingHighlight = true,
+  slideHighlight = true,
   activeIndicator = "bar",
-  pressSquish = false,
-  spinTrigger = false,
-  textRoll = false,
-  springTooltips = false,
-  rollingBadge = true,
-  highlightTone = "primary",
-  itemRadius = "none",
+  pressFeedback = false,
+  spinToggle = false,
+  rollingText = false,
+  elasticTooltips = false,
+  rollingNumbers = true,
+  highlightColor = "primary",
+  itemRounded = "none",
   className,
   style,
   children,
@@ -176,15 +176,15 @@ function SidebarProvider({
       setWidth,
       setResizing,
       resizable,
-      slidingHighlight,
+      slideHighlight,
       activeIndicator,
-      pressSquish,
-      spinTrigger,
-      textRoll,
-      springTooltips,
-      rollingBadge,
-      highlightTone,
-      itemRadius,
+      pressFeedback,
+      spinToggle,
+      rollingText,
+      elasticTooltips,
+      rollingNumbers,
+      highlightColor,
+      itemRounded,
     }),
     [
       state,
@@ -196,15 +196,15 @@ function SidebarProvider({
       toggleSidebar,
       id,
       resizable,
-      slidingHighlight,
+      slideHighlight,
       activeIndicator,
-      pressSquish,
-      spinTrigger,
-      textRoll,
-      springTooltips,
-      rollingBadge,
-      highlightTone,
-      itemRadius,
+      pressFeedback,
+      spinToggle,
+      rollingText,
+      elasticTooltips,
+      rollingNumbers,
+      highlightColor,
+      itemRounded,
     ]
   )
 
@@ -219,7 +219,7 @@ function SidebarProvider({
               "--sidebar-width": width === null ? SIDEBAR_WIDTH : `${width}px`,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               "--sidebar-ease": SMOOTH_EASE,
-              "--sidebar-item-radius": ITEM_RADIUS[itemRadius],
+              "--sidebar-item-radius": ITEM_RADIUS[itemRounded],
               ...style,
             } as React.CSSProperties
           }
@@ -416,9 +416,9 @@ function MobileSidebar({
 }
 
 function SidebarTriggerIcon({ hovered }: { hovered: boolean }) {
-  const { state, isMobile, openMobile, spinTrigger } = useSidebar()
+  const { state, isMobile, openMobile, spinToggle } = useSidebar()
   const opening = isMobile ? !openMobile : state === "collapsed"
-  const arrow = spinTrigger
+  const arrow = spinToggle
     ? opening
       ? "M13 8L9 12L13 16"
       : "M10 8L14 12L10 16"
@@ -437,7 +437,7 @@ function SidebarTriggerIcon({ hovered }: { hovered: boolean }) {
       aria-hidden
       style={{ width: "1.25rem", height: "1.25rem" }}
       initial={false}
-      animate={{ rotate: spinTrigger && hovered ? 180 : 0 }}
+      animate={{ rotate: spinToggle && hovered ? 180 : 0 }}
       transition={spring}
     >
       <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -819,7 +819,7 @@ function useGlide<T extends HTMLElement>(
 }
 
 function SidebarGlideHighlight({ box, as = "div", className }: { box: Box | null; as?: "div" | "li"; className?: string }) {
-  const { highlightTone } = useSidebar()
+  const { highlightColor } = useSidebar()
   const Element = as === "li" ? motion.li : motion.div
   return (
     <AnimatePresence>
@@ -830,7 +830,7 @@ function SidebarGlideHighlight({ box, as = "div", className }: { box: Box | null
           aria-hidden
           className={cn(
             "pointer-events-none absolute -z-10 rounded-(--sidebar-item-radius)",
-            highlightTone === "primary" ? "bg-primary" : "bg-sidebar-accent/70",
+            highlightColor === "primary" ? "bg-primary" : "bg-sidebar-accent/70",
             className
           )}
           initial={{ ...box, opacity: 0 }}
@@ -915,12 +915,12 @@ function PulsingDot({ className }: { className?: string }) {
 }
 
 function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boolean }) {
-  const { id, slidingHighlight, activeIndicator, highlightTone } = useSidebar()
+  const { id, slideHighlight, activeIndicator, highlightColor } = useSidebar()
   if (!isActive) return null
   const indicatorId = `${id}-${sub ? "sub-" : ""}${activeIndicator}`
   return (
     <>
-      {slidingHighlight && (
+      {slideHighlight && (
         <motion.span
           data-sidebar-fx
           aria-hidden
@@ -928,7 +928,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           transition={glide}
           className={cn(
             "pointer-events-none absolute inset-0 -z-10 rounded-(--sidebar-item-radius)",
-            highlightBg[highlightTone]
+            highlightBg[highlightColor]
           )}
         />
       )}
@@ -936,7 +936,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
         <motion.span
           data-sidebar-fx
           aria-hidden
-          layoutId={slidingHighlight ? indicatorId : undefined}
+          layoutId={slideHighlight ? indicatorId : undefined}
           transition={glide}
           className={cn(
             "pointer-events-none absolute rounded-full",
@@ -945,7 +945,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
                 "inset-y-0 -left-2.5 w-0.5 bg-foreground"
               : cn(
                   "top-1/2 left-1.5 h-4 w-0.75 -translate-y-1/2 group-data-[collapsible=icon]:hidden",
-                  highlightTone === "primary" ? "bg-primary-foreground" : "bg-sidebar-primary"
+                  highlightColor === "primary" ? "bg-primary-foreground" : "bg-sidebar-primary"
                 )
           )}
         />
@@ -954,7 +954,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
         <motion.span
           data-sidebar-fx
           aria-hidden
-          layoutId={slidingHighlight ? indicatorId : undefined}
+          layoutId={slideHighlight ? indicatorId : undefined}
           transition={glide}
           className={cn(
             "pointer-events-none absolute top-1/2 size-1.5 -translate-y-1/2",
@@ -964,7 +964,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           <PulsingDot
             className={cn(
               "inset-0",
-              sub ? "bg-foreground" : highlightTone === "primary" && "bg-primary-foreground"
+              sub ? "bg-foreground" : highlightColor === "primary" && "bg-primary-foreground"
             )}
           />
         </motion.span>
@@ -1012,11 +1012,11 @@ function SidebarMenuButton({
   const {
     isMobile,
     state,
-    slidingHighlight,
-    pressSquish,
-    textRoll,
-    springTooltips,
-    highlightTone,
+    slideHighlight,
+    pressFeedback,
+    rollingText,
+    elasticTooltips,
+    highlightColor,
     activeIndicator,
   } = useSidebar()
   const comp = useRender({
@@ -1027,17 +1027,17 @@ function SidebarMenuButton({
         className: cn(
           sidebarMenuButtonVariants({ variant, size }),
           staggeredLabels,
-          variant === "default" && highlightTone === "primary" && primaryTone,
+          variant === "default" && highlightColor === "primary" && primaryTone,
           activeIndicator === "bar" && "px-3.5",
           activeIndicator === "dot" && "px-5.5",
-          slidingHighlight && "hpx-active:bg-transparent",
-          pressSquish && "active:scale-[0.96]",
+          slideHighlight && "hpx-active:bg-transparent",
+          pressFeedback && "active:scale-[0.96]",
           className
         ),
         children: (
           <>
             <ActiveEffects isActive={isActive} />
-            {textRoll ? rollLabels(children) : children}
+            {rollingText ? rollLabels(children) : children}
           </>
         ),
       },
@@ -1070,7 +1070,7 @@ function SidebarMenuButton({
         sideOffset={12}
         hidden={state !== "collapsed" || isMobile}
         positionerClassName="z-70"
-        {...(springTooltips && {
+        {...(elasticTooltips && {
           className: "hpx-open:zoom-in-75 data-[side=right]:slide-in-from-left-3",
           style: { animationDuration: "450ms", animationTimingFunction: SPRING_EASE },
         })}
@@ -1160,7 +1160,7 @@ function SidebarMenuBadge({
   children,
   ...props
 }: Omit<React.ComponentProps<typeof motion.div>, "children"> & { children?: React.ReactNode }) {
-  const { rollingBadge, highlightTone } = useSidebar()
+  const { rollingNumbers, highlightColor } = useSidebar()
   const reduceMotion = useReducedMotion()
   const content = React.useRef<HTMLSpanElement>(null)
   const count = typeof children === "number" ? children : null
@@ -1169,9 +1169,9 @@ function SidebarMenuBadge({
   React.useEffect(() => {
     const changed = last.current !== count
     last.current = count
-    if (!changed || !rollingBadge || reduceMotion || !content.current) return
+    if (!changed || !rollingNumbers || reduceMotion || !content.current) return
     animate(content.current, { scale: [1, 1.35, 1] }, { duration: 0.35, ease: "easeOut" })
-  }, [count, rollingBadge, reduceMotion])
+  }, [count, rollingNumbers, reduceMotion])
 
   return (
     <motion.div
@@ -1184,14 +1184,14 @@ function SidebarMenuBadge({
       className={cn(
         "pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium text-sidebar-foreground tabular-nums select-none peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 peer-hpx-active/menu-button:text-sidebar-accent-foreground",
         "transition-colors duration-300 group-data-[collapsible=icon]:hidden",
-        highlightTone === "primary" &&
+        highlightColor === "primary" &&
           "peer-data-glide/menu-button:text-primary-foreground peer-hpx-active/menu-button:text-primary-foreground",
         className
       )}
       {...props}
     >
       <span ref={content} className="inline-flex">
-        {rollingBadge && count !== null ? <RollingNumber value={count} /> : children}
+        {rollingNumbers && count !== null ? <RollingNumber value={count} /> : children}
       </span>
     </motion.div>
   )
@@ -1355,7 +1355,7 @@ function SidebarMenuSubButton({
     size?: "sm" | "md"
     isActive?: boolean
   }) {
-  const { slidingHighlight, pressSquish, textRoll, highlightTone } = useSidebar()
+  const { slideHighlight, pressFeedback, rollingText, highlightColor } = useSidebar()
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
@@ -1363,15 +1363,15 @@ function SidebarMenuSubButton({
         ...hpxSlot("sidebar-menu-sub-button"),
         className: cn(
           "relative isolate flex h-8 min-w-0 -translate-x-px items-center gap-2 rounded-(--sidebar-item-radius) px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-[scale,color] duration-300 group-data-[collapsible=icon]:hidden hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs hpx-active:bg-sidebar-accent hpx-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
-          highlightTone === "primary" && primaryTone,
-          slidingHighlight && "hpx-active:bg-transparent",
-          pressSquish && "active:scale-[0.96]",
+          highlightColor === "primary" && primaryTone,
+          slideHighlight && "hpx-active:bg-transparent",
+          pressFeedback && "active:scale-[0.96]",
           className
         ),
         children: (
           <>
             <ActiveEffects isActive={isActive} sub />
-            {textRoll ? rollLabels(children) : children}
+            {rollingText ? rollLabels(children) : children}
           </>
         ),
       },

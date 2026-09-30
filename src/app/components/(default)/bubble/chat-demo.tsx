@@ -91,26 +91,26 @@ const suggestionSets = [
 ]
 
 const controls = {
-  enter: { group: "Arriving", type: "checkbox", label: "Pop in", value: true },
+  animateEnter: { group: "Arriving", type: "checkbox", label: "Animate enter", value: true },
   typing: { group: "Arriving", type: "checkbox", label: "Typing indicator", value: true },
-  streaming: { group: "Arriving", type: "checkbox", label: "Stream text (bubble grows)", value: false },
+  streamText: { group: "Arriving", type: "checkbox", label: "Stream text", value: false },
 
   flyIn: { group: "Sending", type: "checkbox", label: "Fly from input", value: false },
-  status: { group: "Sending", type: "checkbox", label: "Delivery status", value: true },
-  shake: { disabled: (v) => !v.failures, group: "Sending", type: "checkbox", label: "Error shake", value: true },
-  failures: { group: "Sending", type: "checkbox", label: "Simulate failures", value: true },
+  showDeliveryStatus: { group: "Sending", type: "checkbox", label: "Show delivery status", value: true },
+  shakeOnError: { disabled: (v) => !v.simulateFailures, group: "Sending", type: "checkbox", label: "Shake on error", value: true },
+  simulateFailures: { group: "Sending", type: "checkbox", label: "Simulate failures", value: true },
 
-  pop: { group: "Reactions", type: "checkbox", label: "Reaction pop", value: true },
-  rolling: { group: "Reactions", type: "checkbox", label: "Rolling count", value: true },
-  doubleClick: { group: "Reactions", type: "checkbox", label: "Double-click to react", value: true },
-  picker: { group: "Reactions", type: "checkbox", label: "Reaction picker", value: true },
-  magnify: { disabled: (v) => !v.picker, group: "Reactions", type: "checkbox", label: "Magnify emojis", value: false },
+  popOnChange: { group: "Reactions", type: "checkbox", label: "Pop on change", value: true },
+  rollingNumbers: { group: "Reactions", type: "checkbox", label: "Rolling numbers", value: true },
+  doubleClickToReact: { group: "Reactions", type: "checkbox", label: "Double click to react", value: true },
+  showReactionPicker: { group: "Reactions", type: "checkbox", label: "Show reaction picker", value: true },
+  magnifyEmojis: { disabled: (v) => !v.showReactionPicker, group: "Reactions", type: "checkbox", label: "Magnify emojis", value: false },
 
-  lift: { group: "Interaction", type: "checkbox", label: "Hover lift", value: false },
+  liftOnHover: { group: "Interaction", type: "checkbox", label: "Lift on hover", value: false },
   selectable: { group: "Interaction", type: "checkbox", label: "Selectable text", value: true },
-  swipe: { group: "Interaction", type: "checkbox", label: "Swipe to reply", value: true },
-  suggestions: { group: "Interaction", type: "checkbox", label: "Suggested replies", value: true },
-  readMore: { group: "Interaction", type: "checkbox", label: "Read more", value: true },
+  swipeToReply: { group: "Interaction", type: "checkbox", label: "Swipe to reply", value: true },
+  showSuggestions: { group: "Interaction", type: "checkbox", label: "Show suggestions", value: true },
+  collapsible: { group: "Interaction", type: "checkbox", label: "Collapsible", value: true },
 
   joined: { group: "Grouping", type: "checkbox", label: "Joined corners", value: false },
 } satisfies HpxControlSchema
@@ -205,7 +205,7 @@ export function HpxChatDemo() {
     const text = replies[replyIndex.current % replies.length]
     const nextSuggestions = suggestionSets[replyIndex.current % suggestionSets.length]
     replyIndex.current += 1
-    const stream = values.streaming
+    const stream = values.streamText
     const showSuggestions = () => setSuggestions({ id: crypto.randomUUID(), texts: nextSuggestions })
     if (stream) pendingSuggestions.current.set(id, showSuggestions)
 
@@ -223,7 +223,7 @@ export function HpxChatDemo() {
 
   function deliver(id: string, canFail: boolean) {
     later(() => {
-      if (canFail && values.failures && Math.random() < FAIL_CHANCE) {
+      if (canFail && values.simulateFailures && Math.random() < FAIL_CHANCE) {
         update(id, { status: "failed" })
         return
       }
@@ -282,18 +282,18 @@ export function HpxChatDemo() {
     const mine = message.from === "me"
     const failed = message.status === "failed"
     const total = Object.values(message.reactions).reduce((sum, n) => sum + n, 0)
-    const showStatus = values.status && mine && (failed || message.id === lastMine?.id)
+    const showStatus = values.showDeliveryStatus && mine && (failed || message.id === lastMine?.id)
     return (
       <HpxBubble
         key={message.id}
         align={mine ? "end" : "start"}
         variant={failed ? "destructive" : mine ? (message.variant ?? "default") : "muted"}
-        enter={values.enter && !message.seed && !message.layoutId}
+        animateEnter={values.animateEnter && !message.seed && !message.layoutId}
         enterFrom={message.flyFrom}
-        shake={values.shake}
-        lift={values.lift}
+        shakeOnError={values.shakeOnError}
+        liftOnHover={values.liftOnHover}
         selectable={values.selectable}
-        swipeToReply={values.swipe}
+        swipeToReply={values.swipeToReply}
         onReply={() => {
           setReplyTo(message)
           inputRef.current?.focus()
@@ -301,9 +301,9 @@ export function HpxChatDemo() {
         onReact={(emoji) => react(message.id, emoji)}
         onUnreact={(emoji) => unreact(message.id, emoji)}
         reacted={message.mine}
-        doubleClickReact={values.doubleClick}
-        picker={values.picker}
-        magnify={values.magnify}
+        doubleClickToReact={values.doubleClickToReact}
+        showReactionPicker={values.showReactionPicker}
+        magnifyEmojis={values.magnifyEmojis}
       >
         <HpxBubbleContent typing={message.typing} grow={message.stream} layoutId={message.layoutId}>
           {message.replyTo && (
@@ -320,7 +320,7 @@ export function HpxChatDemo() {
               pendingSuggestions.current.delete(message.id)
               if (show) later(show, 300)
             }}
-            collapsible={values.readMore}
+            collapsible={values.collapsible}
           />
         </HpxBubbleContent>
         <AnimatePresence initial={false}>
@@ -328,8 +328,8 @@ export function HpxChatDemo() {
             <HpxBubbleReactions
               key="reactions"
               align={mine ? "end" : "start"}
-              pop={values.pop}
-              rolling={values.rolling}
+              popOnChange={values.popOnChange}
+              rollingNumbers={values.rollingNumbers}
               count={total}
             >
               {Object.keys(message.reactions).map((emoji) => (
@@ -377,7 +377,7 @@ export function HpxChatDemo() {
             </HpxBubbleGroup>
           ))}
           <AnimatePresence mode="popLayout">
-            {values.suggestions && suggestions && (
+            {values.showSuggestions && suggestions && (
               <HpxBubbleSuggestions key={suggestions.id}>
                 {suggestions.texts.map((text, i) => {
                   const layoutId = `${suggestions.id}-${i}`

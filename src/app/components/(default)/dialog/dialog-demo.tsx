@@ -18,11 +18,11 @@ import {
 } from "@/components/ui/dialog"
 
 const controls = {
-  textRoll: { group: "Button", type: "checkbox", label: "Text roll on hover", value: true },
+  rollingText: { group: "Button", type: "checkbox", label: "Rolling text", value: true },
   fillOnHover: { group: "Button", type: "checkbox", label: "Fill on hover", value: false },
 
-  fromTrigger: { group: "Opening", type: "checkbox", label: "Grow from button", value: true },
-  springy: { group: "Opening", type: "checkbox", label: "Springy", value: true },
+  originFromTrigger: { group: "Opening", type: "checkbox", label: "Origin from trigger", value: true },
+  elastic: { group: "Opening", type: "checkbox", label: "Elastic", value: true },
   duration: {
     group: "Opening",
     type: "slider",
@@ -33,15 +33,15 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-  bounce: { disabled: (v) => !v.springy, group: "Opening", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
-  contentFade: { group: "Opening", type: "checkbox", label: "Content fade-in", value: true },
-  contentScale: { disabled: (v) => !v.contentFade, group: "Opening", type: "checkbox", label: "Content scales in", value: false },
+  bounce: { disabled: (v) => !v.elastic, group: "Opening", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
+  fadeContent: { group: "Opening", type: "checkbox", label: "Fade content", value: true },
+  scaleContent: { disabled: (v) => !v.fadeContent, group: "Opening", type: "checkbox", label: "Scale content", value: false },
 
-  exit: {
-    disabled: (v) => !!v.fromTrigger,
+  exitAnimation: {
+    disabled: (v) => !!v.originFromTrigger,
     group: "Closing",
     type: "select",
-    label: "Exit",
+    label: "Exit animation",
     value: "fade",
     options: [
       { label: "Fade", value: "fade" },
@@ -49,7 +49,7 @@ const controls = {
       { label: "Shrink", value: "shrink" },
     ],
   },
-  contentFadeOut: { group: "Closing", type: "checkbox", label: "Content fades out first", value: true },
+  fadeContentOut: { group: "Closing", type: "checkbox", label: "Fade content out", value: true },
   dismissible: { group: "Closing", type: "checkbox", label: "Click outside closes", value: true },
   shakeOnBlock: { disabled: (v) => !!v.dismissible, group: "Closing", type: "checkbox", label: "Shake when blocked", value: true },
 
@@ -91,7 +91,7 @@ export function HpxDialogDemo() {
         <HpxDialog
           {...values}
           backdrop={values.backdrop as HpxDialogBackdrop}
-          exit={values.exit as HpxDialogExit}
+          exitAnimation={values.exitAnimation as HpxDialogExit}
           rounded={values.rounded as HpxDialogRounded}
         >
           <HpxDialogTrigger className="h-auto px-5 py-2.5 text-lg" render={<HpxButton variant="outline" />}>Pause subscription</HpxDialogTrigger>

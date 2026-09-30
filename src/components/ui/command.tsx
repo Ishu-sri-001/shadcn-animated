@@ -39,11 +39,11 @@ type CommandMotion = {
   delay: number
   /** Search icon tilts and grows on hover and focus. */
   /** Rolls item labels when highlighted. */
-  textRoll: boolean
-  iconMotion: boolean
+  rollingText: boolean
+  animateIcon: boolean
   /** slide: one highlight glides between items. fill: each fills from the top. */
-  itemHover: CommandItemHover
-  hoverColor: CommandHoverColor
+  itemHighlight: CommandItemHover
+  itemHighlightColor: CommandHoverColor
   rounded: CommandRounded
 }
 
@@ -72,10 +72,10 @@ const DEFAULT_MOTION: CommandMotion = {
   staggerItems: true,
   stagger: 0.03,
   delay: 0.05,
-  iconMotion: true,
-  textRoll: false,
-  itemHover: "slide",
-  hoverColor: "muted",
+  animateIcon: true,
+  rollingText: false,
+  itemHighlight: "slide",
+  itemHighlightColor: "muted",
   rounded: "sm",
 }
 
@@ -88,7 +88,7 @@ function useCommandMotion() {
 // Only props that were passed override the inherited motion
 function useMergedMotion(props: Partial<CommandMotion>) {
   const parent = useCommandMotion()
-  const { duration, bounce, staggerItems, stagger, delay, iconMotion, textRoll, itemHover, hoverColor, rounded } = props
+  const { duration, bounce, staggerItems, stagger, delay, animateIcon, rollingText, itemHighlight, itemHighlightColor, rounded } = props
   return React.useMemo(
     () => ({
       duration: duration ?? parent.duration,
@@ -96,13 +96,13 @@ function useMergedMotion(props: Partial<CommandMotion>) {
       staggerItems: staggerItems ?? parent.staggerItems,
       stagger: stagger ?? parent.stagger,
       delay: delay ?? parent.delay,
-      iconMotion: iconMotion ?? parent.iconMotion,
-      textRoll: textRoll ?? parent.textRoll,
-      itemHover: itemHover ?? parent.itemHover,
-      hoverColor: hoverColor ?? parent.hoverColor,
+      animateIcon: animateIcon ?? parent.animateIcon,
+      rollingText: rollingText ?? parent.rollingText,
+      itemHighlight: itemHighlight ?? parent.itemHighlight,
+      itemHighlightColor: itemHighlightColor ?? parent.itemHighlightColor,
       rounded: rounded ?? parent.rounded,
     }),
-    [parent, duration, bounce, staggerItems, stagger, delay, iconMotion, textRoll, itemHover, hoverColor, rounded]
+    [parent, duration, bounce, staggerItems, stagger, delay, animateIcon, rollingText, itemHighlight, itemHighlightColor, rounded]
   )
 }
 
@@ -113,14 +113,14 @@ function Command({
   staggerItems,
   stagger,
   delay,
-  iconMotion,
-  textRoll,
-  itemHover,
-  hoverColor,
+  animateIcon,
+  rollingText,
+  itemHighlight,
+  itemHighlightColor,
   rounded,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive> & Partial<CommandMotion>) {
-  const motionProps = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, iconMotion, textRoll, itemHover, hoverColor, rounded })
+  const motionProps = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, animateIcon, rollingText, itemHighlight, itemHighlightColor, rounded })
 
   return (
     <CommandMotionContext.Provider value={motionProps}>
@@ -145,18 +145,18 @@ function CommandDialog({
   className,
   open,
   onOpenChange,
-  scale = 0.75,
-  fade = true,
+  startScale = 0.75,
+  fadeContent = true,
   backdrop = "blur",
   duration,
   bounce,
   staggerItems,
   stagger,
   delay = 0.25,
-  iconMotion,
-  textRoll,
-  itemHover,
-  hoverColor,
+  animateIcon,
+  rollingText,
+  itemHighlight,
+  itemHighlightColor,
   rounded,
 }: {
   title?: string
@@ -165,15 +165,15 @@ function CommandDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
   /** Size the palette grows from, 0–1. */
-  scale?: number
+  startScale?: number
   /** Fades in and out while it scales. */
-  fade?: boolean
+  fadeContent?: boolean
   backdrop?: CommandBackdrop
   children: React.ReactNode
 } & Partial<CommandMotion>) {
-  const options = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, iconMotion, textRoll, itemHover, hoverColor, rounded })
+  const options = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, animateIcon, rollingText, itemHighlight, itemHighlightColor, rounded })
   const reduceMotion = useReducedMotion()
-  const from = { opacity: fade || reduceMotion ? 0 : 1, scale: reduceMotion ? 1 : scale }
+  const from = { opacity: fadeContent || reduceMotion ? 0 : 1, scale: reduceMotion ? 1 : startScale }
 
   return (
     <CommandMotionContext.Provider value={options}>
@@ -239,10 +239,10 @@ function CommandInput({
   /** A bare bar with no tinted box, for the search bar. */
   plain?: boolean
 }) {
-  const { iconMotion, duration, bounce } = useCommandMotion()
+  const { animateIcon, duration, bounce } = useCommandMotion()
   const [focused, setFocused] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
-  const active = iconMotion && (focused || hovered)
+  const active = animateIcon && (focused || hovered)
 
   return (
     <div
@@ -398,7 +398,7 @@ function CommandItem({
   children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item>) {
-  const { itemHover, hoverColor, duration, bounce, rounded, textRoll } = useCommandMotion()
+  const { itemHighlight, itemHighlightColor, duration, bounce, rounded, rollingText } = useCommandMotion()
   const listId = React.useContext(CommandListContext)
   const reduceMotion = useReducedMotion()
   const [node, setNode] = React.useState<HTMLElement | null>(null)
@@ -407,7 +407,7 @@ function CommandItem({
   const selected =
     !!current && node?.getAttribute("data-value")?.toLowerCase() === current.toLowerCase()
 
-  const bg = cn("absolute inset-0 -z-10 rounded-[inherit]", HOVER_BG[hoverColor])
+  const bg = cn("absolute inset-0 -z-10 rounded-[inherit]", HOVER_BG[itemHighlightColor])
 
   return (
     <CommandPrimitive.Item
@@ -416,14 +416,14 @@ function CommandItem({
       className={cn(
         "group/command-item relative isolate flex cursor-default items-center gap-2 px-2 py-2 text-base outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         ROUNDED[rounded],
-        itemHover !== "none" && "transition-colors duration-200 motion-reduce:transition-none",
-        itemHover === "none" ? "hpx-selected:bg-foreground/10 hpx-selected:text-foreground" : HOVER_TEXT[hoverColor],
-        itemHover === "none" && hoverColor === "primary" && "hpx-selected:bg-primary hpx-selected:text-primary-foreground",
+        itemHighlight !== "none" && "transition-colors duration-200 motion-reduce:transition-none",
+        itemHighlight === "none" ? "hpx-selected:bg-foreground/10 hpx-selected:text-foreground" : HOVER_TEXT[itemHighlightColor],
+        itemHighlight === "none" && itemHighlightColor === "primary" && "hpx-selected:bg-primary hpx-selected:text-primary-foreground",
         className
       )}
       {...props}
     >
-      {itemHover === "slide" && selected && (
+      {itemHighlight === "slide" && selected && (
         <motion.span
           aria-hidden
           layoutId={`${listId}-hover`}
@@ -433,7 +433,7 @@ function CommandItem({
           }
         />
       )}
-      {itemHover === "fill" && (
+      {itemHighlight === "fill" && (
         <span
           aria-hidden
           className={cn(
@@ -442,7 +442,7 @@ function CommandItem({
           )}
         />
       )}
-      {textRoll ? React.Children.map(children, (child) => {
+      {rollingText ? React.Children.map(children, (child) => {
         if (typeof child === "string") return <CommandRollText>{child}</CommandRollText>
         if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.type === "span" && typeof child.props.children === "string") {
           return React.cloneElement(child, {}, <CommandRollText>{child.props.children}</CommandRollText>)
@@ -502,17 +502,17 @@ function CommandSearch({
   inputRef,
   open: openProp,
   onOpenChange,
-  dropdown = "morph",
+  dropdownAnimation = "morph",
   morphWidth = 1.25,
   duration,
   bounce,
   staggerItems,
   stagger,
   delay,
-  iconMotion,
-  textRoll,
-  itemHover,
-  hoverColor,
+  animateIcon,
+  rollingText,
+  itemHighlight,
+  itemHighlightColor,
   rounded,
 }: {
   children: React.ReactNode
@@ -523,17 +523,17 @@ function CommandSearch({
   inputRef?: React.Ref<HTMLInputElement>
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  dropdown?: CommandDropdown
+  dropdownAnimation?: CommandDropdown
   /** Morph only: how much wider than the bar it grows, 1 = same. */
   morphWidth?: number
 } & Partial<CommandMotion>) {
-  const options = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, iconMotion, textRoll, itemHover, hoverColor, rounded })
+  const options = useMergedMotion({ duration, bounce, staggerItems, stagger, delay, animateIcon, rollingText, itemHighlight, itemHighlightColor, rounded })
   const reduceMotion = useReducedMotion()
   const desktop = useDesktop()
   const [triggerHovered, setTriggerHovered] = React.useState(false)
   const [triggerFocused, setTriggerFocused] = React.useState(false)
   const [inputFocused, setInputFocused] = React.useState(false)
-  const triggerActive = options.iconMotion && (triggerHovered || triggerFocused || inputFocused)
+  const triggerActive = options.animateIcon && (triggerHovered || triggerFocused || inputFocused)
   const [own, setOwn] = React.useState(false)
   const open = openProp ?? own
   const root = React.useRef<HTMLDivElement>(null)
@@ -580,7 +580,7 @@ function CommandSearch({
               <motion.div
                 initial={false}
                 animate={{
-                  width: open ? `${(dropdown === "morph" && desktop ? morphWidth : 1) * 100}%` : 44,
+                  width: open ? `${(dropdownAnimation === "morph" && desktop ? morphWidth : 1) * 100}%` : 44,
                 }}
                 transition={
                   reduceMotion
@@ -635,7 +635,7 @@ function CommandSearch({
                   </motion.span>
                 </motion.div>
                 <AnimatePresence initial={false}>
-                  {open && dropdown === "morph" && (
+                  {open && dropdownAnimation === "morph" && (
                     <motion.div
                       key="results"
                       // Stops the input blurring before an item is clicked
@@ -660,23 +660,23 @@ function CommandSearch({
               </motion.div>
             </div>
             <AnimatePresence initial={false}>
-              {open && dropdown !== "morph" && (
+              {open && dropdownAnimation !== "morph" && (
                 <motion.div
                   key="results"
                   onMouseDown={(event) => event.preventDefault()}
-                  initial={{ opacity: 0, y: dropdown === "slide" ? -16 : 0 }}
+                  initial={{ opacity: 0, y: dropdownAnimation === "slide" ? -16 : 0 }}
                   animate={{
                     opacity: 1,
                     y: 0,
                     transition: reduceMotion
                       ? { duration: 0 }
-                      : dropdown === "slide"
+                      : dropdownAnimation === "slide"
                         ? { type: "spring", visualDuration: options.duration, bounce: options.bounce }
                         : { duration: options.duration, ease: [0.45, 0, 0.25, 1] },
                   }}
                   exit={{
                     opacity: 0,
-                    y: dropdown === "slide" ? -16 : 0,
+                    y: dropdownAnimation === "slide" ? -16 : 0,
                     transition: { duration: 0.15, ease: "easeIn" },
                   }}
                   className={cn(

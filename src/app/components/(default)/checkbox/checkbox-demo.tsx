@@ -33,21 +33,21 @@ const controls = {
       { label: "Cards", value: "card" },
     ],
   },
-  cardFill: {
+  cardFillColor: {
     disabled: (v) => v.variant === "default",
     group: "Style",
     type: "select",
-    label: "Card fill",
+    label: "Card fill color",
     value: "muted",
     options: [
       { label: "Muted", value: "muted" },
       { label: "Primary", value: "primary" },
     ],
   },
-  showIcon: { group: "Style", type: "checkbox", label: "Show box", value: true },
+  showIcon: { group: "Style", type: "checkbox", label: "Icon", value: true },
 
   fill: { disabled: (v) => !v.showIcon, group: "Ticking", type: "checkbox", label: "Fill from centre", value: true },
-  bounce: { disabled: (v) => !v.showIcon, group: "Ticking", type: "checkbox", label: "Springy tick", value: true },
+  elastic: { disabled: (v) => !v.showIcon, group: "Ticking", type: "checkbox", label: "Elastic", value: true },
 
   mark: {
     disabled: (v) => !v.showIcon,
@@ -72,11 +72,11 @@ const controls = {
       { label: "Outline", value: "outline" },
     ],
   },
-  radius: {
+  rounded: {
     disabled: (v) => !v.showIcon,
     group: "Box",
     type: "select",
-    label: "Corner radius",
+    label: "Roundness",
     value: "sm",
     options: [
       { label: "None", value: "none" },
@@ -90,9 +90,9 @@ const controls = {
 
   strike: { group: "Label", type: "checkbox", label: "Strike-through", value: false },
 
-  selectAll: { group: "Multiple select", type: "checkbox", label: "Select all", value: true },
-  deselectAll: { group: "Multiple select", type: "checkbox", label: "Deselect all", value: true },
-  counter: { group: "Multiple select", type: "checkbox", label: "Selected counter", value: true },
+  showSelectAll: { group: "Multiple select", type: "checkbox", label: "Show select all", value: true },
+  showDeselectAll: { group: "Multiple select", type: "checkbox", label: "Show deselect all", value: true },
+  showCounter: { group: "Multiple select", type: "checkbox", label: "Show counter", value: true },
   rangeSelect: { group: "Multiple select", type: "checkbox", label: "Shift-click ranges", value: true },
   min: {
     group: "Multiple select",
@@ -127,7 +127,7 @@ const controls = {
 export function HpxCheckboxDemo() {
   const panel = useHpxControls(controls)
   const { values } = panel
-  const { variant, cardFill, mark, appearance, radius, colorful, min, max, ...groupOptions } =
+  const { variant, cardFillColor, mark, appearance, rounded, colorful, min, max, ...groupOptions } =
     values
   const cards = variant === "card"
   const [picks, setPicks] = React.useState(["Olives", "Basil"])
@@ -145,10 +145,10 @@ export function HpxCheckboxDemo() {
             min={Number(min)}
             max={max === "any" ? undefined : Number(max)}
             variant={variant as HpxCheckboxVariant}
-            cardFill={cardFill as HpxCheckboxCardFill}
+            cardFillColor={cardFillColor as HpxCheckboxCardFill}
             mark={mark as HpxCheckboxMark}
             appearance={appearance as HpxCheckboxAppearance}
-            radius={radius as HpxCheckboxRadius}
+            rounded={rounded as HpxCheckboxRadius}
             value={picks}
             onValueChange={setPicks}
             aria-label="Toppings"

@@ -9,7 +9,7 @@ import { hpxStaggerIn } from "@/lib/stagger-in"
 
 type DrawerMotion = {
   /** Spring instead of an eased slide. */
-  springy: boolean
+  elastic: boolean
   /** Seconds. */
   duration: number
   /** Spring overshoot, 0–0.9. */
@@ -17,9 +17,9 @@ type DrawerMotion = {
   /** Gap between items fading in. */
   stagger: number
   /** Tilts a little while swiped. */
-  swipeTilt: boolean
+  tiltOnSwipe: boolean
   /** Trigger text rolls up on hover. */
-  textRoll: boolean
+  rollingText: boolean
   /** Trigger fills from pointer on hover. */
   fillOnHover: boolean
   /** Slide in, or fade in place. */
@@ -75,12 +75,12 @@ function Drawer({
   showSwipeHandle = false,
   snapPoints,
   swipeDirection = "down",
-  springy = true,
+  elastic = true,
   duration = 0.5,
   bounce = 0.2,
   stagger = 0.04,
-  swipeTilt = false,
-  textRoll = true,
+  tiltOnSwipe = false,
+  rollingText = true,
   fillOnHover = false,
   openAnimation = "slide",
   ...props
@@ -97,12 +97,12 @@ function Drawer({
       modal,
       showSwipeHandle,
       swipeDirection,
-      springy,
+      elastic,
       duration,
       bounce,
       stagger,
-      swipeTilt,
-      textRoll,
+      tiltOnSwipe,
+      rollingText,
       fillOnHover,
       openAnimation,
     }),
@@ -111,12 +111,12 @@ function Drawer({
       modal,
       showSwipeHandle,
       swipeDirection,
-      springy,
+      elastic,
       duration,
       bounce,
       stagger,
-      swipeTilt,
-      textRoll,
+      tiltOnSwipe,
+      rollingText,
       fillOnHover,
       openAnimation,
     ]
@@ -215,19 +215,19 @@ function DrawerContent({
     modal,
     showSwipeHandle,
     swipeDirection,
-    springy,
+    elastic,
     duration,
     bounce,
     stagger,
-    swipeTilt,
+    tiltOnSwipe,
     openAnimation,
   } = useDrawer()
   const fade = openAnimation === "fade"
   const swipeAxis =
     swipeDirection === "down" || swipeDirection === "up" ? "y" : "x"
   const ease = React.useMemo(
-    () => (springy && !fade ? springEasing(bounce) : "cubic-bezier(0.22,1,0.36,1)"),
-    [springy, bounce, fade]
+    () => (elastic && !fade ? springEasing(bounce) : "cubic-bezier(0.22,1,0.36,1)"),
+    [elastic, bounce, fade]
   )
   const attach = React.useCallback(
     (node: HTMLDivElement | null) => {
@@ -300,7 +300,7 @@ function DrawerContent({
             // Direction: right.
             "data-[swipe-direction=right]:right-0 data-[swipe-direction=right]:origin-right data-[swipe-direction=right]:[--closed-transform:translate3d(calc(100%+var(--drawer-inset,0px)+2px),0,0)] data-[swipe-direction=right]:[--translate-x:calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)-(var(--stack-shrink)*100%))]",
             // Tilt with the drag.
-            swipeTilt &&
+            tiltOnSwipe &&
               "data-[swipe-axis=x]:rotate-[atan2(var(--drawer-swipe-movement-x,0px),3000px)] data-[swipe-axis=y]:rotate-[atan2(var(--drawer-swipe-movement-y,0px),3000px)]",
             fade && "data-ending-style:opacity-0 data-starting-style:opacity-0",
             className

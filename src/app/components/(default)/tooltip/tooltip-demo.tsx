@@ -73,10 +73,10 @@ const controls = {
       { label: "Right", value: "right" },
     ],
   },
-  offset: {
+  sideOffset: {
     group: "Position",
     type: "select",
-    label: "Distance",
+    label: "Side offset",
     value: "4",
     options: [
       { label: "1", value: "1" },
@@ -88,10 +88,10 @@ const controls = {
     ],
   },
 
-  change: {
+  changeAnimation: {
     group: "Moving between",
     type: "select",
-    label: "When it changes",
+    label: "Change animation",
     value: "slide",
     options: [
       { label: "Swap text", value: "instant" },
@@ -103,7 +103,7 @@ const controls = {
   duration: {
     group: "Moving between",
     type: "slider",
-    label: "Reshape time",
+    label: "Duration",
     value: 0.35,
     min: 0.1,
     max: 1,
@@ -113,7 +113,7 @@ const controls = {
 
   elastic: { group: "Feel", type: "checkbox", label: "Elastic", value: true },
   bounce: {
-    disabled: (v) => !v.elastic && v.change === "instant",
+    disabled: (v) => !v.elastic && v.changeAnimation === "instant",
     group: "Feel",
     type: "slider",
     label: "Bounce",
@@ -122,8 +122,8 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-  stretch: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Stretches with speed (elastic)", value: true },
-  tilt: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Leans with speed (elastic)", value: true },
+  stretchOnMove: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Stretch on move", value: true },
+  tiltOnMove: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Tilt on move", value: true },
   stiffness: {
     group: "Feel",
     type: "slider",
@@ -134,10 +134,10 @@ const controls = {
     step: 50,
   },
 
-  appear: {
+  appearAnimation: {
     group: "Show and hide",
     type: "select",
-    label: "Appears with",
+    label: "Appear animation",
     value: "scale",
     options: [
       { label: "Scale + fade", value: "scale" },
@@ -169,15 +169,15 @@ export function HpxTooltipDemo() {
           rounded={values.rounded as HpxFloatingTooltipRounded}
           follow={values.follow as HpxFloatingTooltipFollow}
           side={values.side as HpxFloatingTooltipSide}
-          offset={values.offset as HpxFloatingTooltipOffset}
-          change={values.change as HpxFloatingTooltipChange}
+          sideOffset={values.sideOffset as HpxFloatingTooltipOffset}
+          changeAnimation={values.changeAnimation as HpxFloatingTooltipChange}
           duration={values.duration}
           bounce={values.bounce}
           elastic={values.elastic}
-          stretch={values.stretch}
-          tilt={values.tilt}
+          stretchOnMove={values.stretchOnMove}
+          tiltOnMove={values.tiltOnMove}
           stiffness={values.stiffness}
-          appear={values.appear as HpxFloatingTooltipAppear}
+          appearAnimation={values.appearAnimation as HpxFloatingTooltipAppear}
           closeDelay={values.closeDelay}
         >
           <div className="flex flex-wrap items-center justify-center gap-3">

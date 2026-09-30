@@ -81,11 +81,11 @@ const controls = {
       { label: "Replay", value: "replay" },
     ],
   },
-  contentSwitch: {
+  contentAnimation: {
     disabled: (v) => v.switchAnimation !== "glide",
     group: "Between menus",
     type: "select",
-    label: "Content comes in",
+    label: "Content animation",
     value: "slide",
     options: [
       { label: "Slides in", value: "slide" },
@@ -93,11 +93,11 @@ const controls = {
       { label: "At once", value: "none" },
     ],
   },
-  contentShift: {
-    disabled: (v) => v.switchAnimation !== "glide" || v.contentSwitch !== "slide",
+  slideDistance: {
+    disabled: (v) => v.switchAnimation !== "glide" || v.contentAnimation !== "slide",
     group: "Between menus",
     type: "select",
-    label: "Content shift",
+    label: "Slide distance",
     value: "lg",
     options: [
       { label: "Small", value: "sm" },
@@ -160,15 +160,15 @@ const controls = {
       { label: "Muted", value: "muted" },
     ],
   },
-  chevrons: { group: "Bar", type: "checkbox", label: "Chevrons", value: true },
-  triggerTextRoll: { group: "Bar", type: "checkbox", label: "Text roll on hover", value: true },
+  showChevrons: { group: "Bar", type: "checkbox", label: "Chevrons", value: true },
+  triggerRollingText: { group: "Bar", type: "checkbox", label: "Rolling trigger text", value: true },
   openOnClick: { group: "Bar", type: "checkbox", label: "Open on click", value: false },
   pressFeedback: { group: "Bar", type: "checkbox", label: "Press feedback", value: true },
 
   itemHighlight: {
     group: "Items",
     type: "select",
-    label: "Hover highlight",
+    label: "Item highlight",
     value: "slide",
     options: [
       { label: "Slide", value: "slide" },
@@ -180,17 +180,17 @@ const controls = {
     disabled: (v) => v.itemHighlight === "none",
     group: "Items",
     type: "select",
-    label: "Hover fill",
+    label: "Item highlight color",
     value: "primary",
     options: [
       { label: "Primary", value: "primary" },
       { label: "Muted", value: "muted" },
     ],
   },
-  indicator: {
+  selectionIndicator: {
     group: "Items",
     type: "select",
-    label: "Radio indicator",
+    label: "Selection indicator",
     value: "check",
     options: [
       { label: "Check", value: "check" },
@@ -198,9 +198,9 @@ const controls = {
       { label: "Bar", value: "bar" },
     ],
   },
-  icons: { group: "Items", type: "checkbox", label: "Icons", value: true },
-  descriptions: { group: "Items", type: "checkbox", label: "Descriptions", value: true },
-  textRoll: { group: "Items", type: "checkbox", label: "Text roll on hover", value: false },
+  showIcons: { group: "Items", type: "checkbox", label: "Icons", value: true },
+  showDescriptions: { group: "Items", type: "checkbox", label: "Descriptions", value: true },
+  rollingText: { group: "Items", type: "checkbox", label: "Rolling text", value: false },
 
   size: {
     group: "Style",
@@ -254,14 +254,14 @@ export function HpxMenubarDemo() {
           itemHighlight={values.itemHighlight as HpxDropdownMenuHighlight}
           itemHighlightColor={values.itemHighlightColor as HpxDropdownMenuHighlightColor}
           triggerHighlightColor={values.triggerHighlightColor as HpxDropdownMenuHighlightColor}
-          indicator={values.indicator as HpxDropdownMenuIndicator}
-          textRoll={values.textRoll}
-          triggerTextRoll={values.triggerTextRoll}
-          contentSwitch={values.contentSwitch as HpxMenubarContentSwitch}
-          contentShift={values.contentShift as HpxMenubarContentShift}
-          chevrons={values.chevrons}
-          icons={values.icons}
-          descriptions={values.descriptions}
+          selectionIndicator={values.selectionIndicator as HpxDropdownMenuIndicator}
+          rollingText={values.rollingText}
+          triggerRollingText={values.triggerRollingText}
+          contentAnimation={values.contentAnimation as HpxMenubarContentSwitch}
+          slideDistance={values.slideDistance as HpxMenubarContentShift}
+          showChevrons={values.showChevrons}
+          showIcons={values.showIcons}
+          showDescriptions={values.showDescriptions}
           size={values.size as HpxMenubarSize}
           rounded={values.rounded as HpxMenubarRounded}
         >

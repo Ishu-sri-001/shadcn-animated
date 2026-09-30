@@ -38,13 +38,13 @@ type AnimatedButtonMotion = {
   icon: AnimatedButtonIcon
   iconPosition: AnimatedButtonIconPosition
   /** A bright band sweeps across the label, over and over. */
-  shimmer: boolean
+  shimmerText: boolean
   /** The label rolls up to a copy of itself on hover. */
-  textRoll: boolean
+  rollingText: boolean
   /** The button leans toward the pointer. */
   magnetic: boolean
   /** On click the button scales down, then springs back. */
-  press: boolean
+  pressFeedback: boolean
   /** Shows a spinner, then a check, rolling in beside the label. */
   status: AnimatedButtonStatus
   /** Label shown while loading. With this or successText, the label rolls between states. */
@@ -412,10 +412,10 @@ function AnimatedButton({
   tone = "primary",
   icon = "arrow",
   iconPosition = "end",
-  shimmer = false,
-  textRoll = false,
+  shimmerText = false,
+  rollingText = false,
   magnetic = false,
-  press = false,
+  pressFeedback = false,
   status = "idle",
   loadingText,
   successText,
@@ -462,6 +462,16 @@ function AnimatedButton({
   const line = variant === "link" || (plain && underline)
   const timing = { duration: reduceMotion ? 0 : duration, ease: "easeInOut" as const }
 
+  const dotTiming = {
+    duration: reduceMotion ? 0 : duration * 0.95,
+    ease: [0.65, 0, 0.35, 1] as [number, number, number, number],
+  }
+
+  // A started fill always completes before the dot leaves
+  const growing = React.useRef(false)
+  const shrinking = React.useRef(false)
+  const pendingOut = React.useRef<{ left: string; top: string } | null>(null)
+
   // The dot grows from where the pointer came in, and sweeps out toward where it left
   const fill = (
     event: React.PointerEvent<HTMLButtonElement> | React.FocusEvent<HTMLButtonElement>,
@@ -470,11 +480,40 @@ function AnimatedButton({
     if (variant !== "dot-fill") return
     const box = event.currentTarget.getBoundingClientRect()
     const pointer = "clientX" in event
-    setDot({
+    const spot = {
       left: pointer ? `${((event.clientX - box.left) / box.width) * 100}%` : "50%",
       top: pointer ? `${((event.clientY - box.top) / box.height) * 100}%` : "50%",
-      on,
-    })
+    }
+    if (on) {
+      pendingOut.current = null
+      // Re-entering mid-shrink keeps the dot where it is
+      growing.current = true
+      if (shrinking.current) {
+        shrinking.current = false
+        return setDot((d) => ({ ...d, on: true }))
+      }
+      return setDot({ ...spot, on: true })
+    }
+    if (growing.current) {
+      pendingOut.current = spot
+      return
+    }
+    shrinking.current = true
+    setDot({ ...spot, on: false })
+  }
+
+  const settleDot = () => {
+    if (dot.on) {
+      growing.current = false
+      const out = pendingOut.current
+      if (out) {
+        pendingOut.current = null
+        shrinking.current = true
+        setDot({ ...out, on: false })
+      }
+    } else {
+      shrinking.current = false
+    }
   }
 
   // Magnetic: the button trails the pointer a little, then springs home
@@ -495,9 +534,9 @@ function AnimatedButton({
           <span className="sr-only">{children}</span>
           <ScrambleText text={children} duration={duration} active={hovered} />
         </>
-      ) : textRoll ? (
-        <TextRoll>{shimmer ? <TextShimmer text={children} /> : <span>{children}</span>}</TextRoll>
-      ) : shimmer ? (
+      ) : rollingText ? (
+        <TextRoll>{shimmerText ? <TextShimmer text={children} /> : <span>{children}</span>}</TextRoll>
+      ) : shimmerText ? (
         <TextShimmer text={children} />
       ) : (
         <span>{children}</span>
@@ -522,8 +561,8 @@ function AnimatedButton({
       <motion.span
         className={cn(
           "inline-flex",
-          press && PRESS_TRANSITION,
-          press && pressed && !reduceMotion && "scale-[0.97]"
+          pressFeedback && PRESS_TRANSITION,
+          pressFeedback && pressed && !reduceMotion && "scale-[0.97]"
         )}
         style={{ x: pullX, y: pullY }}
       >
@@ -534,7 +573,8 @@ function AnimatedButton({
             else if (ref) ref.current = node
           }}
           data-hpx-slot="animated-button"
-          data-active={hovered ? "true" : "false"}
+          // Text flip follows the fill
+          data-active={(variant === "dot-fill" ? dot.on : hovered) ? "true" : "false"}
           aria-busy={status === "loading" || undefined}
           onPointerEnter={(event) => {
             onPointerEnter?.(event)
@@ -617,11 +657,12 @@ function AnimatedButton({
               initial={false}
               style={{ x: "-50%", y: "-50%" }}
               animate={{ scale: dot.on ? 1 : 0, left: dot.left, top: dot.top }}
+              onAnimationComplete={settleDot}
               // Snap to the entry point, then grow; slide out with the shrink
               transition={{
-                scale: timing,
-                left: dot.on ? { duration: 0 } : timing,
-                top: dot.on ? { duration: 0 } : timing,
+                scale: dotTiming,
+                left: dot.on ? { duration: 0 } : dotTiming,
+                top: dot.on ? { duration: 0 } : dotTiming,
               }}
               className={cn(
                 "pointer-events-none absolute -z-10 aspect-square w-[220%] rounded-full",

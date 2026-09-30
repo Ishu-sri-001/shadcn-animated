@@ -55,18 +55,18 @@ const lineButton = cn(
 )
 
 const controls = {
-  entrance: { group: "Entrance", type: "checkbox", label: "Staggered rows", value: true },
-  rowCellsStagger: {
-    disabled: (v) => !v.entrance,
+  staggerRows: { group: "Entrance", type: "checkbox", label: "Stagger rows", value: true },
+  staggerCells: {
+    disabled: (v) => !v.staggerRows,
     group: "Entrance",
     type: "checkbox",
-    label: "Row cells stagger",
+    label: "Stagger cells",
     value: false,
   },
-  countUp: {
+  numberAnimation: {
     group: "Entrance",
     type: "select",
-    label: "Numbers",
+    label: "Number animation",
     value: "roll",
     options: [
       { label: "Roll", value: "roll" },
@@ -85,7 +85,7 @@ const controls = {
     unit: "s",
   },
   stagger: {
-    disabled: (v) => !v.entrance,
+    disabled: (v) => !v.staggerRows,
     group: "Timing",
     type: "slider",
     label: "Stagger",
@@ -95,7 +95,7 @@ const controls = {
     step: 0.01,
     unit: "s",
   },
-  highlight: {
+  rowHighlight: {
     group: "Hover",
     type: "select",
     label: "Row highlight",
@@ -106,23 +106,23 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  hoverTone: {
-    disabled: (v) => v.highlight === "none",
+  rowHighlightColor: {
+    disabled: (v) => v.rowHighlight === "none",
     group: "Hover",
     type: "select",
-    label: "Hover colour",
+    label: "Row highlight color",
     value: "muted",
     options: [
       { label: "Muted", value: "muted" },
       { label: "Primary", value: "primary" },
     ],
   },
-  textRoll: { group: "Hover", type: "checkbox", label: "Text roll", value: false },
-  filterable: { group: "Data", type: "checkbox", label: "Status filter", value: true },
+  rollingText: { group: "Hover", type: "checkbox", label: "Rolling text", value: false },
+  showStatusFilter: { group: "Data", type: "checkbox", label: "Show status filter", value: true },
   highlightTotal: { group: "Data", type: "checkbox", label: "Highlight total", value: false },
-  pagination: { group: "Data", type: "checkbox", label: "Pagination", value: false },
+  showPagination: { group: "Data", type: "checkbox", label: "Show pagination", value: false },
   selectable: { group: "Selection", type: "checkbox", label: "Row checkboxes", value: false },
-  selectAll: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Select all", value: true },
+  showSelectAll: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Show select all", value: true },
   selectMark: {
     disabled: (v) => !v.selectable,
     group: "Selection",
@@ -134,15 +134,15 @@ const controls = {
       { label: "Filled circle", value: "circle" },
     ],
   },
-  actionBar: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Action bar", value: true },
-  drag: {
+  showActionBar: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Show action bar", value: true },
+  dragMode: {
     group: "Rows",
     type: "checkbox",
-    label: "Drag rows",
+    label: "Drag mode",
     value: false,
   },
-  statusBadges: { group: "Rows", type: "checkbox", label: "Status badges", value: true },
-  expandable: { group: "Rows", type: "checkbox", label: "Expandable rows", value: false },
+  showStatusBadges: { group: "Rows", type: "checkbox", label: "Show status badges", value: true },
+  expandable: { group: "Rows", type: "checkbox", label: "Expandable preview", value: false },
   removable: { group: "Rows", type: "checkbox", label: "Delete column", value: false },
   addable: { group: "Rows", type: "checkbox", label: "Add rows", value: true },
   textAlign: {
@@ -157,7 +157,7 @@ const controls = {
     ],
   },
   bordered: { group: "Layout", type: "checkbox", label: "Border", value: true },
-  radius: {
+  rounded: {
     group: "Layout",
     type: "select",
     label: "Roundness",
@@ -171,9 +171,9 @@ const controls = {
       { label: "2xl", value: "2xl" },
     ],
   },
-  horizontalLines: { group: "Layout", type: "checkbox", label: "Horizontal lines", value: true },
-  verticalLines: { group: "Layout", type: "checkbox", label: "Vertical lines", value: true },
-  headerBorder: { group: "Layout", type: "checkbox", label: "Header line", value: true },
+  showHorizontalLines: { group: "Layout", type: "checkbox", label: "Show horizontal lines", value: true },
+  showVerticalLines: { group: "Layout", type: "checkbox", label: "Show vertical lines", value: true },
+  showHeaderBorder: { group: "Layout", type: "checkbox", label: "Show header border", value: true },
   boldHeader: { group: "Layout", type: "checkbox", label: "Bold header", value: true },
   stickyHeader: { group: "Layout", type: "checkbox", label: "Sticky header", value: true },
   expandFullTable: { group: "Layout", type: "checkbox", label: "Expand full table", value: false },
@@ -189,7 +189,7 @@ const controls = {
     unit: "vh",
   },
   stickyFooter: { disabled: (v) => !v.highlightTotal, group: "Layout", type: "checkbox", label: "Sticky last row", value: true },
-  skeleton: { group: "Layout", type: "checkbox", label: "Loading skeleton", value: true },
+  loadingSkeleton: { group: "Layout", type: "checkbox", label: "Loading skeleton", value: true },
 } satisfies HpxControlSchema
 
 export default function TablePage() {
@@ -248,13 +248,13 @@ export default function TablePage() {
         {...values}
         height={`${values.height}vh`}
         sortable={false}
-        highlight={values.highlight as HpxDataTableHighlight}
-        countUp={values.countUp as HpxDataTableCountUp}
-        hoverTone={values.hoverTone as HpxDataTableHoverTone}
+        rowHighlight={values.rowHighlight as HpxDataTableHighlight}
+        numberAnimation={values.numberAnimation as HpxDataTableCountUp}
+        rowHighlightColor={values.rowHighlightColor as HpxDataTableHoverTone}
         selectMark={values.selectMark as HpxDataTableSelectMark}
         textAlign={values.textAlign as HpxDataTableAlign}
-        radius={values.radius as HpxDataTableRadius}
-        drag={values.drag ? "rows" : "none"}
+        rounded={values.rounded as HpxDataTableRadius}
+        dragMode={values.dragMode ? "rows" : "none"}
       />
 
       <HpxControlsPanel title="Table" {...panel} />

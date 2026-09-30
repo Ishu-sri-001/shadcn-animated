@@ -36,18 +36,18 @@ type SliderMotion = {
   duration: number
   bounce: number
   edgePress: SliderEdgePress
-  thicken: SliderThicken
+  thickenOn: SliderThicken
   elastic: boolean
   /** How far the rail can stretch past an end, as a percent of its width. */
-  stretch: number
+  stretchAmount: number
   labels: SliderLabels
   marks: SliderMarks
   bubble: SliderBubble
   edgeVariant: SliderEdgeVariant
-  roll: boolean
+  rollingNumbers: boolean
   showEdge: boolean
-  thickenTo: SliderThickness
-  radius: SliderRadius
+  thickenedSize: SliderThickness
+  rounded: SliderRadius
   edgeSize: SliderEdgeSize
   format?: (value: number) => React.ReactNode
 }
@@ -215,17 +215,17 @@ function Slider({
   duration = 0.4,
   bounce = 0,
   edgePress = "none",
-  thicken = "hover",
+  thickenOn = "hover",
   elastic = true,
-  stretch = 10,
+  stretchAmount = 10,
   labels = "rail",
   marks = "none",
   bubble = "hover",
   edgeVariant = "bar",
-  roll = true,
+  rollingNumbers = true,
   showEdge = true,
-  thickenTo = "13",
-  radius = "xl",
+  thickenedSize = "13",
+  rounded = "xl",
   edgeSize = "md",
   format,
   className,
@@ -254,17 +254,17 @@ function Slider({
       duration,
       bounce,
       edgePress,
-      thicken,
+      thickenOn,
       elastic,
-      stretch,
+      stretchAmount,
       labels,
       marks,
       bubble,
       edgeVariant,
-      roll,
+      rollingNumbers,
       showEdge,
-      thickenTo,
-      radius,
+      thickenedSize,
+      rounded,
       edgeSize,
       format,
       step: nativeStep,
@@ -274,17 +274,17 @@ function Slider({
       duration,
       bounce,
       edgePress,
-      thicken,
+      thickenOn,
       elastic,
-      stretch,
+      stretchAmount,
       labels,
       marks,
       bubble,
       edgeVariant,
-      roll,
+      rollingNumbers,
       showEdge,
-      thickenTo,
-      radius,
+      thickenedSize,
+      rounded,
       edgeSize,
       format,
       nativeStep,
@@ -340,7 +340,7 @@ function Slider({
         if (!stretching) return
         const past = ev.clientX > rect.right ? ev.clientX - rect.right : Math.min(0, ev.clientX - rect.left)
         // Rubber band: the stretch eases towards a limit the further you go
-        pull.set(Math.sign(past) * (stretch / 100) * Math.tanh(Math.abs(past) / 80))
+        pull.set(Math.sign(past) * (stretchAmount / 100) * Math.tanh(Math.abs(past) / 80))
       }
       const release = (ev: PointerEvent) => {
         window.removeEventListener("pointermove", drag)
@@ -388,7 +388,7 @@ function Slider({
       const down = ["ArrowLeft", "ArrowDown", "PageDown", "Home"].includes(e.key)
       const bump = (now >= max && up) ? 1 : (now <= min && down) ? -1 : 0
       if (!bump) return
-      pull.set(bump * (stretch / 100) * 0.4)
+      pull.set(bump * (stretchAmount / 100) * 0.4)
       setTimeout(() => pull.set(0), 120)
     }
 
@@ -408,7 +408,7 @@ function Slider({
       el.removeEventListener("pointerleave", onLeave)
       el.removeEventListener("pointerdown", onDown)
     }
-  }, [disabled, vertical, stretching, stretch, reduceMotion, min, max, nativeStep, cursor, pull])
+  }, [disabled, vertical, stretching, stretchAmount, reduceMotion, min, max, nativeStep, cursor, pull])
 
   // Stretch from the far edge, squash to match, and nudge towards the pull
   // Base UI moves the value in code on key presses (no native input event), so follow the
@@ -430,11 +430,11 @@ function Slider({
   const cursorLeft = useTransform(cursor, toPercent)
 
   const restThickness = THICKNESS["1"]
-  const grown = THICKNESS[options.thickenTo]
+  const grown = THICKNESS[options.thickenedSize]
   const expanded =
-    options.thicken === "hover"
+    options.thickenOn === "hover"
       ? hovering || pressed || kbFocus
-      : options.thicken === "drag" && pressed
+      : options.thickenOn === "drag" && pressed
   const values = Array.isArray(current) ? current : [current as number]
   // Shade the stretch between the value and the cursor, so you see where a click will land
   // The fill runs to the raw value when no edge is shown, so it reaches the track ends
@@ -478,7 +478,7 @@ function Slider({
           className={cn(
             "group/control relative flex w-full cursor-pointer touch-none items-center select-none hpx-disabled:cursor-not-allowed hpx-disabled:opacity-50 hpx-vertical:h-full hpx-vertical:min-h-40 hpx-vertical:w-auto hpx-vertical:flex-col",
             // A tall hit area, so the rail is easy to grab and never shifts the layout as it grows
-            options.thicken !== "none" && "hpx-horizontal:min-h-20"
+            options.thickenOn !== "none" && "hpx-horizontal:min-h-20"
           )}
         >
           <SliderPrimitive.Track
@@ -487,11 +487,11 @@ function Slider({
               // Min size keeps the springy shrink from dipping below the resting size
               "relative grow overflow-hidden bg-foreground/30 select-none hpx-horizontal:min-h-px hpx-horizontal:w-full hpx-vertical:h-full hpx-vertical:min-w-px",
               GROW,
-              RADIUS[options.radius],
+              RADIUS[options.rounded],
               "group-has-focus-visible/control:ring-2 group-has-focus-visible/control:ring-ring/60 group-has-focus-visible/control:ring-offset-2 group-has-focus-visible/control:ring-offset-background",
               expanded ? cn(grown.rest, "opacity-100") : cn(restThickness.rest, "opacity-80"),
-              // Vertical sliders don't track hover, so they thicken on drag only
-              vertical && options.thicken !== "none" && grown.drag
+              // Vertical sliders don't track hover, so they thickenOn on drag only
+              vertical && options.thickenOn !== "none" && grown.drag
             )}
             render={
               stretching
@@ -518,7 +518,7 @@ function Slider({
                 aria-hidden
                 className={cn(
                   "pointer-events-none absolute inset-y-0",
-                  RADIUS[options.radius],
+                  RADIUS[options.rounded],
                   // Ahead of the fill it previews more fill; behind it, it lightens what you'd drop
                   ahead ? "rounded-l-none bg-primary/20" : "z-[2] bg-primary-foreground/25"
                 )}
@@ -544,7 +544,7 @@ function Slider({
               className={cn(
                 // Percent height ignores the track min size, so repeat it
                 "bg-primary select-none hpx-horizontal:h-full hpx-horizontal:min-h-px hpx-vertical:w-full hpx-vertical:min-w-px",
-                RADIUS[options.radius]
+                RADIUS[options.rounded]
               )}
               render={(indicatorProps, state) => (
                 <SliderIndicatorElement {...indicatorProps} dragging={state.dragging} />
@@ -762,7 +762,7 @@ function BubbleLabel({
   options: ReturnType<typeof useSliderMotion>
 }) {
   const label = options.format ? options.format(value) : value.toFixed(decimalsOf(options.step))
-  return options.roll && (typeof label === "string" || typeof label === "number") ? (
+  return options.rollingNumbers && (typeof label === "string" || typeof label === "number") ? (
     <RollingNumber value={String(label)} />
   ) : (
     label
@@ -842,7 +842,7 @@ function SliderThumbElement({
             y: "-50%",
             width: options.expanded ? 6 : DOT_SIZE[options.edgeSize],
             height: options.expanded
-              ? Math.max(DOT_SIZE[options.edgeSize], THICKNESS[options.thickenTo].px - 10)
+              ? Math.max(DOT_SIZE[options.edgeSize], THICKNESS[options.thickenedSize].px - 10)
               : DOT_SIZE[options.edgeSize],
             opacity: options.showEdge ? 1 : 0,
             scale: dragging ? THUMB_SCALE[options.edgePress] : 1,

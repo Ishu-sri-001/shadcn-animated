@@ -46,10 +46,10 @@ const questions = [
 type Answer = { title: string; values: string[] }
 
 const controls = {
-  content: {
+  contentAnimation: {
     group: "Content",
     type: "select",
-    label: "Question moves",
+    label: "Content animation",
     value: "slide-y",
     options: [
       { label: "Slide (x axis)", value: "slide-x" },
@@ -59,8 +59,8 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  distance: {
-    disabled: (v) => v.content !== "slide-x" && v.content !== "slide-y",
+  slideDistance: {
+    disabled: (v) => v.contentAnimation !== "slide-x" && v.contentAnimation !== "slide-y",
     group: "Content",
     type: "slider",
     label: "Slide distance",
@@ -133,7 +133,7 @@ const controls = {
     disabled: (v) => !v.staggerChoices,
     group: "Choices",
     type: "slider",
-    label: "Stagger delay",
+    label: "Stagger",
     value: 0.05,
     min: 0,
     max: 0.2,
@@ -153,7 +153,7 @@ const controls = {
     ],
   },
   duration: {
-    disabled: (v) => v.content === "none",
+    disabled: (v) => v.contentAnimation === "none",
     group: "Motion",
     type: "slider",
     label: "Duration",
@@ -164,7 +164,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
-    disabled: (v) => v.content === "fade" || v.content === "none",
+    disabled: (v) => v.contentAnimation === "fade" || v.contentAnimation === "none",
     group: "Motion",
     type: "slider",
     label: "Bounce",
@@ -220,8 +220,8 @@ export function HpxQuestionnaireDemo() {
           <HpxQuestionnaire
             key={round}
             shortcuts={values.shortcuts === "off" ? undefined : (values.shortcuts as "letters" | "numbers")}
-            content={values.content as HpxQuestionnaireContent}
-            distance={values.distance}
+            contentAnimation={values.contentAnimation as HpxQuestionnaireContent}
+            slideDistance={values.slideDistance}
             duration={values.duration}
             bounce={values.bounce}
             multiple={values.multiple}

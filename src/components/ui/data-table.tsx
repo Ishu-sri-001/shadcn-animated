@@ -103,40 +103,40 @@ type DataTableProps = {
   /** Gap between rows appearing, in seconds. */
   stagger?: number
   /** Rows fade and rise in one after another when the table scrolls into view. */
-  entrance?: boolean
+  staggerRows?: boolean
   /** Cells come in left to right inside each row, making a diagonal wave. */
-  rowCellsStagger?: boolean
+  staggerCells?: boolean
   /**
    * How numbers animate, from zero the first time they appear and then between values:
    * `roll` spins each digit like an odometer, `on` counts the value up, `off` doesn't animate.
    */
-  countUp?: DataTableCountUp
+  numberAnimation?: DataTableCountUp
   /** How the hovered row is highlighted. */
-  highlight?: DataTableHighlight
+  rowHighlight?: DataTableHighlight
   /** Colour of the row highlight: a soft muted tint, or primary with light text. */
-  hoverTone?: DataTableHoverTone
+  rowHighlightColor?: DataTableHoverTone
   /** Text cells roll to a copy of themselves on hover (not numbers or status badges). */
-  textRoll?: boolean
+  rollingText?: boolean
   /** Click a heading to sort; rows glide to their new places. */
   sortable?: boolean
   /** Status chips above the table filter the rows. */
-  filterable?: boolean
+  showStatusFilter?: boolean
   /** Show the total footer with a muted background and bold text; otherwise hide it. */
   highlightTotal?: boolean
   /** Row checkboxes, with shift-click ranges. */
   selectable?: boolean
   /** A header checkbox that ticks every row in a wave. */
-  selectAll?: boolean
+  showSelectAll?: boolean
   /** How a selected row is marked: a checkbox with a tick, or a circle that fills solid. */
   selectMark?: DataTableSelectMark
   /** Text alignment for every heading, cell and the footer. */
   textAlign?: DataTableAlign
   /** A floating bar with actions for the selected rows. */
-  actionBar?: boolean
+  showActionBar?: boolean
   /** What can be dragged to reorder. */
-  drag?: DataTableDrag
+  dragMode?: DataTableDrag
   /** Status as coloured pills that change on click. */
-  statusBadges?: boolean
+  showStatusBadges?: boolean
   /** Click a row to open its detail panel. */
   expandable?: boolean
   /** A delete button on each row. */
@@ -152,22 +152,22 @@ type DataTableProps = {
   /** Maximum table height when not expanded; CSS length or pixels. Defaults to 50vh. */
   height?: React.CSSProperties["maxHeight"]
   /** The line under the header row. */
-  headerBorder?: boolean
+  showHeaderBorder?: boolean
   /** Semibold header text; off, it's regular weight. */
   boldHeader?: boolean
   /** Shimmering placeholder rows while `loading`. */
-  skeleton?: boolean
+  loadingSkeleton?: boolean
   /** Split rows into pages that slide. */
-  pagination?: boolean
+  showPagination?: boolean
   pageSize?: number
   /** A rounded border around the whole table. */
   bordered?: boolean
   /** Roundness of the table corners; row highlights clip at these outer edges. */
-  radius?: DataTableRadius
+  rounded?: DataTableRadius
   /** Lines between rows. */
-  horizontalLines?: boolean
+  showHorizontalLines?: boolean
   /** Lines between columns. */
-  verticalLines?: boolean
+  showVerticalLines?: boolean
 }
 
 type Settings = Required<
@@ -237,37 +237,37 @@ function DataTable({
   className,
   duration = 0.4,
   stagger = 0.04,
-  entrance = true,
-  rowCellsStagger = false,
-  countUp = "roll",
-  highlight = "slide",
-  hoverTone = "muted",
-  textRoll = false,
+  staggerRows = true,
+  staggerCells = false,
+  numberAnimation = "roll",
+  rowHighlight = "slide",
+  rowHighlightColor = "muted",
+  rollingText = false,
   sortable = true,
-  filterable = true,
+  showStatusFilter = true,
   highlightTotal = false,
   selectable = true,
-  selectAll = true,
+  showSelectAll = true,
   selectMark = "check",
   textAlign = "left",
-  actionBar = true,
-  drag = "none",
-  statusBadges = true,
+  showActionBar = true,
+  dragMode = "none",
+  showStatusBadges = true,
   expandable = false,
   removable = false,
   addable = true,
   stickyHeader = true,
   expandFullTable = false,
   height = "50vh",
-  headerBorder = true,
+  showHeaderBorder = true,
   boldHeader = true,
   stickyFooter = true,
-  skeleton = true,
-  pagination = false,
+  loadingSkeleton = true,
+  showPagination = false,
   bordered = true,
-  radius = "lg",
-  horizontalLines = true,
-  verticalLines = true,
+  rounded = "lg",
+  showHorizontalLines = true,
+  showVerticalLines = true,
   pageSize = 5,
 }: DataTableProps) {
   const settings: Settings = {
@@ -276,38 +276,38 @@ function DataTable({
     loading,
     duration,
     stagger,
-    entrance,
-    rowCellsStagger,
-    countUp,
-    highlight,
-    hoverTone,
-    textRoll,
+    staggerRows,
+    staggerCells,
+    numberAnimation,
+    rowHighlight,
+    rowHighlightColor,
+    rollingText,
     sortable,
-    filterable,
+    showStatusFilter,
     highlightTotal,
     selectable,
-    selectAll,
+    showSelectAll,
     selectMark,
     textAlign,
-    actionBar,
-    drag,
-    statusBadges,
+    showActionBar,
+    dragMode,
+    showStatusBadges,
     expandable: expandable && !!renderDetail,
     removable,
     addable: addable && !!createRow,
     stickyHeader,
     expandFullTable,
     height,
-    headerBorder,
+    showHeaderBorder,
     boldHeader,
     stickyFooter,
-    skeleton,
-    pagination,
+    loadingSkeleton,
+    showPagination,
     pageSize,
     bordered,
-    radius,
-    horizontalLines,
-    verticalLines,
+    rounded,
+    showHorizontalLines,
+    showVerticalLines,
     statusKey,
     renderDetail,
   }
@@ -335,9 +335,9 @@ function DataTable({
   const inView = useInView(wrapper, { once: true, amount: 0.2 })
   // Only reset the entrance during loading when it is enabled. Otherwise the mounted rows
   // retain their full height behind the skeleton and appear immediately when loading ends.
-  const headerRevealed = !entrance || inView
-  const showSkeleton = loading && skeleton
-  const revealed = headerRevealed && !(showSkeleton && entrance)
+  const headerRevealed = !staggerRows || inView
+  const showSkeleton = loading && loadingSkeleton
+  const revealed = headerRevealed && !(showSkeleton && staggerRows)
   // Rows in the first reveal use its staggered timing; rows that arrive later come in quickly.
   // Before that, with the entrance off, rows already on the page don't animate at all.
   const [settled, setSettled] = React.useState(false)
@@ -352,7 +352,7 @@ function DataTable({
   React.useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), [])
 
   const ordered = columns
-  const dragRows = drag === "rows"
+  const dragRows = dragMode === "rows"
   const leading = (dragRows ? 1 : 0) + (selectable ? 1 : 0)
   const trailing = (settings.expandable ? 1 : 0) + (removable ? 1 : 0)
 
@@ -377,9 +377,9 @@ function DataTable({
       return diff * sort.dir
     })
   }
-  const pageCount = pagination ? Math.max(1, Math.ceil(view.length / pageSize)) : 1
+  const pageCount = showPagination ? Math.max(1, Math.ceil(view.length / pageSize)) : 1
   const currentPage = Math.min(page, pageCount - 1)
-  const visible = pagination
+  const visible = showPagination
     ? view.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
     : view
   const total = totalKey ? view.reduce((sum, row) => sum + Number(row[totalKey] ?? 0), 0) : 0
@@ -584,7 +584,7 @@ function DataTable({
       {content != null && (
         <LoadingCell loading={showSkeleton}>{content}</LoadingCell>
       )}
-      {verticalLines && index < context.lines.columns - 1 && (
+      {showVerticalLines && index < context.lines.columns - 1 && (
         <GridLine
           axis="y"
           visible={headerRevealed}
@@ -593,7 +593,7 @@ function DataTable({
         />
       )}
       {/* The header's bottom line draws with the rest of the grid, from the top left. */}
-      {headerBorder && (
+      {showHeaderBorder && (
         <GridLine
           axis="x"
           visible={headerRevealed}
@@ -660,7 +660,7 @@ function DataTable({
         <th className={cn(thClass, "w-8")}>
           {headCell(
             dragRows ? 1 : 0,
-            selectAll ? (
+            showSelectAll ? (
               <RowCheckbox
                 checked={allSelected}
                 indeterminate={!allSelected && someSelected}
@@ -694,7 +694,7 @@ function DataTable({
 
   // The footer is the row after the last body row.
   const footLine = (j: number) =>
-    verticalLines && j < context.lines.columns - 1 ? (
+    showVerticalLines && j < context.lines.columns - 1 ? (
       <GridLine
         axis="y"
         visible={headerRevealed}
@@ -723,14 +723,14 @@ function DataTable({
     <DataTableRowView
       // With pagination, rows are kept by position so paging swaps the content inside each
       // cell (a sideways swipe) instead of replacing whole rows.
-      key={pagination ? `slot-${i}` : row.id}
+      key={showPagination ? `slot-${i}` : row.id}
       index={i}
       // The last row's bottom line is the footer's top line, or the border without a footer.
       bottomLine={i < visible.length - 1 || (!!totalKey && highlightTotal)}
       nextId={visible[i + 1]?.id}
       row={row}
       dragRows={dragRows}
-      initial={entrance || settled ? "hidden" : false}
+      initial={staggerRows || settled ? "hidden" : false}
       // Explicit, so rows that stay mounted through loading go hidden and reveal again.
       animate={reveal}
       custom={{
@@ -743,7 +743,7 @@ function DataTable({
       <motion.tr
         key={`${row.id}:detail`}
         layout="position"
-        className={cn(horizontalLines && "border-b")}
+        className={cn(showHorizontalLines && "border-b")}
       >
         <td colSpan={leading + ordered.length + trailing} className="p-0">
           <motion.div
@@ -784,9 +784,9 @@ function DataTable({
     <TableContext.Provider value={context}>
       <MotionConfig reducedMotion="user">
         <div className={cn("flex w-full flex-col gap-3", className)}>
-          {((filterable && statusKey && statuses.length > 0) || settings.addable) && (
+          {((showStatusFilter && statusKey && statuses.length > 0) || settings.addable) && (
             <div className="flex items-center justify-between gap-3 max-md:flex-col max-md:items-start">
-              {filterable && statusKey && statuses.length > 0 ? (
+              {showStatusFilter && statusKey && statuses.length > 0 ? (
                 <FilterChips
                   value={filter}
                   counts={statusCounts}
@@ -820,15 +820,15 @@ function DataTable({
               }}
               className={cn(
                 "relative w-full",
-                RADIUS_CLASS[radius],
+                RADIUS_CLASS[rounded],
                 // The outline is a plain border, there from the start; only the inner lines draw.
                 bordered && "border",
                 "overflow-auto"
               )}
             >
               <HoverOverlays
-                highlight={highlight}
-                tone={hoverTone}
+                rowHighlight={rowHighlight}
+                tone={rowHighlightColor}
                 rowBox={rowBox}
               />
               <motion.table
@@ -837,7 +837,7 @@ function DataTable({
                 // Fixed layout: columns keep their widths when filtering or paging changes the rows.
                 // On phones it's wider than the screen and scrolls, so cells aren't cut off.
                 className="relative w-full table-fixed caption-bottom text-base max-md:min-w-[150vw]"
-                initial={entrance ? "hidden" : false}
+                initial={staggerRows ? "hidden" : false}
                 animate={reveal}
                 // Re-measured on every move, so the highlight follows rows that have shifted.
                 onPointerMove={(event) => {
@@ -858,13 +858,13 @@ function DataTable({
                 {showSkeleton && (
                   <tbody data-hpx-slot="table-skeleton">
                     {Array.from({ length: skeletonRows }, (_, i) => (
-                      <tr key={i} className={cn(horizontalLines && "border-b")}>
+                      <tr key={i} className={cn(showHorizontalLines && "border-b")}>
                         {Array.from({ length: leading + ordered.length + trailing }, (_, j) => (
                           <td
                             key={j}
                             className={cn(
                               "px-2 py-3 align-middle",
-                              verticalLines &&
+                              showVerticalLines &&
                                 j < leading + ordered.length + trailing - 1 &&
                                 "border-r"
                             )}
@@ -888,7 +888,7 @@ function DataTable({
                     className={cn(
                       "[&_tr:last-child]:border-0",
                       showSkeleton && "hidden",
-                      loading && !skeleton && "opacity-50"
+                      loading && !loadingSkeleton && "opacity-50"
                     )}
                   >
                     {body}
@@ -899,7 +899,7 @@ function DataTable({
                     className={cn(
                       "[&_tr:last-child]:border-0",
                       showSkeleton && "hidden",
-                      loading && !skeleton && "opacity-50"
+                      loading && !loadingSkeleton && "opacity-50"
                     )}
                   >
                     {body}
@@ -928,7 +928,7 @@ function DataTable({
                                 <NumberValue
                                   value={total}
                                   format={(v) => format(column, v)}
-                                  mode={countUp}
+                                  mode={numberAnimation}
                                   fromZero
                                   animate
                                   run={revealed}
@@ -954,7 +954,7 @@ function DataTable({
             </div>
           </div>
 
-          {pagination && (
+          {showPagination && (
             <div className="flex items-center justify-end gap-2 text-sm">
               <HpxButton
                 variant="ghost"
@@ -983,7 +983,7 @@ function DataTable({
           )}
         </div>
 
-        {actionBar && selectable && (
+        {showActionBar && selectable && (
           <ActionBar
             count={selected.size}
             markLabel={statuses[0]?.value}
@@ -1041,7 +1041,7 @@ function DataTableRowView({
   const hovered = hoverRow === row.id
   const isSelected = selected.has(row.id)
   // A primary highlight sits under the hovered row, so its text switches to light.
-  const onPrimary = hovered && settings.hoverTone === "primary" && settings.highlight !== "none"
+  const onPrimary = hovered && settings.rowHighlightColor === "primary" && settings.rowHighlight !== "none"
 
   const variants: Variants = {
     // The row itself stays put; each cell's content slides up inside its cell (see `Reveal`).
@@ -1055,7 +1055,7 @@ function DataTableRowView({
         ease: smoothEase,
         delay: c.delay,
         // Row cells stagger: the cells come in left to right; otherwise they rise together.
-        delayChildren: settings.rowCellsStagger
+        delayChildren: settings.staggerCells
           ? staggerChildren(CELL_GAP, { startDelay: c.delay })
           : c.delay,
       },
@@ -1088,12 +1088,12 @@ function DataTableRowView({
   // Grid lines for the cell in column `j`: its bottom edge and, unless it's last, its right edge.
   // Lines the hover highlight covers fade out, so it reads as one solid block: this row's
   // own lines when it's hovered, and its bottom line when the row below is hovered.
-  const highlighted = settings.highlight !== "none"
+  const highlighted = settings.rowHighlight !== "none"
   const coverSelf = highlighted && hovered
   const coverBottom = highlighted && (hovered || (!!nextId && hoverRow === nextId))
   const lines = (j: number) => (
     <>
-      {settings.horizontalLines && bottomLine && (
+      {settings.showHorizontalLines && bottomLine && (
         <GridLine
           axis="x"
           delay={t.start + (index + 1 + j) * t.step}
@@ -1101,7 +1101,7 @@ function DataTableRowView({
           faded={coverBottom}
         />
       )}
-      {settings.verticalLines && j < t.columns - 1 && (
+      {settings.showVerticalLines && j < t.columns - 1 && (
         <GridLine
           axis="y"
           delay={t.start + (index + 1 + j) * t.step}
@@ -1208,8 +1208,8 @@ function DataTableRowView({
     onClick: settings.expandable ? () => context.toggleExpand(row.id) : undefined,
     className: cn(
       "relative transition-colors duration-300",
-      settings.highlight === "none" &&
-        (settings.hoverTone === "primary"
+      settings.rowHighlight === "none" &&
+        (settings.rowHighlightColor === "primary"
           ? "hover:bg-primary hover:text-primary-foreground [&:hover_.text-muted-foreground]:text-primary-foreground/70 [&:hover_[data-hpx-slot=status-badge]]:bg-background"
           : "hover:bg-muted/50"),
       isSelected && "bg-primary/[0.06]",
@@ -1264,7 +1264,7 @@ function CellValue({
   let content: React.ReactNode
   if (column.kind === "status") {
     const status = settings.statuses.find((s) => s.value === value)
-    content = settings.statusBadges ? (
+    content = settings.showStatusBadges ? (
       <StatusBadge value={String(value)} status={status} onCycle={() => cycleStatus(row.id)} />
     ) : (
       String(value)
@@ -1274,7 +1274,7 @@ function CellValue({
       <NumberValue
         value={Number(value)}
         format={(v) => format(column, v)}
-        mode={settings.countUp}
+        mode={settings.numberAnimation}
         fromZero={!settled}
         animate
         run={revealed}
@@ -1285,7 +1285,7 @@ function CellValue({
     content = String(value)
   }
   // Text cells roll on hover, a touch later per column; numbers and status badges don't.
-  if (settings.textRoll && (column.kind ?? "text") === "text") {
+  if (settings.rollingText && (column.kind ?? "text") === "text") {
     content = (
       <RollText active={hovered} delay={index * 0.03}>
         {content}
@@ -1316,7 +1316,7 @@ function GridLine({
   visible?: boolean
 }) {
   const { revealed, settled, settings } = useTable()
-  const draws = settings.entrance && !settled
+  const draws = settings.staggerRows && !settled
   const shown = axis === "x" ? { scaleX: 1 } : { scaleY: 1 }
   const hidden = axis === "x" ? { scaleX: 0 } : { scaleY: 0 }
   return (
@@ -1338,7 +1338,7 @@ function GridLine({
 function Reveal({ swapKey, children }: { swapKey?: string; children: React.ReactNode }) {
   const { settings, settled, pageDir } = useTable()
   const transition = { duration: settings.duration, ease: smoothEase }
-  const preserveHeight = !settled || (settings.loading && settings.skeleton)
+  const preserveHeight = !settled || (settings.loading && settings.loadingSkeleton)
   // The cell's vertical padding lives inside, so a collapsed cell is truly zero height.
   // Initial and skeleton reveals keep full row heights; only the content slides in.
   // Rows added or removed after settling can still expand or collapse.
@@ -1359,7 +1359,7 @@ function Reveal({ swapKey, children }: { swapKey?: string; children: React.React
           exit: { y: "100%", transition },
         }}
       >
-        {settings.pagination && swapKey ? (
+        {settings.showPagination && swapKey ? (
           <Swap swapKey={swapKey} dir={pageDir} duration={settings.duration}>
             {children}
           </Swap>
@@ -1429,7 +1429,7 @@ function NumberValue({
 }) {
   if (mode === "off") return <span className="tabular-nums">{props.format(props.value)}</span>
   if (mode === "roll") return <RollingNumber {...props} fromZero={fromZero} />
-  return <AnimatedNumber {...props} countUp={fromZero} />
+  return <AnimatedNumber {...props} numberAnimation={fromZero} />
 }
 
 /**
@@ -1509,33 +1509,33 @@ function RollingNumber({
 function AnimatedNumber({
   value,
   format,
-  countUp,
+  numberAnimation,
   animate,
   run,
   duration,
 }: {
   value: number
   format: (value: number) => string
-  countUp: boolean
+  numberAnimation: boolean
   animate: boolean
   run: boolean
   duration: number
 }) {
   const ref = React.useRef<HTMLSpanElement>(null)
   const reduceMotion = useReducedMotion()
-  const current = React.useRef(countUp ? 0 : value)
-  const [initial] = React.useState(() => format(countUp ? 0 : value))
+  const current = React.useRef(numberAnimation ? 0 : value)
+  const [initial] = React.useState(() => format(numberAnimation ? 0 : value))
 
   const play = React.useEffectEvent(() => {
     const el = ref.current
     if (!el) return
     if (!run) {
       // Hidden again (loading): start from zero next time.
-      if (countUp) current.current = 0
+      if (numberAnimation) current.current = 0
       return
     }
     const from = current.current
-    if (reduceMotion || (!animate && !(countUp && from === 0 && value !== 0)) || from === value) {
+    if (reduceMotion || (!animate && !(numberAnimation && from === 0 && value !== 0)) || from === value) {
       current.current = value
       el.textContent = format(value)
       return
@@ -1797,11 +1797,11 @@ type RowBox = { id: string; top: number; height: number; snap: boolean }
 
 /** Square row highlights, clipped to the scroll wrapper's rounded outer corners. */
 function HoverOverlays({
-  highlight,
+  rowHighlight,
   tone,
   rowBox,
 }: {
-  highlight: DataTableHighlight
+  rowHighlight: DataTableHighlight
   tone: DataTableHoverTone
   rowBox: RowBox | null
 }) {
@@ -1810,7 +1810,7 @@ function HoverOverlays({
 
   return (
     <>
-      {highlight === "slide" && (
+      {rowHighlight === "slide" && (
         <motion.div
           aria-hidden
           className={cn(
@@ -1830,7 +1830,7 @@ function HoverOverlays({
           }}
         />
       )}
-      {highlight === "fill" && (
+      {rowHighlight === "fill" && (
         <AnimatePresence>
           {rowBox && (
             <motion.div

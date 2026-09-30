@@ -17,22 +17,22 @@ type ThemeSwitchIconMotion = "spin" | "orbit"
 
 type ThemeSwitchProps = Omit<React.ComponentProps<typeof HpxButton>, "size" | "onClick"> & {
   /** How the new theme reveals itself. */
-  transition?: ThemeSwitchVariant
+  revealAnimation?: ThemeSwitchVariant
   /** Seconds. */
   duration?: number
-  iconMotion?: ThemeSwitchIconMotion
+  iconAnimation?: ThemeSwitchIconMotion
   /** A label above the button while hovered or focused. */
-  tooltip?: boolean
+  showTooltip?: boolean
   onThemeChange?: (theme: "light" | "dark") => void
 }
 
 function revealFrames(
-  transition: ThemeSwitchVariant,
+  revealAnimation: ThemeSwitchVariant,
   toDark: boolean,
   origin: { x: number; y: number; radius: number }
 ): Keyframe[] {
-  if (transition === "fade") return [{ opacity: 0 }, { opacity: 1 }]
-  if (transition === "swipe") {
+  if (revealAnimation === "fade") return [{ opacity: 0 }, { opacity: 1 }]
+  if (revealAnimation === "swipe") {
     // Going dark wipes left to right, going light wipes back
     return toDark
       ? [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }]
@@ -47,10 +47,10 @@ function revealFrames(
 const subscribe = () => () => {}
 
 function ThemeSwitch({
-  transition = "circle",
+  revealAnimation = "circle",
   duration = 0.7,
-  iconMotion = "spin",
-  tooltip = true,
+  iconAnimation = "spin",
+  showTooltip = true,
   variant = "outline",
   className,
   onThemeChange,
@@ -67,7 +67,7 @@ function ThemeSwitch({
   const [hovered, setHovered] = React.useState(false)
   const reduceMotion = useReducedMotion()
   const dark = resolvedTheme === "dark"
-  const orbiting = iconMotion === "orbit"
+  const orbiting = iconAnimation === "orbit"
 
   // The orbit starts wherever the current theme needs it
   React.useLayoutEffect(() => {
@@ -153,7 +153,7 @@ function ThemeSwitch({
       await view.ready
       const progress = { value: 0 }
       // A paused native animation holds the snapshot while GSAP sets its time
-      const reveal = root.animate(revealFrames(transition, next === "dark", origin), {
+      const reveal = root.animate(revealFrames(revealAnimation, next === "dark", origin), {
         duration: 1000,
         easing: "linear",
         fill: "both",
@@ -238,7 +238,7 @@ function ThemeSwitch({
       )}
 
       <AnimatePresence>
-        {tooltip && hovered && resolvedTheme && (
+        {showTooltip && hovered && resolvedTheme && (
           <motion.span
             aria-hidden
             className="pointer-events-none absolute bottom-[calc(100%+0.5rem)] left-1/2 z-50 flex -translate-x-1/2 gap-1 rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background"

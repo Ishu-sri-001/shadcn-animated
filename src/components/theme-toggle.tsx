@@ -51,8 +51,8 @@ export function HpxThemeToggle() {
         duration={0.3}
         delay={0.02}
         stagger={0.03}
-        highlight="slide"
-        highlightColor="muted"
+        itemHighlight="slide"
+        itemHighlightColor="muted"
         typeahead
       >
         <HpxDropdownMenuTrigger

@@ -57,17 +57,17 @@ type MenubarMotion = {
   triggerHighlightColor: HpxDropdownMenuHighlightColor
   itemHighlight: HpxDropdownMenuHighlight
   itemHighlightColor: HpxDropdownMenuHighlightColor
-  indicator: HpxDropdownMenuIndicator
-  textRoll: boolean
-  triggerTextRoll: boolean
+  selectionIndicator: HpxDropdownMenuIndicator
+  rollingText: boolean
+  triggerRollingText: boolean
   pressFeedback: boolean
   /** Menus open on hover by default; turn this on to require a click. */
   openOnClick: boolean
-  contentSwitch: MenubarContentSwitch
-  contentShift: MenubarContentShift
-  chevrons: boolean
-  icons: boolean
-  descriptions: boolean
+  contentAnimation: MenubarContentSwitch
+  slideDistance: MenubarContentShift
+  showChevrons: boolean
+  showIcons: boolean
+  showDescriptions: boolean
   size: MenubarSize
   rounded: MenubarRounded
 }
@@ -184,16 +184,16 @@ function Menubar({
   triggerHighlightColor = "primary",
   itemHighlight = "slide",
   itemHighlightColor = "primary",
-  indicator = "check",
-  textRoll = false,
-  triggerTextRoll = true,
+  selectionIndicator = "check",
+  rollingText = false,
+  triggerRollingText = true,
   pressFeedback = true,
   openOnClick = false,
-  contentSwitch = "slide",
-  contentShift = "lg",
-  chevrons = true,
-  icons = true,
-  descriptions = false,
+  contentAnimation = "slide",
+  slideDistance = "lg",
+  showChevrons = true,
+  showIcons = true,
+  showDescriptions = false,
   size = "md",
   rounded = "lg",
   className,
@@ -274,16 +274,16 @@ function Menubar({
         triggerHighlightColor,
         itemHighlight,
         itemHighlightColor,
-        indicator,
-        textRoll,
-        triggerTextRoll,
+        selectionIndicator,
+        rollingText,
+        triggerRollingText,
         pressFeedback,
         openOnClick,
-        contentSwitch,
-        contentShift,
-        chevrons,
-        icons,
-        descriptions,
+        contentAnimation,
+        slideDistance,
+        showChevrons,
+        showIcons,
+        showDescriptions,
         size,
         rounded,
       },
@@ -306,16 +306,16 @@ function Menubar({
       triggerHighlightColor,
       itemHighlight,
       itemHighlightColor,
-      indicator,
-      textRoll,
-      triggerTextRoll,
+      selectionIndicator,
+      rollingText,
+      triggerRollingText,
       pressFeedback,
       openOnClick,
-      contentSwitch,
-      contentShift,
-      chevrons,
-      icons,
-      descriptions,
+      contentAnimation,
+      slideDistance,
+      showChevrons,
+      showIcons,
+      showDescriptions,
       size,
       rounded,
     ]
@@ -373,10 +373,10 @@ function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typ
         stagger={options.stagger}
         delay={options.delay}
         exitFast={options.exitFast}
-        highlight={options.itemHighlight}
-        highlightColor={options.itemHighlightColor}
-        indicator={options.indicator}
-        textRoll={options.textRoll}
+        itemHighlight={options.itemHighlight}
+        itemHighlightColor={options.itemHighlightColor}
+        selectionIndicator={options.selectionIndicator}
+        rollingText={options.rollingText}
         pressFeedback={options.pressFeedback}
         onOpenChange={(open, details) => {
           setHoverOpen(open)
@@ -446,7 +446,7 @@ function DesktopMenubarTrigger({
   const hover = React.useContext(MenubarHoverContext)
   const marker = options.triggerHighlight
   const leave = () => setHovered(null)
-  const showChevron = chevron ?? options.chevrons
+  const showChevron = chevron ?? options.showChevrons
   const open = active === menu
   const lit = highlightOn === menu && highlightVisible
 
@@ -485,7 +485,7 @@ function DesktopMenubarTrigger({
       }}
       {...props}
     >
-      {options.triggerTextRoll && typeof children === "string" ? (
+      {options.triggerRollingText && typeof children === "string" ? (
         <TriggerRollText lit={lit}>{children}</TriggerRollText>
       ) : (
         children
@@ -549,11 +549,11 @@ function MenubarPanelBody({
   if (reduceMotion) return <>{children}</>
 
   const entrance =
-    from === 0 || options.switchAnimation !== "glide" || options.contentSwitch === "none"
+    from === 0 || options.switchAnimation !== "glide" || options.contentAnimation === "none"
       ? false
-      : options.contentSwitch === "slide"
+      : options.contentAnimation === "slide"
         ?
-          { opacity: 0, x: from * CONTENT_SHIFT[options.contentShift] }
+          { opacity: 0, x: from * CONTENT_SHIFT[options.slideDistance] }
         : { opacity: 0, x: 0 }
 
   const body = (
@@ -649,9 +649,9 @@ function slideOutPrevious(
   box: HTMLElement,
   previous: HTMLElement,
   direction: number,
-  options: Pick<MenubarMotion, "contentSwitch" | "contentShift">
+  options: Pick<MenubarMotion, "contentAnimation" | "slideDistance">
 ) {
-  if (options.contentSwitch === "none" || direction === 0) return null
+  if (options.contentAnimation === "none" || direction === 0) return null
   const source = previous.querySelector<HTMLElement>(":scope > [data-hpx-slot=menubar-surface-content]")
   if (!source) return null
 
@@ -670,7 +670,7 @@ function slideOutPrevious(
   })
   box.prepend(ghost)
 
-  const x = options.contentSwitch === "slide" ? -direction * CONTENT_SHIFT[options.contentShift] : 0
+  const x = options.contentAnimation === "slide" ? -direction * CONTENT_SHIFT[options.slideDistance] : 0
   const animation = animate(ghost, { x: [0, x], opacity: [1, 0] }, GLIDE)
   animation.then(() => ghost.remove())
   return ghost
@@ -827,8 +827,8 @@ function DesktopMenubarItem({
   description?: React.ReactNode
 }) {
   const { motion: options } = useMenubar()
-  const showIcon = options.icons && icon
-  const showDescription = options.descriptions && description
+  const showIcon = options.showIcons && icon
+  const showDescription = options.showDescriptions && description
   const heading = React.Children.map(children, (child) =>
     typeof child === "string" && child.trim() ? (
       <HpxDropdownMenuItemTitle>{child.trim()}</HpxDropdownMenuItemTitle>
@@ -1167,7 +1167,7 @@ function MobileMenubarItem({
     disabled?: boolean
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
   }
-  const showDescription = options.descriptions && description
+  const showDescription = options.showDescriptions && description
   return (
     <button
       type="button"
@@ -1183,7 +1183,7 @@ function MobileMenubarItem({
         typeof className === "string" && className
       )}
     >
-      {options.icons && icon && (
+      {options.showIcons && icon && (
         <span className="flex shrink-0 items-center text-muted-foreground [&_svg:not([class*='size-'])]:size-4">
           {icon}
         </span>

@@ -63,15 +63,15 @@ const seed: Item[] = [
 ]
 
 const controls = {
-  enter: { group: "Adding", type: "checkbox", label: "Spring in", value: true },
-  stagger: { disabled: (v) => !v.enter, group: "Adding", type: "slider", label: "Stagger", value: 0.08, min: 0, max: 0.3, step: 0.01, unit: "s" },
+  animateEnter: { group: "Adding", type: "checkbox", label: "Animate enter", value: true },
+  stagger: { disabled: (v) => !v.animateEnter, group: "Adding", type: "slider", label: "Stagger", value: 0.08, min: 0, max: 0.3, step: 0.01, unit: "s" },
   flyIn: { group: "Adding", type: "checkbox", label: "Fly in from drop", value: true },
-  marching: { group: "Adding", type: "checkbox", label: "Drop zone border", value: true },
+  animatedBorder: { group: "Adding", type: "checkbox", label: "Animated border", value: true },
 
-  leave: { group: "Layout", type: "checkbox", label: "Shrink out on remove", value: true },
+  animateExit: { group: "Layout", type: "checkbox", label: "Animate exit", value: true },
 
-  rolling: { group: "Progress", type: "checkbox", label: "Rolling percentage", value: true },
-  shimmer: { group: "Progress", type: "checkbox", label: "Title shimmer", value: true },
+  rollingNumbers: { group: "Progress", type: "checkbox", label: "Rolling numbers", value: true },
+  shimmerText: { group: "Progress", type: "checkbox", label: "Shimmer text", value: true },
   borderTrace: { group: "Progress", type: "checkbox", label: "Border trace", value: true },
   fill: { group: "Progress", type: "checkbox", label: "Card fill (images)", value: true },
   fillDirection: {
@@ -86,18 +86,18 @@ const controls = {
     ],
   },
 
-  shake: { disabled: (v) => !v.failures, group: "States", type: "checkbox", label: "Error shake", value: true },
+  shakeOnError: { disabled: (v) => !v.simulateFailures, group: "States", type: "checkbox", label: "Shake on error", value: true },
 
-  reveal: { group: "Hover", type: "checkbox", label: "Reveal remove button", value: true },
-  zoom: { group: "Hover", type: "checkbox", label: "Image zoom", value: true },
-  develop: { group: "Hover", type: "checkbox", label: "Blur until uploaded", value: true },
+  revealAction: { group: "Hover", type: "checkbox", label: "Reveal action", value: true },
+  zoomOnHover: { group: "Hover", type: "checkbox", label: "Zoom on hover", value: true },
+  blurUntilLoaded: { group: "Hover", type: "checkbox", label: "Blur until loaded", value: true },
 
   reorder: { group: "Group", type: "checkbox", label: "Drag to reorder", value: true },
-  tilt: { group: "Group", type: "checkbox", label: "Tilt on scroll", value: false },
+  tiltOnScroll: { group: "Group", type: "checkbox", label: "Tilt on scroll", value: false },
   wrap: { group: "Group", type: "checkbox", label: "Wrap", value: false },
-  expand: { group: "Group", type: "checkbox", label: "Open image preview", value: true },
+  expandable: { group: "Group", type: "checkbox", label: "Expandable preview", value: true },
 
-  failures: { group: "Demo", type: "checkbox", label: "Simulate failures", value: true },
+  simulateFailures: { group: "Demo", type: "checkbox", label: "Simulate failures", value: true },
 } satisfies HpxControlSchema
 
 function truncateName(name: string, limit = 20) {
@@ -181,7 +181,7 @@ export function HpxUploadDemo() {
         state: "uploading",
         progress: 0,
         preview: image ? URL.createObjectURL(file) : undefined,
-        failAt: values.failures && Math.random() < FAIL_CHANCE ? 30 + Math.random() * 50 : undefined,
+        failAt: values.simulateFailures && Math.random() < FAIL_CHANCE ? 30 + Math.random() * 50 : undefined,
         from,
         delay: i * values.stagger,
       }
@@ -233,7 +233,7 @@ export function HpxUploadDemo() {
       case "uploading":
         return (
           <>
-            Uploading · <HpxAttachmentProgress value={item.progress} rolling={values.rolling} />
+            Uploading · <HpxAttachmentProgress value={item.progress} rollingNumbers={values.rollingNumbers} />
           </>
         )
       case "processing":
@@ -253,12 +253,12 @@ export function HpxUploadDemo() {
         value={item.id}
         state={item.state}
         orientation={image ? "vertical" : "horizontal"}
-        enter={values.enter}
+        animateEnter={values.animateEnter}
         enterDelay={item.delay}
         enterFrom={values.flyIn ? item.from : undefined}
-        leave={values.leave}
+        animateExit={values.animateExit}
         borderTrace={values.borderTrace}
-        shake={values.shake}
+        shakeOnError={values.shakeOnError}
         fill={image && values.fill}
         fillDirection={values.fillDirection as "left-to-right" | "bottom-to-top"}
         progress={item.progress}
@@ -266,9 +266,9 @@ export function HpxUploadDemo() {
         {image ? (
           <HpxAttachmentMedia
             variant="image"
-            zoom={values.zoom}
-            develop={values.develop}
-            expandable={values.expand}
+            zoomOnHover={values.zoomOnHover}
+            blurUntilLoaded={values.blurUntilLoaded}
+            expandable={values.expandable}
           >
             {item.preview ? (
               // eslint-disable-next-line @next/next/no-img-element -- local object URL
@@ -283,7 +283,7 @@ export function HpxUploadDemo() {
           </HpxAttachmentMedia>
         )}
         <HpxAttachmentContent>
-          <HpxAttachmentTitle shimmer={values.shimmer} title={item.name}>
+          <HpxAttachmentTitle shimmerText={values.shimmerText} title={item.name}>
             {truncateName(item.name)}
           </HpxAttachmentTitle>
           <HpxAttachmentDescription>{describe(item)}</HpxAttachmentDescription>
@@ -300,7 +300,7 @@ export function HpxUploadDemo() {
           )}
           <HpxAttachmentAction
             variant={image ? "secondary" : undefined}
-            reveal={values.reveal}
+            revealAction={values.revealAction}
             aria-label={`Remove ${item.name}`}
             onClick={() => remove(item.id)}
           >
@@ -323,7 +323,7 @@ export function HpxUploadDemo() {
         </p>
       </div>
       <div className="flex items-center justify-between gap-6">
-        <HpxAttachment state="idle" enter={false}>
+        <HpxAttachment state="idle" animateEnter={false}>
           <HpxAttachmentMedia>
             <PlusIcon />
           </HpxAttachmentMedia>
@@ -348,13 +348,13 @@ export function HpxUploadDemo() {
       </div>
 
       <HpxAttachmentDropzone
-        marching={values.marching}
+        animatedBorder={values.animatedBorder}
         onFiles={addFiles}
         className="flex min-h-76 flex-col gap-4 p-6 max-md:p-4"
       >
         <HpxAttachmentGroup
           reorder={values.reorder}
-          tilt={values.tilt}
+          tiltOnScroll={values.tiltOnScroll}
           wrap={values.wrap}
           values={files.map((item) => item.id)}
           onReorder={(ids) => reorder("file", ids)}
@@ -366,7 +366,7 @@ export function HpxUploadDemo() {
 
         <HpxAttachmentGroup
           reorder={values.reorder}
-          tilt={values.tilt}
+          tiltOnScroll={values.tiltOnScroll}
           wrap={values.wrap}
           values={images.map((item) => item.id)}
           onReorder={(ids) => reorder("image", ids)}

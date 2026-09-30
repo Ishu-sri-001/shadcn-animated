@@ -157,7 +157,7 @@ export function HpxNotesDemo() {
                   </HpxAttachmentContent>
                   <HpxAttachmentActions>
                     <HpxAttachmentAction
-                      reveal
+                      revealAction
                       className={classes.action}
                       aria-label={`Remove note: ${note.text}`}
                       onClick={() => setNotes((current) => current.filter((n) => n.id !== note.id))}

@@ -13,18 +13,18 @@ const snappy = { type: "spring", visualDuration: 0.25, bounce: 0 } as const
 const springyEase = "ease-[cubic-bezier(0.34,1.56,0.64,1)]"
 
 type RadioOptions = {
-  dotSlide: boolean
-  cardSlide: boolean
-  bounce: boolean
+  slideDot: boolean
+  slideCard: boolean
+  elastic: boolean
   showIcon: boolean
   /** Outline or filled radio. */
   appearance: RadioAppearance
 }
 
 const defaultOptions: RadioOptions = {
-  dotSlide: false,
-  cardSlide: true,
-  bounce: true,
+  slideDot: false,
+  slideCard: true,
+  elastic: true,
   showIcon: true,
   appearance: "outline",
 }
@@ -32,7 +32,7 @@ const defaultOptions: RadioOptions = {
 type RadioGroupContextValue = RadioOptions & {
   id: string
   variant: RadioVariant
-  cardFill: RadioCardFill
+  cardFillColor: RadioCardFill
   selected: string
   select: (value: string) => void
   reorder: boolean
@@ -49,7 +49,7 @@ type RadioGroupProps = Partial<RadioOptions> & {
   defaultValue?: string
   onValueChange?: (value: string) => void
   variant?: RadioVariant
-  cardFill?: RadioCardFill
+  cardFillColor?: RadioCardFill
   reorder?: boolean
   onReorder?: (order: string[]) => void
 }
@@ -63,7 +63,7 @@ function RadioGroup({
   reorder = false,
   onReorder,
   variant = "default",
-  cardFill = "muted",
+  cardFillColor = "muted",
   "aria-label": ariaLabel,
   ...optionProps
 }: RadioGroupProps) {
@@ -113,7 +113,7 @@ function RadioGroup({
     ...optionProps,
     id,
     variant,
-    cardFill,
+    cardFillColor,
     selected,
     select,
     reorder,
@@ -190,16 +190,16 @@ function RadioItem({
   }
 
   React.useEffect(() => {
-    if (pulse === 0 || !group.bounce || reduceMotion || !visual.current) return
+    if (pulse === 0 || !group.elastic || reduceMotion || !visual.current) return
     animate(
       visual.current,
       { scale: [1, 0.7, 1.25, 0.94, 1] },
       { duration: 0.55, times: [0, 0.2, 0.5, 0.75, 1], ease: "easeOut" }
     )
-  }, [pulse, group.bounce, reduceMotion])
+  }, [pulse, group.elastic, reduceMotion])
 
   const hasText = label !== undefined || description !== undefined
-  const solid = card && group.cardFill === "primary"
+  const solid = card && group.cardFillColor === "primary"
   const onFill = solid && checked
   const showControl = group.showIcon
   const filled = group.appearance === "filled"
@@ -264,7 +264,7 @@ function RadioItem({
       {...rootProps}
     >
       {card &&
-        (group.cardSlide ? (
+        (group.slideCard ? (
           checked && (
             <motion.span
               layoutId={`${group.id}-card`}
@@ -286,7 +286,7 @@ function RadioItem({
 
       <motion.span
         className={showControl ? "relative grid size-6 shrink-0 place-items-center" : "sr-only"}
-        whileTap={disabled || !group.bounce ? undefined : { scale: 0.85 }}
+        whileTap={disabled || !group.elastic ? undefined : { scale: 0.85 }}
       >
         <span
           aria-hidden
@@ -324,7 +324,7 @@ function RadioItem({
 
         {showControl &&
           !full &&
-          (group.dotSlide ? (
+          (group.slideDot ? (
             checked && (
               <motion.span layoutId={`${group.id}-dot`} aria-hidden className={dotClass} transition={glide} />
             )

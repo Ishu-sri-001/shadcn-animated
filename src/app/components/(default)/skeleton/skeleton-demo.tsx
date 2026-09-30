@@ -35,7 +35,7 @@ const controls = {
     disabled: (v) => v.animation === "none",
     group: "Skeleton appearance",
     type: "slider",
-    label: "Animation cycle duration",
+    label: "Duration",
     value: 1.6,
     min: 0.6,
     max: 3,
@@ -46,7 +46,7 @@ const controls = {
     disabled: (v) => v.animation === "none",
     group: "Skeleton appearance",
     type: "slider",
-    label: "Delay between placeholders",
+    label: "Stagger",
     value: 0.12,
     min: 0,
     max: 0.4,
@@ -56,7 +56,7 @@ const controls = {
   rounded: {
     group: "Skeleton appearance",
     type: "select",
-    label: "Corner radius",
+    label: "Roundness",
     value: "md",
     options: [
       { label: "None", value: "none" },
@@ -68,10 +68,10 @@ const controls = {
     ],
   },
 
-  swap: {
+  swapAnimation: {
     group: "Content transition",
     type: "select",
-    label: "Transition animation",
+    label: "Swap animation",
     value: "scale",
     options: [
       { label: "Rise", value: "rise" },
@@ -81,7 +81,7 @@ const controls = {
     ],
   },
   swapDuration: {
-    disabled: (v) => v.swap === "none",
+    disabled: (v) => v.swapAnimation === "none",
     group: "Content transition",
     type: "slider",
     label: "Content entrance duration",
@@ -92,7 +92,7 @@ const controls = {
     unit: "s",
   },
   swapStagger: {
-    disabled: (v) => v.swap === "none",
+    disabled: (v) => v.swapAnimation === "none",
     group: "Content transition",
     type: "slider",
     label: "Delay between content items",
@@ -211,7 +211,7 @@ export function HpxSkeletonDemo() {
 
         <HpxSkeletonSwap
           loading={loading}
-          swap={values.swap as HpxSkeletonSwapKind}
+          swapAnimation={values.swapAnimation as HpxSkeletonSwapKind}
           duration={values.swapDuration}
           stagger={values.swapStagger}
           skeleton={placeholder}

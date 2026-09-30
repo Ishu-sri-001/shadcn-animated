@@ -48,7 +48,7 @@ const controls = {
       { label: "Rose", value: "rose" },
     ],
   },
-  green: { disabled: (v) => v.variant !== "apple" || v.color !== "foreground", group: "Style", type: "checkbox", label: "iOS green (Apple)", value: false },
+  appleGreen: { disabled: (v) => v.variant !== "apple" || v.color !== "foreground", group: "Style", type: "checkbox", label: "Apple green", value: false },
   rounded: {
     group: "Style",
     type: "select",
@@ -62,11 +62,11 @@ const controls = {
       { label: "Full", value: "full" },
     ],
   },
-  marks: { group: "Style", type: "checkbox", label: "I / O marks", value: false },
-  labelSide: {
+  showMarks: { group: "Style", type: "checkbox", label: "Show marks", value: false },
+  labelPosition: {
     group: "Style",
     type: "select",
-    label: "Text position",
+    label: "Label position",
     value: "top",
     options: [
       { label: "Above", value: "top" },
@@ -76,7 +76,7 @@ const controls = {
     ],
   },
 
-  squeeze: {
+  pressSqueeze: {
     group: "Motion",
     type: "slider",
     label: "Press squeeze",
@@ -88,7 +88,7 @@ const controls = {
   duration: {
     group: "Motion",
     type: "slider",
-    label: "Travel time",
+    label: "Duration",
     value: 0.35,
     min: 0.1,
     max: 1,
@@ -121,11 +121,11 @@ export function HpxSwitchDemo() {
           variant={values.variant as HpxSwitchVariant}
           size={values.size as HpxSwitchSize}
           color={values.color as HpxSwitchColor}
-          green={values.green}
+          appleGreen={values.appleGreen}
           rounded={values.rounded as HpxSwitchRounded}
-          marks={values.marks}
-          labelSide={values.labelSide as HpxSwitchLabelSide}
-          squeeze={values.squeeze}
+          showMarks={values.showMarks}
+          labelPosition={values.labelPosition as HpxSwitchLabelSide}
+          pressSqueeze={values.pressSqueeze}
           duration={values.duration}
           bounce={values.bounce}
         />

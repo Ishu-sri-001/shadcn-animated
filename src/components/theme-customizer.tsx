@@ -190,7 +190,7 @@ export function HpxThemeCustomizer({
   onOpenChange: (open: boolean) => void
 }) {
   return (
-    <HpxDialog open={open} onOpenChange={onOpenChange} fromTrigger={false}>
+    <HpxDialog open={open} onOpenChange={onOpenChange} originFromTrigger={false}>
       <HpxDialogContent className="max-w-2xl">
         <CustomizerBody onDone={() => onOpenChange(false)} />
       </HpxDialogContent>

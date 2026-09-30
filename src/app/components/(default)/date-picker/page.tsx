@@ -22,7 +22,7 @@ const DATE_FORMATS = [
 
 const controls = {
   showIcon: { group: "Trigger", type: "checkbox", label: "Icon", value: true },
-  rollingLabel: { group: "Trigger", type: "checkbox", label: "Rolling label", value: true },
+  rollingText: { group: "Trigger", type: "checkbox", label: "Rolling text", value: true },
   dateFormat: {
     group: "Trigger",
     type: "select",
@@ -35,14 +35,14 @@ const controls = {
   contentAnimation: {
     group: "Popup",
     type: "select",
-    label: "Content in",
+    label: "Content animation",
     value: "scale",
     options: [
       { label: "Scale + fade", value: "scale" },
       { label: "Fade", value: "fade" },
     ],
   },
-  contentScale: {
+  startScale: {
     disabled: (v) => v.contentAnimation === "fade",
     group: "Popup",
     type: "slider",
@@ -86,10 +86,10 @@ const controls = {
     max: 100,
     step: 1,
   },
-  monthTransition: {
+  monthAnimation: {
     group: "Month change",
     type: "select",
-    label: "Transition",
+    label: "Month animation",
     value: "slide",
     options: [
       { label: "Slide + fade", value: "slide" },
@@ -98,7 +98,7 @@ const controls = {
     ],
   },
   monthSlideDistance: {
-    disabled: (v) => v.monthTransition !== "slide",
+    disabled: (v) => v.monthAnimation !== "slide",
     group: "Month change",
     type: "slider",
     label: "Slide distance",
@@ -108,7 +108,7 @@ const controls = {
     step: 5,
     unit: "%",
   },
-  slidingArrows: { group: "Month change", type: "checkbox", label: "Sliding arrows", value: true },
+  slideArrows: { group: "Month change", type: "checkbox", label: "Slide arrows", value: true },
 
   hoverVariant: {
     group: "Date hover",
@@ -120,10 +120,10 @@ const controls = {
       { label: "Outline", value: "outline" },
     ],
   },
-  hoverTransition: {
+  hoverAnimation: {
     group: "Date hover",
     type: "select",
-    label: "Transition",
+    label: "Hover animation",
     value: "slide",
     options: [
       { label: "Slide", value: "slide" },
@@ -141,7 +141,7 @@ const controls = {
     unit: "s",
   },
   hoverBounce: {
-    disabled: (v) => v.hoverTransition === "fade",
+    disabled: (v) => v.hoverAnimation === "fade",
     group: "Date hover",
     type: "slider",
     label: "Glide bounce",
@@ -185,20 +185,20 @@ export default function DatePickerPage() {
           value={date}
           onChange={setDate}
           showIcon={values.showIcon}
-          rollingLabel={values.rollingLabel}
+          rollingText={values.rollingText}
           dateFormat={values.dateFormat}
           fromBehind={values.fromBehind}
           contentAnimation={values.contentAnimation as DatePickerProps["contentAnimation"]}
-          contentScale={values.contentScale}
+          startScale={values.startScale}
           closeOnSelect={values.closeOnSelect}
           captionLayout={values.captionLayout as DatePickerProps["captionLayout"]}
           yearsBefore={values.yearsBefore}
           yearsAfter={values.yearsAfter}
-          monthTransition={values.monthTransition as DatePickerProps["monthTransition"]}
+          monthAnimation={values.monthAnimation as DatePickerProps["monthAnimation"]}
           monthSlideDistance={values.monthSlideDistance}
-          slidingArrows={values.slidingArrows}
+          slideArrows={values.slideArrows}
           hoverVariant={values.hoverVariant as DatePickerProps["hoverVariant"]}
-          hoverTransition={values.hoverTransition as DatePickerProps["hoverTransition"]}
+          hoverAnimation={values.hoverAnimation as DatePickerProps["hoverAnimation"]}
           hoverDuration={values.hoverDuration}
           hoverBounce={values.hoverBounce}
           weekStartsOn={Number(values.weekStartsOn) as DatePickerProps["weekStartsOn"]}

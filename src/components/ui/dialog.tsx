@@ -22,25 +22,25 @@ type DialogExit = "fade" | "drop" | "shrink"
 
 type DialogMotion = {
   /** Spring instead of an eased tween. */
-  springy: boolean
+  elastic: boolean
   /** Seconds. */
   duration: number
   /** Spring overshoot, 0–1. */
   bounce: number
   /** Grow from and back into trigger. */
-  fromTrigger: boolean
+  originFromTrigger: boolean
   /** Content fades in after the box. */
-  contentFade: boolean
+  fadeContent: boolean
   /** Content grows from 80% while fading. */
-  contentScale: boolean
+  scaleContent: boolean
   /** Content fades out before closing. */
-  contentFadeOut: boolean
+  fadeContentOut: boolean
   /** Trigger text rolls up on hover. */
-  textRoll: boolean
+  rollingText: boolean
   /** Trigger fills from pointer on hover. */
   fillOnHover: boolean
   backdrop: DialogBackdrop
-  exit: DialogExit
+  exitAnimation: DialogExit
   /** Clicking outside closes the dialog. */
   dismissible: boolean
   /** Shake when outside click is blocked. */
@@ -127,17 +127,17 @@ function Dialog({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
-  springy = true,
+  elastic = true,
   duration = 0.35,
   bounce = 0.2,
-  fromTrigger = true,
-  contentFade = true,
-  contentScale = false,
-  contentFadeOut = true,
-  textRoll = true,
+  originFromTrigger = true,
+  fadeContent = true,
+  scaleContent = false,
+  fadeContentOut = true,
+  rollingText = true,
   fillOnHover = true,
   backdrop = "blur",
-  exit = "fade",
+  exitAnimation = "fade",
   dismissible = true,
   shakeOnBlock = true,
   rounded = "xl",
@@ -153,23 +153,23 @@ function Dialog({
       origin,
       setOrigin,
       motion: {
-        springy,
+        elastic,
         duration,
         bounce,
-        fromTrigger,
-        contentFade,
-        contentScale,
-        contentFadeOut,
-        textRoll,
+        originFromTrigger,
+        fadeContent,
+        scaleContent,
+        fadeContentOut,
+        rollingText,
         fillOnHover,
         backdrop,
-        exit,
+        exitAnimation,
         dismissible,
         shakeOnBlock,
         rounded,
       },
     }),
-    [open, origin, springy, duration, bounce, fromTrigger, contentFade, contentScale, contentFadeOut, textRoll, fillOnHover, backdrop, exit, dismissible, shakeOnBlock, rounded]
+    [open, origin, elastic, duration, bounce, originFromTrigger, fadeContent, scaleContent, fadeContentOut, rollingText, fillOnHover, backdrop, exitAnimation, dismissible, shakeOnBlock, rounded]
   )
 
   return (
@@ -253,7 +253,7 @@ function DialogOverlay({
             transition: {
               duration: 0.2,
               ease: "easeOut",
-              delay: options.contentFadeOut ? CONTENT_OUT : 0,
+              delay: options.fadeContentOut ? CONTENT_OUT : 0,
             },
           }}
           transition={{ duration: 0.2, ease: "easeOut" }}
@@ -279,16 +279,16 @@ function DialogContent({
 
   const enter: Transition = reduceMotion
     ? { duration: 0.2, ease: "easeOut" }
-    : options.springy
+    : options.elastic
       ? { type: "spring", visualDuration: options.duration, bounce: options.bounce }
       : { duration: options.duration, ease: [0.22, 1, 0.36, 1] }
 
   // Reduced motion: fade only, in place.
-  const fromTrigger = options.fromTrigger && origin !== null && !reduceMotion
+  const originFromTrigger = options.originFromTrigger && origin !== null && !reduceMotion
   const still = { opacity: 0, scale: 1, x: 0, y: "0%" }
   const closed = reduceMotion
     ? still
-    : fromTrigger
+    : originFromTrigger
       ? {
           opacity: 0,
           scale: 0.2,
@@ -296,18 +296,18 @@ function DialogContent({
           y: origin.y - window.innerHeight / 2,
         }
       : { opacity: 0, scale: 0.95, x: 0, y: "0%" }
-  const leave = reduceMotion ? still : fromTrigger ? closed : { ...EXIT[options.exit], x: 0 }
+  const leave = reduceMotion ? still : originFromTrigger ? closed : { ...EXIT[options.exitAnimation], x: 0 }
 
   const attach = React.useCallback(
     (node: HTMLDivElement | null) => {
       popup.current = node
-      if (node && options.contentFade) fadeInContent(node, options.contentScale ? 0.8 : 1)
+      if (node && options.fadeContent) fadeInContent(node, options.scaleContent ? 0.8 : 1)
     },
-    [options.contentFade, options.contentScale]
+    [options.fadeContent, options.scaleContent]
   )
 
   // Fade content out before exit.
-  const fadeOut = options.contentFadeOut
+  const fadeOut = options.fadeContentOut
   React.useEffect(() => {
     if (open || !fadeOut || !popup.current) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
@@ -339,7 +339,7 @@ function DialogContent({
                   ...leave,
                   transition: reduceMotion
                     ? { duration: 0.2, ease: "easeOut" }
-                    : fromTrigger
+                    : originFromTrigger
                     ? {
                         type: "spring",
                         visualDuration: options.duration * 0.8,

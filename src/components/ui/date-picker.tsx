@@ -322,18 +322,18 @@ function DatePicker({
   placeholder = "Pick a date",
   dateFormat = "PPP",
   showIcon = true,
-  rollingLabel = true,
+  rollingText = true,
   fromBehind = true,
   contentAnimation = "scale",
-  contentScale = 0.9,
+  startScale = 0.9,
   captionLayout = "dropdown",
   yearsBefore = 10,
   yearsAfter = 10,
-  monthTransition = "slide",
+  monthAnimation = "slide",
   monthSlideDistance = 40,
-  slidingArrows = true,
+  slideArrows = true,
   hoverVariant = "filled",
-  hoverTransition = "slide",
+  hoverAnimation = "slide",
   hoverDuration = 0.25,
   hoverBounce = 0.15,
   weekStartsOn = 0,
@@ -349,18 +349,18 @@ function DatePicker({
   placeholder?: string
   dateFormat?: string
   showIcon?: boolean
-  rollingLabel?: boolean
+  rollingText?: boolean
   fromBehind?: boolean
   contentAnimation?: "scale" | "fade"
-  contentScale?: number
+  startScale?: number
   captionLayout?: CalendarProps["captionLayout"]
   yearsBefore?: number
   yearsAfter?: number
-  monthTransition?: "slide" | "fade" | "none"
+  monthAnimation?: "slide" | "fade" | "none"
   monthSlideDistance?: number
-  slidingArrows?: boolean
+  slideArrows?: boolean
   hoverVariant?: "filled" | "outline"
-  hoverTransition?: "slide" | "fade"
+  hoverAnimation?: "slide" | "fade"
   hoverDuration?: number
   hoverBounce?: number
   weekStartsOn?: CalendarProps["weekStartsOn"]
@@ -379,11 +379,11 @@ function DatePicker({
   const hoverStyle = React.useMemo<HoverStyle>(
     () => ({
       variant: hoverVariant,
-      transition: hoverTransition,
+      transition: hoverAnimation,
       duration: hoverDuration,
       bounce: hoverBounce,
     }),
-    [hoverVariant, hoverTransition, hoverDuration, hoverBounce]
+    [hoverVariant, hoverAnimation, hoverDuration, hoverBounce]
   )
   const [dateHoverSquare, dateHover] = useHoverSquare(
     calendarBox,
@@ -397,7 +397,7 @@ function DatePicker({
   const enterDirection = React.useRef<1 | -1 | null>(null)
 
   const slideBy = (direction: number) =>
-    monthTransition === "slide" ? `${direction * monthSlideDistance}%` : "0%"
+    monthAnimation === "slide" ? `${direction * monthSlideDistance}%` : "0%"
 
   const monthParts = () =>
     calendarBox.current?.querySelectorAll(
@@ -409,7 +409,7 @@ function DatePicker({
     const alreadyAnimating = pendingMonth.current !== null
     const target = addMonths(pendingMonth.current ?? month, step)
 
-    if (reduceMotion || monthTransition === "none") {
+    if (reduceMotion || monthAnimation === "none") {
       setMonth(target)
       return
     }
@@ -477,7 +477,7 @@ function DatePicker({
           }
         >
           {showIcon && <HpxCalendarRangeIcon ref={icon} size="1.25em" />}
-          {rollingLabel ? (
+          {rollingText ? (
             <span className="relative block overflow-hidden">
               <span className="block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/trigger:-translate-y-full motion-reduce:transition-none">
                 {label}
@@ -527,7 +527,7 @@ function DatePicker({
               startMonth={startOfYear(addYears(startOfToday(), -yearsBefore))}
               endMonth={endOfYear(addYears(startOfToday(), yearsAfter))}
               buttonVariant="outline"
-              components={slidingArrows ? SLIDING_ARROWS : PLAIN_ARROWS}
+              components={slideArrows ? SLIDING_ARROWS : PLAIN_ARROWS}
               fixedWeeks={fixedWeeks}
               showOutsideDays={!onlyCurrentMonth}
               weekStartsOn={weekStartsOn}
@@ -536,7 +536,7 @@ function DatePicker({
               style={
                 {
                   "--tw-enter-scale":
-                    contentAnimation === "scale" ? contentScale : 1,
+                    contentAnimation === "scale" ? startScale : 1,
                 } as React.CSSProperties
               }
               className={cn(

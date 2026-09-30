@@ -23,7 +23,7 @@ const controls = {
   duration: {
     group: "Track",
     type: "slider",
-    label: "Spring duration",
+    label: "Duration",
     value: 0.4,
     min: 0.1,
     max: 1,
@@ -33,16 +33,16 @@ const controls = {
   bounce: {
     group: "Track",
     type: "slider",
-    label: "Spring bounce",
+    label: "Bounce",
     value: 0,
     min: 0,
     max: 0.6,
     step: 0.05,
   },
-  thicken: {
+  thickenOn: {
     group: "Track",
     type: "select",
-    label: "Thickens on",
+    label: "Thicken on",
     value: "hover",
     options: [
       { label: "Hover", value: "hover" },
@@ -50,8 +50,8 @@ const controls = {
       { label: "Never", value: "none" },
     ],
   },
-  elastic: { group: "Track", type: "checkbox", label: "Stretches past the ends", value: true },
-  stretch: {
+  elastic: { group: "Track", type: "checkbox", label: "Elastic", value: true },
+  stretchAmount: {
     disabled: (v) => !v.elastic,
     group: "Track",
     type: "slider",
@@ -72,8 +72,8 @@ const controls = {
       { label: "Hide", value: "none" },
     ],
   },
-  thickenTo: {
-    disabled: (v) => v.thicken === "none",
+  thickenedSize: {
+    disabled: (v) => v.thickenOn === "none",
     group: "Track",
     type: "select",
     label: "Thickened size",
@@ -87,7 +87,7 @@ const controls = {
       { label: "13", value: "13" },
     ],
   },
-  radius: {
+  rounded: {
     group: "Track",
     type: "select",
     label: "Roundness",
@@ -149,7 +149,7 @@ const controls = {
       { label: "Never", value: "none" },
     ],
   },
-  roll: { disabled: (v) => v.bubble === "none", group: "Edge", type: "checkbox", label: "Roll the numbers", value: true },
+  rollingNumbers: { disabled: (v) => v.bubble === "none", group: "Edge", type: "checkbox", label: "Rolling numbers", value: true },
 
   edgeSize: {
     disabled: (v) => !v.showEdge || v.edgeVariant === "bar",
@@ -179,17 +179,17 @@ export function HpxSliderDemo() {
     duration: values.duration,
     bounce: values.bounce,
     edgePress: values.edgePress as HpxSliderEdgePress,
-    thicken: values.thicken as HpxSliderThicken,
+    thickenOn: values.thickenOn as HpxSliderThicken,
     elastic: values.elastic,
-    stretch: values.stretch,
+    stretchAmount: values.stretchAmount,
     labels: values.labels as HpxSliderLabels,
     marks: values.marks as HpxSliderMarks,
     bubble: values.bubble as HpxSliderBubble,
     edgeVariant: values.edgeVariant as HpxSliderEdgeVariant,
-    roll: values.roll,
+    rollingNumbers: values.rollingNumbers,
     showEdge: values.showEdge,
-    radius: values.radius as HpxSliderRadius,
-    thickenTo: values.thickenTo as HpxSliderThickness,
+    rounded: values.rounded as HpxSliderRadius,
+    thickenedSize: values.thickenedSize as HpxSliderThickness,
     edgeSize: values.edgeSize as HpxSliderEdgeSize,
     smooth: values.smooth,
   }
@@ -201,7 +201,7 @@ export function HpxSliderDemo() {
           <div className="flex items-baseline justify-between gap-4">
             <HpxLabel htmlFor="grind">Grind size</HpxLabel>
             <span className="font-mono text-sm tabular-nums text-muted-foreground">
-              <Rolled on={values.roll} value={String(grind)} />
+              <Rolled on={values.rollingNumbers} value={String(grind)} />
             </span>
           </div>
           <HpxSlider
@@ -222,8 +222,8 @@ export function HpxSliderDemo() {
           <div className="flex items-baseline justify-between gap-4">
             <HpxLabel htmlFor="temp">Water temperature</HpxLabel>
             <span className="font-mono text-sm tabular-nums text-muted-foreground">
-              <Rolled on={values.roll} value={String(range[0])} />–
-              <Rolled on={values.roll} value={String(range[1])} />°C
+              <Rolled on={values.rollingNumbers} value={String(range[0])} />–
+              <Rolled on={values.rollingNumbers} value={String(range[1])} />°C
             </span>
           </div>
           <HpxSlider

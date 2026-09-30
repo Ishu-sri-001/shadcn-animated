@@ -50,9 +50,9 @@ const controls = {
     ],
   },
 
-  successTick: { disabled: (v) => !v.validate, group: "Input", type: "checkbox", label: "Tick when valid", value: true },
-  counter: { group: "Input", type: "checkbox", label: "Rolling character count", value: true },
-  description: { group: "Input", type: "checkbox", label: "Hint under email", value: false },
+  showSuccessTick: { disabled: (v) => !v.validate, group: "Input", type: "checkbox", label: "Show success tick", value: true },
+  showCounter: { group: "Input", type: "checkbox", label: "Show counter", value: true },
+  showDescription: { group: "Input", type: "checkbox", label: "Description", value: false },
   rounded: {
     group: "Input",
     type: "select",
@@ -110,7 +110,7 @@ const addressSchema = z.object({
 
 export function HpxFormDemo() {
   const panel = useHpxControls(controls)
-  const { counter, description, rounded, errorAnimation, labelStyle, validate, ...options } =
+  const { showCounter, showDescription, rounded, errorAnimation, labelStyle, validate, ...options } =
     panel.values
 
   const [name, setName] = React.useState("")
@@ -178,7 +178,7 @@ export function HpxFormDemo() {
                 placeholder={labelStyle === "floating" ? " " : "Sam Rivera"}
                 value={name}
                 maxLength={40}
-                counter={counter}
+                showCounter={showCounter}
                 onChange={(event) => setName(event.target.value)}
                 onBlur={() => touch("name")}
               />
@@ -194,15 +194,15 @@ export function HpxFormDemo() {
                 onChange={(event) => setEmail(event.target.value)}
                 onBlur={() => touch("email")}
               />
-              {description && <HpxFieldDescription className="text-sm">We&apos;ll send tracking here.</HpxFieldDescription>}
+              {showDescription && <HpxFieldDescription className="text-sm">We&apos;ll send tracking here.</HpxFieldDescription>}
               <HpxFieldError>{errors.email}</HpxFieldError>
             </HpxField>
             <HpxField {...enter(3)}>
               <div className="flex items-end gap-2">
-                <HpxDropdownMenu animation="scale" duration={0.3} delay={0.02} stagger={0} highlight="slide" highlightColor="muted" typeahead>
+                <HpxDropdownMenu animation="scale" duration={0.3} delay={0.02} stagger={0} itemHighlight="slide" itemHighlightColor="muted" typeahead>
                   <HpxDropdownMenuTrigger
                     type="button"
-                    animateValue
+                    rollingValue
                     aria-label={`Country calling code: ${country.name} ${country.code}`}
                     className={cn(
                       "flex shrink-0 items-center gap-2 border border-input bg-transparent px-2.5 text-sm shadow-xs transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-input/30",
@@ -249,7 +249,7 @@ export function HpxFormDemo() {
                 placeholder={labelStyle === "floating" ? " " : "Leave it by the blue door"}
                 value={note}
                 maxLength={60}
-                counter={counter}
+                showCounter={showCounter}
                 onChange={(event) => setNote(event.target.value)}
               />
             </HpxField>

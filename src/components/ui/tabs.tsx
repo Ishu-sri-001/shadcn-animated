@@ -20,12 +20,12 @@ type TabsActiveColor = "primary" | "muted"
 type TabsRounded = "none" | "sm" | "md" | "lg" | "xl" | "full"
 
 type TabsMotion = {
-  indicator: TabsIndicator
-  content: TabsContentMotion
+  activeIndicator: TabsIndicator
+  contentAnimation: TabsContentMotion
   /** Background of the active tab. */
   activeColor: TabsActiveColor
   /** How far the content slides, in px. */
-  distance: number
+  slideDistance: number
   /** Seconds. How long the indicator and a sliding panel take. */
   duration: number
   bounce: number
@@ -34,7 +34,7 @@ type TabsMotion = {
   /** The panel grows and shrinks to fit the content instead of jumping. */
   smoothHeight: boolean
   /** A soft highlight follows the pointer over the tabs. */
-  hover: boolean
+  hoverHighlight: boolean
   /** A line under the row of tabs, between the tabs and the content. */
   divider: boolean
   /** A box border around the row of tabs. */
@@ -89,15 +89,15 @@ function useMotionOk(transition: Transition): Transition {
 }
 
 function Tabs({
-  indicator = "glide",
-  content = "slide",
+  activeIndicator = "glide",
+  contentAnimation = "slide",
   activeColor = "primary",
-  distance = 40,
+  slideDistance = 40,
   duration = 0.35,
   bounce = 0.15,
   fadeDuration = 0.35,
   smoothHeight = true,
-  hover = false,
+  hoverHighlight = false,
   divider = true,
   listBorder = false,
   panelBorder = false,
@@ -122,15 +122,15 @@ function Tabs({
       direction,
       hovered,
       setHovered,
-      indicator,
-      content,
+      activeIndicator,
+      contentAnimation,
       activeColor,
-      distance,
+      slideDistance,
       duration,
       bounce,
       fadeDuration,
       smoothHeight,
-      hover,
+      hoverHighlight,
       divider,
       listBorder,
       panelBorder,
@@ -141,15 +141,15 @@ function Tabs({
       value,
       direction,
       hovered,
-      indicator,
-      content,
+      activeIndicator,
+      contentAnimation,
       activeColor,
-      distance,
+      slideDistance,
       duration,
       bounce,
       fadeDuration,
       smoothHeight,
-      hover,
+      hoverHighlight,
       divider,
       listBorder,
       panelBorder,
@@ -182,8 +182,8 @@ function Tabs({
 }
 
 function TabsList({ className, ...props }: Omit<TabsPrimitive.List.Props, "render">) {
-  const { indicator, rounded, listBorder, divider } = useTabs()
-  const pill = indicator === "glide"
+  const { activeIndicator, rounded, listBorder, divider } = useTabs()
+  const pill = activeIndicator === "glide"
 
   return (
     // The line sits right under the tabs; the pill row gets a little air above it
@@ -269,7 +269,7 @@ function TabsTrigger({
         ROUNDED[c.rounded],
         // Only the glide pill has a fill behind the text; the underline modes are just the bar
         active
-          ? c.indicator === "glide"
+          ? c.activeIndicator === "glide"
             ? ACTIVE_TEXT[c.activeColor]
             : "text-foreground"
           : "text-muted-foreground hover:text-foreground",
@@ -278,7 +278,7 @@ function TabsTrigger({
       {...props}
     >
       <AnimatePresence initial={false}>
-        {c.hover && c.hovered === value && !active && (
+        {c.hoverHighlight && c.hovered === value && !active && (
           <motion.span
             key="hover"
             aria-hidden
@@ -292,15 +292,15 @@ function TabsTrigger({
         )}
       </AnimatePresence>
 
-      {c.indicator === "glide" && active && (
+      {c.activeIndicator === "glide" && active && (
         <motion.span aria-hidden layoutId={`${c.id}-pill`} className={bg} transition={move} />
       )}
 
-      {c.indicator === "underline" && active && (
+      {c.activeIndicator === "underline" && active && (
         <motion.span aria-hidden layoutId={`${c.id}-line`} className={bar} transition={move} />
       )}
 
-      {c.indicator === "fade" && (
+      {c.activeIndicator === "fade" && (
         <motion.span
           aria-hidden
           className={bar}
@@ -371,28 +371,28 @@ function TabsContent({
 }) {
   const c = useTabs()
   const reduceMotion = useReducedMotion()
-  const slide = c.content === "slide" && !reduceMotion
-  const still = c.content === "none" || reduceMotion
+  const slide = c.contentAnimation === "slide" && !reduceMotion
+  const still = c.contentAnimation === "none" || reduceMotion
   const fade = c.fadeDuration
 
   const variants: Variants = {
-    enter: (d: number) => ({ opacity: still ? 1 : 0, x: slide ? d * c.distance : 0 }),
+    enter: (d: number) => ({ opacity: still ? 1 : 0, x: slide ? d * c.slideDistance : 0 }),
     center: {
       opacity: 1,
       x: 0,
       transition: still
         ? { duration: 0 }
-        : c.content === "slide"
+        : c.contentAnimation === "slide"
           ? { type: "spring", duration: c.duration, bounce: c.bounce }
           : { duration: fade, ease: fadeEase },
     },
     exit: (d: number) => ({
       opacity: still ? 1 : 0,
-      x: slide ? -d * c.distance : 0,
+      x: slide ? -d * c.slideDistance : 0,
       // Sliding out is quick so the switch never feels slow; a fade uses its own duration each way
       transition: still
         ? { duration: 0 }
-        : c.content === "slide"
+        : c.contentAnimation === "slide"
           ? { duration: c.duration * 0.5, ease: "easeIn" }
           : { duration: fade, ease: fadeEase },
     }),

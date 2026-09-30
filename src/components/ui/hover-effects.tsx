@@ -57,7 +57,7 @@ function useHoverFill() {
  * The hover state shared by the dialog and drawer triggers: text that rolls, and optionally
  * the circle fill. Without the fill, hover leaves the background alone.
  */
-function useTriggerHover({ textRoll, fillOnHover }: { textRoll: boolean; fillOnHover: boolean }) {
+function useTriggerHover({ rollingText, fillOnHover }: { rollingText: boolean; fillOnHover: boolean }) {
   const { place, circle, label } = useHoverFill()
   return {
     className: cn(
@@ -73,7 +73,7 @@ function useTriggerHover({ textRoll, fillOnHover }: { textRoll: boolean; fillOnH
       if (fillOnHover) place(event, false)
     },
     content: (children: React.ReactNode) => {
-      const text = textRoll && typeof children === "string" ? <RollText>{children}</RollText> : children
+      const text = rollingText && typeof children === "string" ? <RollText>{children}</RollText> : children
       return fillOnHover ? (
         <>
           {circle}

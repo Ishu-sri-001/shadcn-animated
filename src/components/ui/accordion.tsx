@@ -34,7 +34,7 @@ type MotionPreset = {
 }
 
 type MotionOptions = {
-  gooey: boolean
+  elastic: boolean
   duration: number
   bounce: number
   delay: number
@@ -44,13 +44,13 @@ type MotionOptions = {
 const clamp01 = (n: number) => Math.min(Math.max(n, 0), 1)
 
 function buildPreset({
-  gooey,
+  elastic,
   duration,
   bounce,
   delay,
   stagger,
 }: MotionOptions): MotionPreset {
-  if (!gooey) {
+  if (!elastic) {
     const smooth = { duration, ease: smoothEase }
     const fill = { duration, ease: fillEase }
     const quick = { duration: duration * 0.6, ease: "easeOut" } as const
@@ -95,7 +95,7 @@ const HOVER_INTENT_MS = 100
 
 const AccordionMotionContext = React.createContext<MotionPreset>(
   buildPreset({
-    gooey: false,
+    elastic: false,
     duration: 0.5,
     bounce: 0.3,
     delay: 0.2,
@@ -136,7 +136,7 @@ function contentItemVariants(preset: MotionPreset): Variants {
 function Accordion({
   className,
   bordered = false,
-  gooey = false,
+  elastic = false,
   duration = 0.5,
   bounce = 0.3,
   delay = 0.2,
@@ -149,7 +149,7 @@ function Accordion({
   ...props
 }: AccordionPrimitive.Root.Props & {
   bordered?: boolean
-  gooey?: boolean
+  elastic?: boolean
   duration?: number
   bounce?: number
   delay?: number
@@ -157,8 +157,8 @@ function Accordion({
   openOnHover?: boolean
 }) {
   const preset = React.useMemo(
-    () => buildPreset({ gooey, duration, bounce, delay, stagger }),
-    [gooey, duration, bounce, delay, stagger]
+    () => buildPreset({ elastic, duration, bounce, delay, stagger }),
+    [elastic, duration, bounce, delay, stagger]
   )
 
   const [openValue, setOpenValue] = React.useState<unknown[]>(
@@ -220,13 +220,13 @@ function AccordionItem({
   className,
   fill,
   rounded = "rounded-none",
-  line = false,
+  showLine = false,
   onPointerMove,
   ...props
 }: AccordionPrimitive.Item.Props & {
   fill?: keyof typeof FILL_COLOR | false
   rounded?: string
-  line?: boolean
+  showLine?: boolean
 }) {
   const preset = React.useContext(AccordionMotionContext)
   const openFromHover = React.useContext(AccordionHoverContext)
@@ -282,7 +282,7 @@ function AccordionItem({
                 "transition-opacity duration-300 group-hpx-open/accordion-item:opacity-0 group-has-[+[data-open]]/accordion-item:opacity-0"
             )}
           />
-          {line && <AccordionItemLine drawn={hovered || state.open} />}
+          {showLine && <AccordionItemLine drawn={hovered || state.open} />}
         </motion.div>
       )}
       {...props}

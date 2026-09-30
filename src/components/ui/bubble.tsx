@@ -157,11 +157,11 @@ function Bubble({
   variant = "default",
   align = "start",
   className,
-  enter = true,
+  animateEnter = true,
   enterDelay = 0,
   enterFrom,
-  shake = true,
-  lift = false,
+  shakeOnError = true,
+  liftOnHover = false,
   selectable = true,
   time,
   revealTime = false,
@@ -170,9 +170,9 @@ function Bubble({
   onReact,
   onUnreact,
   reacted,
-  doubleClickReact = true,
-  picker = true,
-  magnify = false,
+  doubleClickToReact = true,
+  showReactionPicker = true,
+  magnifyEmojis = false,
   reactions = DEFAULT_REACTIONS,
   ref,
   style,
@@ -187,11 +187,11 @@ function Bubble({
 }: React.ComponentProps<"div"> &
   VariantProps<typeof bubbleVariants> & {
     align?: "start" | "end"
-    enter?: boolean
+    animateEnter?: boolean
     enterDelay?: number
     enterFrom?: { x: number; y: number; width: number; height: number }
-    shake?: boolean
-    lift?: boolean
+    shakeOnError?: boolean
+    liftOnHover?: boolean
     selectable?: boolean
     time?: string
     revealTime?: boolean
@@ -201,9 +201,9 @@ function Bubble({
     onUnreact?: (emoji: string) => void
     /** Emojis you've already reacted with. */
     reacted?: string[]
-    doubleClickReact?: boolean
-    picker?: boolean
-    magnify?: boolean
+    doubleClickToReact?: boolean
+    showReactionPicker?: boolean
+    magnifyEmojis?: boolean
     /** Emojis offered by the picker. */
     reactions?: string[]
   }) {
@@ -237,7 +237,7 @@ function Bubble({
     }
     setPickerOpen(true)
   }
-  const canPick = picker && onReact !== undefined
+  const canPick = showReactionPicker && onReact !== undefined
 
   const flyFrom = React.useRef(enterFrom)
   React.useLayoutEffect(() => {
@@ -292,9 +292,9 @@ function Bubble({
   React.useEffect(() => {
     const was = lastVariant.current
     lastVariant.current = variant
-    if (!shake || reduceMotion || variant !== "destructive" || was === "destructive") return
+    if (!shakeOnError || reduceMotion || variant !== "destructive" || was === "destructive") return
     animate(x, [0, -8, 8, -5, 5, -2, 0], { duration: 0.45, ease: "easeOut" })
-  }, [variant, shake, reduceMotion, x])
+  }, [variant, shakeOnError, reduceMotion, x])
 
   React.useEffect(() => () => window.clearTimeout(pickerTimer.current), [])
 
@@ -314,19 +314,19 @@ function Bubble({
         bubbleVariants({ variant }),
         "has-data-[hpx-slot=bubble-reactions]:z-10",
         (pickerOpen || bursts.length > 0) && "z-20",
-        lift &&
+        liftOnHover &&
           "*:data-[hpx-slot=bubble-content]:transition-shadow *:data-[hpx-slot=bubble-content]:duration-300 hover:*:data-[hpx-slot=bubble-content]:shadow-md",
         className
       )}
       style={{ ...style, x, originX: align === "end" ? 1 : 0, originY: 1 }}
       custom={enterDelay}
       variants={enterVariants}
-      initial={enter && !flying ? "hidden" : false}
+      initial={animateEnter && !flying ? "hidden" : false}
       animate="visible"
       layout={inThread ? "position" : undefined}
       transition={{ layout: spring }}
-      whileHover={lift ? { y: -2 } : undefined}
-      whileTap={lift ? { scale: 0.98 } : undefined}
+      whileHover={liftOnHover ? { y: -2 } : undefined}
+      whileTap={liftOnHover ? { scale: 0.98 } : undefined}
       drag={canSwipe ? "x" : false}
       dragListener={!selectable}
       dragControls={dragControls}
@@ -342,11 +342,11 @@ function Bubble({
       }}
       onMouseDown={(event) => {
         onMouseDown?.(event)
-        if (doubleClickReact && onReact && event.detail > 1) event.preventDefault()
+        if (doubleClickToReact && onReact && event.detail > 1) event.preventDefault()
       }}
       onDoubleClick={(event) => {
         onDoubleClick?.(event)
-        if (!doubleClickReact || !onReact) return
+        if (!doubleClickToReact || !onReact) return
         if (reacted?.includes("❤️") && onUnreact) {
           onUnreact("❤️")
           return
@@ -416,7 +416,7 @@ function Bubble({
             align={align}
             side={pickerSide}
             reactions={reactions}
-            magnify={magnify}
+            magnifyEmojis={magnifyEmojis}
             onPick={(emoji) => {
               setPickerOpen(false)
               onReact?.(emoji)
@@ -462,17 +462,17 @@ function ReactionPicker({
   align,
   side,
   reactions,
-  magnify,
+  magnifyEmojis,
   onPick,
 }: {
   align: "start" | "end"
   side: "top" | "bottom"
   reactions: string[]
-  magnify: boolean
+  magnifyEmojis: boolean
   onPick: (emoji: string) => void
 }) {
   const scaleUnderPointer = (row: HTMLElement, pointerX: number | null) => {
-    if (!magnify) return
+    if (!magnifyEmojis) return
     for (const button of row.querySelectorAll<HTMLElement>("[data-emoji]")) {
       const box = button.getBoundingClientRect()
       const distance = pointerX === null ? Infinity : Math.abs(pointerX - (box.left + box.width / 2))
@@ -816,17 +816,17 @@ function BubbleReactions({
   side = "bottom",
   align = "end",
   className,
-  pop = true,
+  popOnChange = true,
   count,
-  rolling = true,
+  rollingNumbers = true,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
   align?: "start" | "end"
   side?: "top" | "bottom"
-  pop?: boolean
+  popOnChange?: boolean
   count?: number
-  rolling?: boolean
+  rollingNumbers?: boolean
 }) {
   const node = React.useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
@@ -834,9 +834,9 @@ function BubbleReactions({
   React.useEffect(() => {
     const was = lastCount.current
     lastCount.current = count
-    if (!pop || reduceMotion || was === count || !node.current) return
+    if (!popOnChange || reduceMotion || was === count || !node.current) return
     animate(node.current, { rotate: [0, -12, 10, -6, 0], scale: [1, 1.2, 1] }, { duration: 0.5 })
-  }, [count, pop, reduceMotion])
+  }, [count, popOnChange, reduceMotion])
 
   const pill = (
     <motion.div
@@ -845,14 +845,14 @@ function BubbleReactions({
       data-align={align}
       data-side={side}
       className={cn(bubbleReactionsVariants({ side, align }), className)}
-      initial={pop ? { scale: 0, opacity: 0 } : false}
+      initial={popOnChange ? { scale: 0, opacity: 0 } : false}
       animate={{ scale: 1, opacity: 1 }}
-      exit={pop ? { scale: 0, opacity: 0 } : undefined}
+      exit={popOnChange ? { scale: 0, opacity: 0 } : undefined}
       transition={bouncy}
       {...(props as HTMLMotionProps<"div">)}
     >
       <span className="flex gap-0.5">{children}</span>
-      {count !== undefined && <RollingNumber value={count} rolling={rolling} />}
+      {count !== undefined && <RollingNumber value={count} rollingNumbers={rollingNumbers} />}
     </motion.div>
   )
 
@@ -871,9 +871,9 @@ function BubbleReactions({
   )
 }
 
-function RollingNumber({ value, rolling }: { value: number; rolling: boolean }) {
+function RollingNumber({ value, rollingNumbers }: { value: number; rollingNumbers: boolean }) {
   const text = String(value)
-  if (!rolling) return <span className="tabular-nums">{text}</span>
+  if (!rollingNumbers) return <span className="tabular-nums">{text}</span>
   const digits = text.split("")
   return (
     <span className="tabular-nums">

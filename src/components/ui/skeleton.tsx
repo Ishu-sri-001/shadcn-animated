@@ -103,7 +103,7 @@ function Skeleton({
 
 function SkeletonSwap({
   loading,
-  swap = "scale",
+  swapAnimation = "scale",
   duration = 0.4,
   stagger = 0.06,
   skeleton,
@@ -111,7 +111,7 @@ function SkeletonSwap({
   className,
 }: {
   loading: boolean
-  swap?: SkeletonSwap
+  swapAnimation?: SkeletonSwap
   duration?: number
   stagger?: number
   skeleton: React.ReactNode
@@ -122,7 +122,7 @@ function SkeletonSwap({
 
   const enter = React.useCallback(
     (node: HTMLDivElement | null) => {
-      if (!node || reduced || swap === "none" || stagger <= 0) return
+      if (!node || reduced || swapAnimation === "none" || stagger <= 0) return
       // Wrapper divs with one child would stagger as a single item
       let row: Element = node
       while (row.children.length === 1) row = row.children[0]
@@ -130,17 +130,17 @@ function SkeletonSwap({
       const stop = hpxStaggerIn(node, "[data-skeleton-row] > *", {
         gap: stagger,
         delay: 0,
-        distance: swap === "rise" ? 8 : 0,
+        distance: swapAnimation === "rise" ? 8 : 0,
       })?.stop
       return () => {
         row.removeAttribute("data-skeleton-row")
         stop?.()
       }
     },
-    [reduced, swap, stagger]
+    [reduced, swapAnimation, stagger]
   )
 
-  const kind = reduced && swap !== "none" ? "fade" : swap
+  const kind = reduced && swapAnimation !== "none" ? "fade" : swapAnimation
   const initial = {
     fade: { opacity: 0 },
     rise: { opacity: 0, y: 8 },

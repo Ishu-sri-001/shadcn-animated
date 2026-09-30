@@ -41,13 +41,13 @@ type FloatingTooltipOptions = {
   follow: FloatingTooltipFollow
   /** Which side of the cursor or element the tooltip sits on. It is centred on that point. */
   side: FloatingTooltipSide
-  offset: FloatingTooltipOffset
-  appear: FloatingTooltipAppear
-  change: FloatingTooltipChange
+  sideOffset: FloatingTooltipOffset
+  appearAnimation: FloatingTooltipAppear
+  changeAnimation: FloatingTooltipChange
   /** The box stretches along the way it is moving, with speed. Needs elastic. */
-  stretch: boolean
+  stretchOnMove: boolean
   /** The box leans into the way it is moving, with speed. Needs elastic. */
-  tilt: boolean
+  tiltOnMove: boolean
   /**
    * The rubbery feel: it overshoots a little, and can stretch and lean with speed.
    * Off, it just glides smoothly to where it is going and stops there.
@@ -142,11 +142,11 @@ function FloatingTooltipProvider({
   rounded = "md",
   follow = "cursor",
   side = "top",
-  offset = "4",
-  appear = "scale",
-  change = "instant",
-  stretch = true,
-  tilt = true,
+  sideOffset = "4",
+  appearAnimation = "scale",
+  changeAnimation = "instant",
+  stretchOnMove = true,
+  tiltOnMove = true,
   elastic = true,
   stiffness = 750,
   closeDelay = 0.1,
@@ -155,10 +155,10 @@ function FloatingTooltipProvider({
 }: { children: React.ReactNode } & Partial<FloatingTooltipOptions>) {
   const options = React.useMemo(
     () => ({
-      variant, rounded, follow, side, offset, appear, change, stretch, tilt,
+      variant, rounded, follow, side, sideOffset, appearAnimation, changeAnimation, stretchOnMove, tiltOnMove,
       elastic, stiffness, closeDelay, duration, bounce,
     }),
-    [variant, rounded, follow, side, offset, appear, change, stretch, tilt, elastic, stiffness, closeDelay, duration, bounce]
+    [variant, rounded, follow, side, sideOffset, appearAnimation, changeAnimation, stretchOnMove, tiltOnMove, elastic, stiffness, closeDelay, duration, bounce]
   )
 
   const reduceMotion = useReducedMotion()
@@ -208,7 +208,7 @@ function FloatingTooltipProvider({
     (jump = false) => {
       const o = optionsRef.current
       const { w, h } = size$.current
-      const gap = Number(o.offset) * 4
+      const gap = Number(o.sideOffset) * 4
       const vw = window.innerWidth
       const vh = window.innerHeight
       let x = 0
@@ -355,15 +355,15 @@ function FloatingTooltipProvider({
   const stretchOn = useMotionValue(0)
   const tiltOn = useMotionValue(0)
   React.useEffect(() => {
-    stretchOn.set(elastic && stretch && !reduceMotion ? 1 : 0)
-    tiltOn.set(elastic && tilt && !reduceMotion ? 1 : 0)
-  }, [elastic, stretch, tilt, reduceMotion, stretchOn, tiltOn])
+    stretchOn.set(elastic && stretchOnMove && !reduceMotion ? 1 : 0)
+    tiltOn.set(elastic && tiltOnMove && !reduceMotion ? 1 : 0)
+  }, [elastic, stretchOnMove, tiltOnMove, reduceMotion, stretchOn, tiltOn])
   const scaleX = useTransform(() => 1 + clamp(vx.get() / 1000, -1.5, 1.5) * 0.15 * stretchOn.get())
   const scaleY = useTransform(() => 1 - clamp(Math.abs(vx.get()) / 1000, 0, 1.5) * 0.06 * stretchOn.get())
   const skewX = useTransform(() => clamp(vx.get() / 1000, -1.5, 1.5) * 3 * tiltOn.get())
 
   // On a touch screen it only fades in and out
-  const how = touch && appear === "scale" ? "fade" : appear
+  const how = touch && appearAnimation === "scale" ? "fade" : appearAnimation
   const appearIn = how === "scale" ? { opacity: 0, scale: 0.9 } : { opacity: 0 }
   const appearOut = how === "scale" ? { opacity: 0, scale: 0.8 } : { opacity: 0 }
   const enter: Transition =
@@ -397,7 +397,7 @@ function FloatingTooltipProvider({
                         "w-max font-medium",
                         VARIANT[variant],
                         ROUNDED[rounded],
-                        change !== "instant" && !touch && "overflow-hidden"
+                        changeAnimation !== "instant" && !touch && "overflow-hidden"
                       )}
                       style={{
                         scaleX,
@@ -435,11 +435,11 @@ function Text({ payload }: { payload: Payload }) {
 }
 
 function Body({ payload, direction, touch }: { payload: Payload; direction: number; touch: boolean }) {
-  const { change } = useOptions()
+  const { changeAnimation } = useOptions()
   // A tap only fades the text out and in: no reshaping, no sliding, whatever the setting
   if (touch) return <FadeOnly payload={payload} />
-  if (change === "instant") return <Text payload={payload} />
-  return <Morph payload={payload} direction={direction} mode={change} />
+  if (changeAnimation === "instant") return <Text payload={payload} />
+  return <Morph payload={payload} direction={direction} mode={changeAnimation} />
 }
 
 // The old text fades out, then the new text fades in. The box just becomes the new size.

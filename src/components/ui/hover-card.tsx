@@ -20,7 +20,7 @@ type HoverCardMotion = {
   /** Card drifts with the pointer. */
   followCursor: boolean
   /** Content fades in after the card. */
-  contentFade: boolean
+  fadeContent: boolean
   /** Link underline draws on hover. */
   underline: boolean
   rounded: HoverCardRounded
@@ -67,10 +67,10 @@ function useHoverCard() {
 function HoverCard({
   contentAnimation = "scale",
   startScale = 0.9,
-  openDelay = 400,
-  closeDelay = 200,
+  openDelay = 0.4,
+  closeDelay = 0.2,
   followCursor = false,
-  contentFade = true,
+  fadeContent = true,
   underline = true,
   rounded = "lg",
   open: openProp,
@@ -93,12 +93,12 @@ function HoverCard({
         openDelay,
         closeDelay,
         followCursor,
-        contentFade,
+        fadeContent,
         underline,
         rounded,
       },
     }),
-    [follow, open, contentAnimation, startScale, openDelay, closeDelay, followCursor, contentFade, underline, rounded]
+    [follow, open, contentAnimation, startScale, openDelay, closeDelay, followCursor, fadeContent, underline, rounded]
   )
   return (
     <HoverCardContext.Provider value={context}>
@@ -127,8 +127,8 @@ function HoverCardTrigger({
   return (
     <PreviewCardPrimitive.Trigger
       data-hpx-slot="hover-card-trigger"
-      delay={options.openDelay}
-      closeDelay={options.closeDelay}
+      delay={options.openDelay * 1000}
+      closeDelay={options.closeDelay * 1000}
       onPointerDown={(event) => {
         onPointerDown?.(event)
         pointerType.current = event.pointerType
@@ -180,9 +180,9 @@ function HoverCardContent({
       // Start centred under the link.
       follow.jump(0)
       x.jump(0)
-      if (options.contentFade) fadeInContent(node)
+      if (options.fadeContent) fadeInContent(node)
     },
-    [follow, x, options.contentFade]
+    [follow, x, options.fadeContent]
   )
 
   const scale = options.contentAnimation === "scale" ? options.startScale : 1
