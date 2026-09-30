@@ -83,7 +83,7 @@ function ColorField({
           const hex = normalize(e.target.value)
           if (HPX_HEX_PATTERN.test(hex)) onCommit(hex.toLowerCase())
         }}
-        className="font-mono uppercase"
+        className="font-mono uppercase focus-visible:ring-0 aria-invalid:ring-0"
       />
     </div>
   )
@@ -143,6 +143,7 @@ function CustomizerBody({ onDone }: { onDone: () => void }) {
             aria-invalid={taken}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && save()}
+            className="focus-visible:ring-0 aria-invalid:ring-0"
           />
           {taken && (
             <span className="text-xs text-destructive">That name is already used.</span>
