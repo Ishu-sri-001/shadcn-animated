@@ -414,7 +414,7 @@ function CheckboxItem({
               aria-hidden
               className={cn(
                 "pointer-events-none  absolute inset-x-0 top-1/2 h-0.5! -translate-y-1/2 origin-left rounded-full opacity-70",
-                onAccent ? "bg-(--checkbox-on-accent)" : "bg-black"
+                onAccent ? "bg-(--checkbox-on-accent)" : "bg-foreground"
               )}
               initial={false}
               animate={{ scaleX: checked ? 1 : 0 }}
@@ -458,7 +458,7 @@ function CheckboxItem({
       className
     ),
     style: accent
-      ? ({ "--checkbox-accent": accent, "--checkbox-on-accent": "white" } as React.CSSProperties)
+      ? ({ "--checkbox-accent": accent, "--checkbox-on-accent": "var(--primary-foreground)" } as React.CSSProperties)
       : undefined,
     onPointerDown: (event: React.PointerEvent) => {
       shift.current = event.shiftKey

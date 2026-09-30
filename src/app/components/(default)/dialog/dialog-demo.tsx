@@ -33,11 +33,12 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-  bounce: { group: "Opening", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
+  bounce: { disabled: (v) => !v.springy, group: "Opening", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
   contentFade: { group: "Opening", type: "checkbox", label: "Content fade-in", value: true },
-  contentScale: { group: "Opening", type: "checkbox", label: "Content scales in", value: false },
+  contentScale: { disabled: (v) => !v.contentFade, group: "Opening", type: "checkbox", label: "Content scales in", value: false },
 
   exit: {
+    disabled: (v) => !!v.fromTrigger,
     group: "Closing",
     type: "select",
     label: "Exit",
@@ -50,7 +51,7 @@ const controls = {
   },
   contentFadeOut: { group: "Closing", type: "checkbox", label: "Content fades out first", value: true },
   dismissible: { group: "Closing", type: "checkbox", label: "Click outside closes", value: true },
-  shakeOnBlock: { group: "Closing", type: "checkbox", label: "Shake when blocked", value: true },
+  shakeOnBlock: { disabled: (v) => !!v.dismissible, group: "Closing", type: "checkbox", label: "Shake when blocked", value: true },
 
   backdrop: {
     group: "Style",
@@ -70,12 +71,12 @@ const controls = {
     value: "xl",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
-      { label: "2XL", value: "2xl" },
-      { label: "3XL", value: "3xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
+      { label: "2xl", value: "2xl" },
+      { label: "3xl", value: "3xl" },
     ],
   },
 } satisfies ControlSchema

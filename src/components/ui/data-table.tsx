@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const easeOutCubic = [0.33, 1, 0.68, 1] as const
-const glide = { type: "spring", visualDuration: 0.3, bounce: 0.15 } as const
+const glide = { type: "spring", visualDuration: 0.3 * 0.6, bounce: 0.15 } as const
 
 /** Gap between a row's cells with `rowCellsStagger`, in seconds. */
 const CELL_GAP = 0.04
@@ -1567,9 +1567,9 @@ function AnimatedNumber({
 }
 
 const toneClasses: Record<DataTableStatusTone, string> = {
-  success: "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
-  warning: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
-  danger: "bg-rose-500/12 text-rose-700 dark:text-rose-400",
+  success: "bg-success/12 text-success",
+  warning: "bg-warning/15 text-warning",
+  danger: "bg-destructive/12 text-destructive",
   neutral: "bg-muted text-muted-foreground",
 }
 

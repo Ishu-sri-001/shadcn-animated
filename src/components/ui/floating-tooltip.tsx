@@ -26,12 +26,12 @@ type FloatingTooltipSide = "top" | "bottom" | "left" | "right"
 type FloatingTooltipAppear = "scale" | "fade" | "none"
 /**
  * What happens when you move to another trigger while a tooltip is open.
- * instant: the text swaps. morph: the box stays and reshapes, and the text slides the way you moved.
+ * instant: the text swaps.
  * fade: the box reshapes and the text cross-fades.
  * roll: the box reshapes and the text rolls up or down, the way you moved.
- * swipe: the box reshapes and the text swipes fully out and in sideways, the way you moved.
+ * slide: the box reshapes and the text slides fully out and in sideways, the way you moved.
  */
-type FloatingTooltipChange = "instant" | "morph" | "fade" | "roll" | "swipe"
+type FloatingTooltipChange = "instant" | "fade" | "roll" | "slide"
 /** A Tailwind spacing step: "4" is 1rem. */
 type FloatingTooltipOffset = "1" | "2" | "3" | "4" | "6" | "8"
 
@@ -55,16 +55,12 @@ type FloatingTooltipOptions = {
   elastic: boolean
   /** How tightly it follows. Lower is softer. */
   stiffness: number
-  /** Seconds before it opens. */
-  delay: number
   /** Seconds before it closes, so it can stay open while you cross a gap to the next trigger. */
   closeDelay: number
   /** Seconds the box takes to reshape when the text changes. */
   duration: number
-  /** How springy it is: the follow overshoot (elastic) and the box reshaping. 0 is none. */
+  /** How much it overshoots: following (needs elastic) and reshaping for morph. 0 is none. */
   bounce: number
-  /** How far the text slides in a "morph", in px. */
-  distance: number
 }
 
 const TEXT_SIZE = "px-3.5 py-2.5 text-sm"
@@ -79,7 +75,7 @@ const ROUNDED: Record<FloatingTooltipRounded, string> = {
 }
 
 const VARIANT: Record<FloatingTooltipVariant, string> = {
-  default: "bg-primary text-background dark:bg-white dark:text-neutral-900",
+  default: "bg-primary text-primary-foreground",
   outline: "border border-border bg-background text-foreground",
 }
 
@@ -153,18 +149,16 @@ function FloatingTooltipProvider({
   tilt = true,
   elastic = true,
   stiffness = 750,
-  delay = 0,
   closeDelay = 0.1,
   duration = 0.35,
   bounce = 0.2,
-  distance = 24,
 }: { children: React.ReactNode } & Partial<FloatingTooltipOptions>) {
   const options = React.useMemo(
     () => ({
       variant, rounded, follow, side, offset, appear, change, stretch, tilt,
-      elastic, stiffness, delay, closeDelay, duration, bounce, distance,
+      elastic, stiffness, closeDelay, duration, bounce,
     }),
-    [variant, rounded, follow, side, offset, appear, change, stretch, tilt, elastic, stiffness, delay, closeDelay, duration, bounce, distance]
+    [variant, rounded, follow, side, offset, appear, change, stretch, tilt, elastic, stiffness, closeDelay, duration, bounce]
   )
 
   const reduceMotion = useReducedMotion()
@@ -188,7 +182,6 @@ function FloatingTooltipProvider({
   const size$ = React.useRef({ w: 0, h: 0 })
   const shell = React.useRef<HTMLDivElement>(null)
   const opening = React.useRef(false)
-  const openTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
   const closeTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
   const touchTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
   const switchTimer = React.useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -262,7 +255,6 @@ function FloatingTooltipProvider({
   const show = React.useCallback<Show>(
     (next, anchor, from, point) => {
       clearTimeout(closeTimer.current)
-      clearTimeout(openTimer.current)
       clearTimeout(touchTimer.current)
       clearTimeout(switchTimer.current)
       if (point) cursor.current = point
@@ -290,13 +282,11 @@ function FloatingTooltipProvider({
         }
       }
 
-      const wait = optionsRef.current.delay
       if (from === "touch" && openRef.current && anchorEl.current !== anchor) {
         // Tapping another element: fade out where it is, then fade in on the new one. No sliding.
         setOpen(false)
         switchTimer.current = setTimeout(reveal, TOUCH_SWITCH)
-      } else if (openRef.current || wait <= 0 || from === "touch") reveal()
-      else openTimer.current = setTimeout(reveal, wait * 1000)
+      } else reveal()
     },
     [place]
   )
@@ -312,7 +302,6 @@ function FloatingTooltipProvider({
   const hide = React.useCallback((key?: string) => {
     // The tooltip has moved on to another trigger (a tap can blur the old one after the new one opens)
     if (key && keyRef.current && key !== keyRef.current) return
-    clearTimeout(openTimer.current)
     clearTimeout(closeTimer.current)
     closeTimer.current = setTimeout(() => setOpen(false), optionsRef.current.closeDelay * 1000)
   }, [])
@@ -337,7 +326,6 @@ function FloatingTooltipProvider({
       window.removeEventListener("keydown", onKey)
       document.removeEventListener("pointerdown", away, true)
       window.removeEventListener("scroll", away, true)
-      clearTimeout(openTimer.current)
       clearTimeout(closeTimer.current)
       clearTimeout(touchTimer.current)
       clearTimeout(switchTimer.current)
@@ -482,7 +470,7 @@ function Morph({
   direction: number
   mode: FloatingTooltipChange
 }) {
-  const { distance, duration, bounce } = useOptions()
+  const { duration, bounce } = useOptions()
   const reduceMotion = useReducedMotion()
   const reshape = useMotionOk({ type: "spring", duration, bounce })
   const width = useMotionValue(0)
@@ -503,11 +491,9 @@ function Morph({
     [width, height, reshape, reduceMotion]
   )
 
-  const slide = mode === "morph" && !reduceMotion
+  const slide = mode === "slide" && !reduceMotion
   const roll = mode === "roll" && !reduceMotion
-  const swipe = mode === "swipe" && !reduceMotion
-  // A slide moves a short, adjustable way. A swipe moves the whole width, like a roll moves the whole height.
-  const shift = (d: number) => (swipe ? `${d * 100}%` : slide ? d * distance : 0)
+  const shift = (d: number) => (slide ? `${d * 100}%` : 0)
   const variants: Variants = {
     enter: (d: number) => ({ opacity: 0, x: shift(d), y: roll ? `${d * 100}%` : "0%" }),
     center: { opacity: 1, x: 0, y: "0%" },

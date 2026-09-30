@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/checkbox-group"
 
 const toppings = [
-  { value: "Mushrooms", description: "Roasted chestnut mushrooms.", accent: "#a16207" },
-  { value: "Olives", description: "Kalamata, pitted.", accent: "#4d7c0f" },
-  { value: "Peppers", description: "Sweet red and yellow.", accent: "#dc2626" },
-  { value: "Onions", description: "Slow-cooked until sweet.", accent: "#9333ea" },
-  { value: "Basil", description: "Added fresh after baking.", accent: "#16a34a" },
-  { value: "Chilli", description: "Fresh, thinly sliced.", accent: "#ea580c" },
+  { value: "Mushrooms", description: "Roasted chestnut mushrooms.", accent: "var(--warning)" },
+  { value: "Olives", description: "Kalamata, pitted.", accent: "var(--success)" },
+  { value: "Peppers", description: "Sweet red and yellow.", accent: "var(--destructive)" },
+  { value: "Onions", description: "Slow-cooked until sweet.", accent: "var(--primary)" },
+  { value: "Basil", description: "Added fresh after baking.", accent: "var(--chart-2)" },
+  { value: "Chilli", description: "Fresh, thinly sliced.", accent: "var(--info)" },
 ]
 
 const controls = {
@@ -34,6 +34,7 @@ const controls = {
     ],
   },
   cardFill: {
+    disabled: (v) => v.variant === "default",
     group: "Style",
     type: "select",
     label: "Card fill",
@@ -45,10 +46,11 @@ const controls = {
   },
   showIcon: { group: "Style", type: "checkbox", label: "Show box", value: true },
 
-  fill: { group: "Ticking", type: "checkbox", label: "Fill from centre", value: true },
-  bounce: { group: "Ticking", type: "checkbox", label: "Springy tick", value: true },
+  fill: { disabled: (v) => !v.showIcon, group: "Ticking", type: "checkbox", label: "Fill from centre", value: true },
+  bounce: { disabled: (v) => !v.showIcon, group: "Ticking", type: "checkbox", label: "Springy tick", value: true },
 
   mark: {
+    disabled: (v) => !v.showIcon,
     group: "Box",
     type: "select",
     label: "Mark",
@@ -60,6 +62,7 @@ const controls = {
     ],
   },
   appearance: {
+    disabled: (v) => !v.showIcon,
     group: "Box",
     type: "select",
     label: "Look",
@@ -70,16 +73,17 @@ const controls = {
     ],
   },
   radius: {
+    disabled: (v) => !v.showIcon,
     group: "Box",
     type: "select",
     label: "Corner radius",
     value: "sm",
     options: [
       { label: "None", value: "none" },
-      { label: "XS", value: "xs" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
+      { label: "xs", value: "xs" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
       { label: "Full", value: "full" },
     ],
   },

@@ -3,8 +3,7 @@
 import * as React from "react"
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
 import { cn } from "cn"
-import { ChevronRightIcon } from "lucide-react"
-import { MorphPlus } from "@/components/ui/dropdown-menu"
+import { MorphChevron, MorphPlus } from "@/components/ui/dropdown-menu"
 import {
   motion,
   MotionConfig,
@@ -13,8 +12,6 @@ import {
   type HTMLMotionProps,
   type Variants,
 } from "motion/react"
-
-const MotionChevronRightIcon = motion.create(ChevronRightIcon)
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const fillEase = [0.215, 0.61, 0.355, 1] as const
@@ -27,7 +24,7 @@ type MotionPreset = {
   fillOpen: Transition
   fillClose: Transition
   fillClosedScaleX: number
-  chevron: Transition
+  iconDuration: number
   lineDraw: Transition
   lineRetract: Transition
   contentY: Transition
@@ -63,7 +60,7 @@ function buildPreset({
       fillOpen: fill,
       fillClose: fill,
       fillClosedScaleX: 1,
-      chevron: quick,
+      iconDuration: duration,
       lineDraw: { duration, ease: "easeOut" },
       lineRetract: { duration, ease: "easeOut" },
       contentY: quick,
@@ -75,14 +72,13 @@ function buildPreset({
   const spring = (b: number, d = duration) =>
     ({ type: "spring", visualDuration: d, bounce: clamp01(b) }) as const
   const settle = spring(0, Math.max(duration - 0.1, 0.1))
-  const icon = spring(bounce + 0.2, Math.max(duration - 0.1, 0.1))
   return {
     panelOpen: spring(bounce - 0.05),
     panelClose: settle,
     fillOpen: spring(bounce),
     fillClose: settle,
     fillClosedScaleX: 0.94,
-    chevron: icon,
+    iconDuration: duration,
     lineDraw: spring(bounce - 0.1),
     lineRetract: settle,
     contentY: spring(bounce + 0.1),
@@ -215,6 +211,11 @@ function Accordion({
   )
 }
 
+const FILL_COLOR = {
+  muted: { bg: "bg-muted", text: "" },
+  primary: { bg: "bg-primary", text: "data-open:**:text-primary-foreground!" },
+} as const
+
 function AccordionItem({
   className,
   fill,
@@ -223,7 +224,7 @@ function AccordionItem({
   onPointerMove,
   ...props
 }: AccordionPrimitive.Item.Props & {
-  fill?: string
+  fill?: keyof typeof FILL_COLOR | false
   rounded?: string
   line?: boolean
 }) {
@@ -247,7 +248,7 @@ function AccordionItem({
       }}
       className={cn(
         "group/accordion-item relative py-3",
-        fill && cn("isolate px-4 transition-colors duration-500", rounded),
+        fill && cn("isolate px-4 transition-colors duration-500", rounded, FILL_COLOR[fill].text),
         className
       )}
       render={(itemProps, state) => (
@@ -261,7 +262,7 @@ function AccordionItem({
               aria-hidden
               className={cn(
                 "pointer-events-none absolute inset-0 -z-10 rounded-[inherit]",
-                fill
+                FILL_COLOR[fill].bg
               )}
               style={{ originY: 0 }}
               initial={false}
@@ -324,7 +325,7 @@ function AccordionItemLine({ drawn }: { drawn: boolean }) {
       ref={scope}
       aria-hidden
       style={{ scaleX: 0 }}
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-foreground"
+      className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-current"
     />
   )
 }
@@ -358,12 +359,11 @@ function AccordionTrigger({
                 className="size-5!"
               />
             ) : (
-              <MotionChevronRightIcon
+              // Shared with the dropdown trigger, so both morph the same way.
+              <MorphChevron
                 data-slot="accordion-trigger-icon"
-                className="pointer-events-none shrink-0"
-                initial={false}
-                animate={{ rotate: state.open ? 90 : 0 }}
-                transition={preset.chevron}
+                open={state.open}
+                duration={preset.iconDuration}
               />
             )}
           </button>

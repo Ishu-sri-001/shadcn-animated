@@ -54,7 +54,7 @@ const controls = {
       { label: "Fade", value: "fade" },
     ],
   },
-  springy: { group: "Motion", type: "checkbox", label: "Springy", value: true },
+  springy: { disabled: (v) => v.openAnimation === "fade", group: "Motion", type: "checkbox", label: "Springy", value: true },
   duration: {
     group: "Motion",
     type: "slider",
@@ -65,7 +65,7 @@ const controls = {
     step: 0.05,
     unit: "s",
   },
-  bounce: { group: "Motion", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
+  bounce: { disabled: (v) => !v.springy || v.openAnimation === "fade", group: "Motion", type: "slider", label: "Bounce", value: 0.2, min: 0, max: 0.6, step: 0.05 },
   stagger: {
     group: "Motion",
     type: "slider",
@@ -115,7 +115,7 @@ export function DrawerDemo() {
                     <DrawerTitle>Next box</DrawerTitle>
                     <DrawerDescription>Pick the roast for Friday&apos;s delivery.</DrawerDescription>
                   </DrawerHeader>
-                  <div className="flex flex-col gap-2 p-4">
+                  <div className="flex flex-col gap-3 px-6 py-2">
                     {roasts.map((roast) => (
                       <DrawerClose
                         key={roast.name}
@@ -149,7 +149,7 @@ export function DrawerDemo() {
                     >
                       {/* An underline draws in from the left on hover and leaves to the right. */}
                       <span className="relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out group-hover/line:after:origin-left group-hover/line:after:scale-x-100 group-focus-visible/line:after:origin-left group-focus-visible/line:after:scale-x-100 motion-reduce:after:transition-none">
-                        Cancel
+                        Close
                       </span>
                     </DrawerClose>
                   </DrawerFooter>

@@ -176,9 +176,9 @@ const TRANSITION = {
 
 // Coloured left line per type.
 const ACCENT: Record<string, string> = {
-  success: "before:bg-emerald-500",
-  info: "before:bg-sky-500",
-  warning: "before:bg-amber-500",
+  success: "before:bg-success",
+  info: "before:bg-info",
+  warning: "before:bg-warning",
   error: "before:bg-destructive",
 }
 

@@ -38,6 +38,7 @@ const SMOOTH_EASE = "cubic-bezier(0.32, 0.72, 0, 1)"
 const SPRING_EASE =
   "linear(0, 0.034 2.2%, 0.136 4.6%, 0.542 11.5%, 0.787 16.4%, 0.93 21.1%, 1.012 26.4%, 1.042 30.9%, 1.047 35.5%, 1.036 40.9%, 1.005 53.3%, 0.996 64%, 1)"
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.2 } as const
+const glide = { ...spring, visualDuration: spring.visualDuration * 0.6 } as const
 
 const MIN_WIDTH = 192
 const MAX_WIDTH = 400
@@ -835,7 +836,7 @@ function SidebarGlideHighlight({ box, as = "div", className }: { box: Box | null
           initial={{ ...box, opacity: 0 }}
           animate={{ ...box, opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.15 } }}
-          transition={spring}
+          transition={glide}
         />
       )}
     </AnimatePresence>
@@ -924,7 +925,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           data-sidebar-fx
           aria-hidden
           layoutId={`${id}-highlight`}
-          transition={spring}
+          transition={glide}
           className={cn(
             "pointer-events-none absolute inset-0 -z-10 rounded-(--sidebar-item-radius)",
             highlightBg[highlightTone]
@@ -936,7 +937,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           data-sidebar-fx
           aria-hidden
           layoutId={slidingHighlight ? indicatorId : undefined}
-          transition={spring}
+          transition={glide}
           className={cn(
             "pointer-events-none absolute rounded-full",
             sub
@@ -954,7 +955,7 @@ function ActiveEffects({ isActive, sub = false }: { isActive: boolean; sub?: boo
           data-sidebar-fx
           aria-hidden
           layoutId={slidingHighlight ? indicatorId : undefined}
-          transition={spring}
+          transition={glide}
           className={cn(
             "pointer-events-none absolute top-1/2 size-1.5 -translate-y-1/2",
             sub ? "-left-3" : "left-2 group-data-[collapsible=icon]:hidden"

@@ -27,7 +27,6 @@ import {
   type QuestionnaireChoiceIndicator,
   type QuestionnaireContent,
   type QuestionnaireIndicatorRounded,
-  type QuestionnaireProgressStyle,
 } from "@/components/ui/questionnaire"
 
 const questions = [
@@ -61,6 +60,7 @@ const controls = {
     ],
   },
   distance: {
+    disabled: (v) => v.content !== "slide-x" && v.content !== "slide-y",
     group: "Content",
     type: "slider",
     label: "Slide distance",
@@ -101,19 +101,20 @@ const controls = {
     ],
   },
   indicatorRounded: {
+    disabled: (v) => v.choiceIndicator !== "check",
     group: "Choices",
     type: "select",
     label: "Icon roundness",
     value: "full",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
       { label: "Full", value: "full" },
     ],
   },
-  indicatorBorder: { group: "Choices", type: "checkbox", label: "Icon border", value: false },
+  indicatorBorder: { disabled: (v) => v.choiceIndicator !== "check", group: "Choices", type: "checkbox", label: "Icon border", value: false },
   choiceIndicator: {
     group: "Choices",
     type: "select",
@@ -129,6 +130,7 @@ const controls = {
   multiple: { group: "Choices", type: "checkbox", label: "Choose multiple", value: false },
   staggerChoices: { group: "Choices", type: "checkbox", label: "Stagger choices", value: true },
   stagger: {
+    disabled: (v) => !v.staggerChoices,
     group: "Choices",
     type: "slider",
     label: "Stagger delay",
@@ -139,16 +141,6 @@ const controls = {
     unit: "s",
   },
   showProgress: { group: "Progress", type: "checkbox", label: "Show progress", value: true },
-  progressStyle: {
-    group: "Progress",
-    type: "select",
-    label: "Progress",
-    value: "bar",
-    options: [
-      { label: "Bar", value: "bar" },
-      { label: "Text", value: "text" },
-    ],
-  },
   shortcuts: {
     group: "Progress",
     type: "select",
@@ -161,6 +153,7 @@ const controls = {
     ],
   },
   duration: {
+    disabled: (v) => v.content === "none",
     group: "Motion",
     type: "slider",
     label: "Duration",
@@ -171,6 +164,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
+    disabled: (v) => v.content === "fade" || v.content === "none",
     group: "Motion",
     type: "slider",
     label: "Bounce",
@@ -240,7 +234,6 @@ export function QuestionnaireDemo() {
             staggerChoices={values.staggerChoices}
             stagger={values.stagger}
             showProgress={values.showProgress}
-            progressStyle={values.progressStyle as QuestionnaireProgressStyle}
             onSubmit={(event) => {
               event.preventDefault()
               const data = new FormData(event.currentTarget)

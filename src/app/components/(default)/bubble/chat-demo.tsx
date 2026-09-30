@@ -95,14 +95,14 @@ const controls = {
 
   flyIn: { group: "Sending", type: "checkbox", label: "Fly from input", value: false },
   status: { group: "Sending", type: "checkbox", label: "Delivery status", value: true },
-  shake: { group: "Sending", type: "checkbox", label: "Error shake", value: true },
+  shake: { disabled: (v) => !v.failures, group: "Sending", type: "checkbox", label: "Error shake", value: true },
   failures: { group: "Sending", type: "checkbox", label: "Simulate failures", value: true },
 
   pop: { group: "Reactions", type: "checkbox", label: "Reaction pop", value: true },
   rolling: { group: "Reactions", type: "checkbox", label: "Rolling count", value: true },
   doubleClick: { group: "Reactions", type: "checkbox", label: "Double-click to react", value: true },
   picker: { group: "Reactions", type: "checkbox", label: "Reaction picker", value: true },
-  magnify: { group: "Reactions", type: "checkbox", label: "Magnify emojis", value: false },
+  magnify: { disabled: (v) => !v.picker, group: "Reactions", type: "checkbox", label: "Magnify emojis", value: false },
 
   lift: { group: "Interaction", type: "checkbox", label: "Hover lift", value: false },
   selectable: { group: "Interaction", type: "checkbox", label: "Selectable text", value: true },

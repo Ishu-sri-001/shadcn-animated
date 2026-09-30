@@ -8,7 +8,7 @@ type RadioVariant = "default" | "card"
 type RadioAppearance = "outline" | "filled" | "full"
 type RadioCardFill = "muted" | "primary"
 const spring = { type: "spring", visualDuration: 0.35, bounce: 0.3 } as const
-const glide = { type: "spring", visualDuration: 0.4, bounce: 0.15 } as const
+const glide = { type: "spring", visualDuration: 0.4 * 0.6, bounce: 0.15 } as const
 const snappy = { type: "spring", visualDuration: 0.25, bounce: 0 } as const
 const springyEase = "ease-[cubic-bezier(0.34,1.56,0.64,1)]"
 
@@ -240,7 +240,7 @@ function RadioItem({
       className
     ),
     style: accent
-      ? ({ "--radio-accent": accent, "--radio-on-accent": "white" } as React.CSSProperties)
+      ? ({ "--radio-accent": accent, "--radio-on-accent": "var(--primary-foreground)" } as React.CSSProperties)
       : undefined,
     initial: { opacity: 0, y: 6 },
     animate: { opacity: disabled ? 0.5 : 1, y: 0 },

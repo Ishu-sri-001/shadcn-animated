@@ -54,6 +54,7 @@ const controls = {
     ],
   },
   activeColor: {
+    disabled: (v) => v.indicator !== "glide",
     group: "Tabs",
     type: "select",
     label: "Active tab colour",
@@ -74,10 +75,10 @@ const controls = {
     value: "lg",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
       { label: "Full", value: "full" },
     ],
   },
@@ -94,6 +95,7 @@ const controls = {
     ],
   },
   distance: {
+    disabled: (v) => v.content !== "slide",
     group: "Content",
     type: "slider",
     label: "Slide distance",
@@ -106,6 +108,7 @@ const controls = {
   smoothHeight: { group: "Content", type: "checkbox", label: "Smooth panel height", value: true },
 
   fadeDuration: {
+    disabled: (v) => v.content !== "fade",
     group: "Content",
     type: "slider",
     label: "Fade in / out time",
@@ -126,6 +129,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
+    disabled: (v) => v.indicator === "fade" && v.content !== "slide",
     group: "Motion",
     type: "slider",
     label: "Bounce",

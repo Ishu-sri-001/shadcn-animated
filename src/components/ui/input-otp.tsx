@@ -274,7 +274,7 @@ function InputOTP({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 // Outside the row, so no shift.
-                className="absolute top-1/2 left-[calc(100%+0.75rem)] size-5 -translate-y-1/2 text-emerald-600 dark:text-emerald-400 max-md:top-0 max-md:left-full max-md:size-5 max-md:-translate-x-3/4 max-md:rounded-full max-md:bg-background max-md:p-0.5 max-md:ring-1 max-md:ring-emerald-500"
+                className="absolute top-1/2 left-[calc(100%+0.75rem)] size-5 -translate-y-1/2 text-success max-md:top-0 max-md:left-full max-md:size-5 max-md:-translate-x-3/4 max-md:rounded-full max-md:bg-background max-md:p-0.5 max-md:ring-1 max-md:ring-success"
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.15 } }}
@@ -344,7 +344,7 @@ function InputOTPSlot({
         !options.glide &&
           "data-[active=true]:z-10 data-[active=true]:border-foreground data-[active=true]:aria-invalid:border-destructive",
         waved &&
-          "border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-500/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+          "border-success bg-success/10 text-success",
         SIZE[options.boxSize],
         options.joined
           ? cn(
@@ -365,7 +365,7 @@ function InputOTPSlot({
             "pointer-events-none absolute -inset-px z-10 rounded-[inherit] border border-foreground",
             options.invalid && "border-destructive"
           )}
-          transition={{ type: "spring", visualDuration: 0.25, bounce: 0.2 }}
+          transition={{ type: "spring", visualDuration: 0.25 * 0.6, bounce: 0.2 }}
         />
       )}
       <span className={cn("relative grid place-items-center", animation === "roll" && "overflow-hidden")}>

@@ -56,7 +56,7 @@ function buildPreset({
     enter: { duration, ease: smoothEase },
     exit: { duration: exitDuration, ease: smoothEase },
     item: { duration, ease: smoothEase },
-    glide: { duration: 0.3, ease: smoothEase },
+    glide: { duration: duration * 0.6, ease: smoothEase },
     icon: { duration, ease: smoothEase },
     exitDuration,
     iconDuration: duration,

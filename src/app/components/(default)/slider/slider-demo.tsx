@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/slider"
 
 const controls = {
+  smooth: { group: "Track", type: "checkbox", label: "Smooth (no snapping)", value: false },
   duration: {
     group: "Track",
     type: "slider",
@@ -38,7 +39,6 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-  showEdge: { group: "Edge", type: "checkbox", label: "Show edge", value: true },
   thicken: {
     group: "Track",
     type: "select",
@@ -52,6 +52,7 @@ const controls = {
   },
   elastic: { group: "Track", type: "checkbox", label: "Stretches past the ends", value: true },
   stretch: {
+    disabled: (v) => !v.elastic,
     group: "Track",
     type: "slider",
     label: "Stretch amount",
@@ -72,6 +73,7 @@ const controls = {
     ],
   },
   thickenTo: {
+    disabled: (v) => v.thicken === "none",
     group: "Track",
     type: "select",
     label: "Thickened size",
@@ -92,10 +94,10 @@ const controls = {
     value: "xl",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
       { label: "Full", value: "full" },
     ],
   },
@@ -110,8 +112,9 @@ const controls = {
       { label: "Lines", value: "lines" },
     ],
   },
-
+  showEdge: { group: "Edge", type: "checkbox", label: "Show edge", value: true },
   edgePress: {
+    disabled: (v) => !v.showEdge,
     group: "Edge",
     type: "select",
     label: "While dragging",
@@ -123,6 +126,7 @@ const controls = {
     ],
   },
   edgeVariant: {
+    disabled: (v) => !v.showEdge,
     group: "Edge",
     type: "select",
     label: "Style",
@@ -145,17 +149,18 @@ const controls = {
       { label: "Never", value: "none" },
     ],
   },
-  roll: { group: "Edge", type: "checkbox", label: "Roll the numbers", value: true },
+  roll: { disabled: (v) => v.bubble === "none", group: "Edge", type: "checkbox", label: "Roll the numbers", value: true },
 
   edgeSize: {
+    disabled: (v) => !v.showEdge || v.edgeVariant === "bar",
     group: "Style",
     type: "select",
     label: "Edge size",
     value: "md",
     options: [
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
     ],
   },
 } satisfies ControlSchema
@@ -186,6 +191,7 @@ export function SliderDemo() {
     radius: values.radius as SliderRadius,
     thickenTo: values.thickenTo as SliderThickness,
     edgeSize: values.edgeSize as SliderEdgeSize,
+    smooth: values.smooth,
   }
 
   return (

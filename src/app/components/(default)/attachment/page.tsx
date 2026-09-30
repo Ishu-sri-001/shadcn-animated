@@ -15,7 +15,7 @@ export default function AttachmentPage() {
 
       <UploadDemo />
 
-      <Separator className='my-10 bg-black/30' />
+      <Separator className='my-10 bg-foreground/30' />
 
       <NotesDemo />
     </div>

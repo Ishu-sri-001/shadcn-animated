@@ -58,6 +58,7 @@ const controls = {
     ],
   },
   pasteStagger: {
+    disabled: (v) => v.charAnimation === "none",
     group: "Typing",
     type: "slider",
     label: "Paste stagger",
@@ -93,10 +94,10 @@ const controls = {
     value: "lg",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
       { label: "Full", value: "full" },
     ],
   },

@@ -69,6 +69,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
+    disabled: (v) => !v.gooey,
     group: "Timing",
     type: "slider",
     label: "Bounce (elastic)",
@@ -98,7 +99,19 @@ const controls = {
     unit: "s",
   },
   fill: { group: "Item", type: "checkbox", label: "Fill", value: false },
+  fillColor: {
+    disabled: (v) => !v.fill,
+    group: "Item",
+    type: "select",
+    label: "Fill colour",
+    value: "muted",
+    options: [
+      { label: "Muted", value: "muted" },
+      { label: "Primary", value: "primary" },
+    ],
+  },
   rounded: {
+    disabled: (v) => !v.fill,
     group: "Item",
     type: "select",
     label: "Fill roundness",
@@ -108,9 +121,9 @@ const controls = {
       { label: "Small", value: "rounded-sm" },
       { label: "Medium", value: "rounded-md" },
       { label: "Large", value: "rounded-lg" },
-      { label: "XL", value: "rounded-xl" },
-      { label: "2XL", value: "rounded-2xl" },
-      { label: "3XL", value: "rounded-3xl" },
+      { label: "xl", value: "rounded-xl" },
+      { label: "2xl", value: "rounded-2xl" },
+      { label: "3xl", value: "rounded-3xl" },
     ],
   },
   line: { group: "Item", type: "checkbox", label: "Line on hover", value: true },
@@ -153,7 +166,7 @@ export default function AccordionPage() {
               key={faq.question}
               value={`item-${i + 1}`}
               line={values.line}
-              fill={values.fill ? "bg-muted" : undefined}
+              fill={values.fill ? (values.fillColor as "muted" | "primary") : false}
               rounded={values.rounded}
             >
               <AccordionTrigger

@@ -82,6 +82,7 @@ const controls = {
     ],
   },
   contentSwitch: {
+    disabled: (v) => v.switchAnimation !== "glide",
     group: "Between menus",
     type: "select",
     label: "Content comes in",
@@ -93,6 +94,7 @@ const controls = {
     ],
   },
   contentShift: {
+    disabled: (v) => v.switchAnimation !== "glide" || v.contentSwitch !== "slide",
     group: "Between menus",
     type: "select",
     label: "Content shift",
@@ -148,6 +150,7 @@ const controls = {
     ],
   },
   triggerHighlightColor: {
+    disabled: (v) => v.triggerHighlight === "none",
     group: "Bar",
     type: "select",
     label: "Highlight fill",
@@ -157,8 +160,9 @@ const controls = {
       { label: "Muted", value: "muted" },
     ],
   },
-  chevrons: { group: "Bar", type: "checkbox", label: "Chevrons", value: false },
+  chevrons: { group: "Bar", type: "checkbox", label: "Chevrons", value: true },
   triggerTextRoll: { group: "Bar", type: "checkbox", label: "Text roll on hover", value: true },
+  openOnClick: { group: "Bar", type: "checkbox", label: "Open on click", value: false },
   pressFeedback: { group: "Bar", type: "checkbox", label: "Press feedback", value: true },
 
   itemHighlight: {
@@ -173,6 +177,7 @@ const controls = {
     ],
   },
   itemHighlightColor: {
+    disabled: (v) => v.itemHighlight === "none",
     group: "Items",
     type: "select",
     label: "Hover fill",
@@ -203,9 +208,9 @@ const controls = {
     label: "Size",
     value: "lg",
     options: [
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
     ],
   },
   rounded: {
@@ -215,11 +220,11 @@ const controls = {
     value: "lg",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
-      { label: "2XL", value: "2xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
+      { label: "2xl", value: "2xl" },
     ],
   },
 } satisfies ControlSchema
@@ -245,6 +250,7 @@ export function MenubarDemo() {
           stagger={values.stagger}
           triggerHighlight={values.triggerHighlight as MenubarTriggerHighlight}
           pressFeedback={values.pressFeedback}
+          openOnClick={values.openOnClick}
           itemHighlight={values.itemHighlight as DropdownMenuHighlight}
           itemHighlightColor={values.itemHighlightColor as DropdownMenuHighlightColor}
           triggerHighlightColor={values.triggerHighlightColor as DropdownMenuHighlightColor}

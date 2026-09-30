@@ -19,6 +19,23 @@ import {
   type FieldRounded,
 } from "@/components/ui/field"
 import { FillButton } from "@/components/ui/hover-effects"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItemTitle,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+  DropdownMenuTriggerIcon,
+  DropdownMenuValue,
+} from "@/components/ui/dropdown-menu"
+
+import { countries } from "./countries"
+
+const selectorRadius: Record<FieldRounded, string> = {
+  none: "rounded-none", sm: "rounded-sm", md: "rounded-md",
+  lg: "rounded-lg", xl: "rounded-xl", full: "rounded-full",
+}
 
 const controls = {
   labelStyle: {
@@ -33,7 +50,7 @@ const controls = {
     ],
   },
 
-  successTick: { group: "Input", type: "checkbox", label: "Tick when valid", value: true },
+  successTick: { disabled: (v) => !v.validate, group: "Input", type: "checkbox", label: "Tick when valid", value: true },
   counter: { group: "Input", type: "checkbox", label: "Rolling character count", value: true },
   description: { group: "Input", type: "checkbox", label: "Hint under email", value: false },
   rounded: {
@@ -43,10 +60,10 @@ const controls = {
     value: "lg",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
       { label: "Full", value: "full" },
     ],
   },
@@ -54,6 +71,7 @@ const controls = {
   // Off: anything goes, empty included, so no errors show. On: the fields are checked.
   validate: { group: "Errors", type: "checkbox", label: "Check required fields", value: false },
   errorAnimation: {
+    disabled: (v) => !v.validate,
     group: "Errors",
     type: "select",
     label: "Error message entry",
@@ -64,7 +82,7 @@ const controls = {
       { label: "None", value: "none" },
     ],
   },
-  shakeOnError: { group: "Errors", type: "checkbox", label: "Shake on error", value: true },
+  shakeOnError: { disabled: (v) => !v.validate, group: "Errors", type: "checkbox", label: "Shake on error", value: true },
 } satisfies ControlSchema
 
 /**
@@ -90,7 +108,7 @@ const addressSchema = z.object({
   note: z.string().max(60, "Keep the note under 60 characters."),
 })
 
-export function FieldDemo() {
+export function FormDemo() {
   const panel = useControls(controls)
   const { counter, description, rounded, errorAnimation, labelStyle, validate, ...options } =
     panel.values
@@ -99,6 +117,9 @@ export function FieldDemo() {
   const [email, setEmail] = React.useState("")
   const [postcode, setPostcode] = React.useState("")
   const [note, setNote] = React.useState("")
+  const [countryId, setCountryId] = React.useState("IN")
+  const [mobile, setMobile] = React.useState("")
+  const country = countries.find((item) => item.id === countryId) ?? countries[0]
   const [touched, setTouched] = React.useState<Record<string, boolean>>({})
   const touch = (key: string) => setTouched((t) => ({ ...t, [key]: true }))
 
@@ -152,8 +173,9 @@ export function FieldDemo() {
           >
             <Field invalid={!!errors.name} valid={valid.name} {...enter(1)}>
               <FieldInput
-                label="Name"
-                placeholder="Sam Rivera"
+                label={validate ? "Name *" : "Name"}
+                required={validate}
+                placeholder={labelStyle === "floating" ? " " : "Sam Rivera"}
                 value={name}
                 maxLength={40}
                 counter={counter}
@@ -164,30 +186,67 @@ export function FieldDemo() {
             </Field>
             <Field invalid={!!errors.email} valid={valid.email} {...enter(2)}>
               <FieldInput
-                label="Email"
+                label={validate ? "Email *" : "Email"}
+                required={validate}
                 type="email"
-                placeholder="sam@example.com"
+                placeholder={labelStyle === "floating" ? " " : "sam@example.com"}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 onBlur={() => touch("email")}
               />
-              {description && <FieldDescription>We&apos;ll send tracking here.</FieldDescription>}
+              {description && <FieldDescription className="text-sm">We&apos;ll send tracking here.</FieldDescription>}
               <FieldError>{errors.email}</FieldError>
             </Field>
-            <Field invalid={!!errors.postcode} valid={valid.postcode} {...enter(3)}>
+            <Field {...enter(3)}>
+              <div className="flex items-end gap-2">
+                <DropdownMenu animation="scale" duration={0.3} delay={0.02} stagger={0} highlight="slide" highlightColor="muted" typeahead>
+                  <DropdownMenuTrigger
+                    type="button"
+                    animateValue
+                    aria-label={`Country calling code: ${country.name} ${country.code}`}
+                    className={cn(
+                      "flex shrink-0 items-center gap-2 border border-input bg-transparent px-2.5 text-sm shadow-xs transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-input/30",
+                      labelStyle === "above" ? "h-9" : "h-11",
+                      selectorRadius[rounded as FieldRounded]
+                    )}
+                  >
+                    <DropdownMenuValue>{`${country.flag} ${country.code}`}</DropdownMenuValue>
+                    <DropdownMenuTriggerIcon icon="chevron" className="size-3.5 text-muted-foreground" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="max-h-72 w-72 max-w-[calc(100vw-2rem)] p-1.5">
+                    <DropdownMenuRadioGroup aria-label="Country calling code" value={countryId} onValueChange={setCountryId}>
+                      {countries.map((item) => (
+                        <DropdownMenuRadioItem key={item.id} value={item.id} label={item.name} className="py-2.5">
+                          <span aria-hidden>{item.flag}</span>
+                          <DropdownMenuItemTitle>{item.name}</DropdownMenuItemTitle>
+                          <span className="ml-auto text-sm tabular-nums text-muted-foreground">{item.code}</span>
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <div className="min-w-0 flex-1">
+                  <FieldInput label="Mobile number (optional)" type="tel" inputMode="tel" autoComplete="tel-national" name="mobile" value={mobile} onChange={(event) => setMobile(event.target.value)} />
+                </div>
+              </div>
+              <input type="hidden" name="country" value={country.id} />
+              <input type="hidden" name="callingCode" value={country.code} />
+            </Field>
+            <Field invalid={!!errors.postcode} valid={valid.postcode} {...enter(4)}>
               <FieldInput
-                label="Postcode"
-                placeholder="BS1 4DJ"
+                label={validate ? "Postcode *" : "Postcode"}
+                required={validate}
+                placeholder={labelStyle === "floating" ? " " : "BS1 4DJ"}
                 value={postcode}
                 onChange={(event) => setPostcode(event.target.value)}
                 onBlur={() => touch("postcode")}
               />
               <FieldError>{errors.postcode}</FieldError>
             </Field>
-            <Field {...enter(4)}>
+            <Field {...enter(5)}>
               <FieldInput
                 label="Note for the courier"
-                placeholder="Leave it by the blue door"
+                placeholder={labelStyle === "floating" ? " " : "Leave it by the blue door"}
                 value={note}
                 maxLength={60}
                 counter={counter}
@@ -196,7 +255,7 @@ export function FieldDemo() {
             </Field>
           </FieldGroup>
         </FieldSet>
-        <div style={enter(5).style} className={cn("flex items-center gap-4", enter(5).className)}>
+        <div style={enter(6).style} className={cn("flex items-center gap-4", enter(6).className)}>
           <FillButton type="submit" className="h-auto px-5 py-2.5 text-base">
             Save address
           </FillButton>
@@ -205,7 +264,7 @@ export function FieldDemo() {
               <motion.p
                 key={savedId}
                 role="status"
-                className="flex items-center gap-2 text-base text-emerald-700 dark:text-emerald-400"
+                className="flex items-center gap-2 text-base text-success"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -238,7 +297,7 @@ export function FieldDemo() {
         Tip: turn on &quot;Check required fields&quot;, then press Save with the form empty to see the errors.
       </p>
 
-      <ControlsPanel title="Field" {...panel} />
+      <ControlsPanel title="Form" {...panel} />
     </div>
   )
 }

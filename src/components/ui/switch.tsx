@@ -17,16 +17,16 @@ import {
 /** elastic: the handle squashes when pressed and stretches as it travels. apple: a glass capsule that turns see-through when pressed, and can be dragged. */
 type SwitchVariant = "elastic" | "apple"
 type SwitchSize = "md" | "lg" | "xl"
-type SwitchColor = "auto" | "foreground" | "green" | "blue" | "orange" | "rose"
+type SwitchColor = "foreground" | "green" | "blue" | "orange" | "rose"
 type SwitchRounded = "sm" | "md" | "lg" | "xl" | "full"
 type SwitchLabelSide = "top" | "right" | "bottom" | "left"
 
 type SwitchMotion = {
   variant: SwitchVariant
   size: SwitchSize
-  /** Track colour when on. "auto" is the theme foreground. */
+  /** Track colour when on. "foreground" is the theme foreground. */
   color: SwitchColor
-  /** With "auto" colour, use the iOS system green on the apple switch. */
+  /** With "foreground" colour, use the system green on the apple switch. */
   green: boolean
   rounded: SwitchRounded
   /** How hard the handle squashes (elastic) or widens (apple) when pressed. */
@@ -74,18 +74,17 @@ const HANDLE_ROUNDED: Record<SwitchRounded, string> = {
 }
 
 // On a dark page "on" is the dark grey that "off" used to be, not a bright fill
-const FOREGROUND = "bg-foreground dark:bg-[#3a3a3a]"
+const FOREGROUND = "bg-foreground dark:bg-secondary"
 
 const ON_COLOR: Record<SwitchColor, string> = {
-  auto: "",
   foreground: FOREGROUND,
-  green: "bg-green-500",
-  blue: "bg-blue-500",
-  orange: "bg-orange-500",
-  rose: "bg-rose-500",
+  green: "bg-success",
+  blue: "bg-info",
+  orange: "bg-warning",
+  rose: "bg-destructive",
 }
 
-const IOS_GREEN = "bg-[#34c759]"
+const IOS_GREEN = "bg-success"
 const OFF: Record<SwitchVariant, string> = {
   elastic: "bg-foreground/20 dark:bg-foreground/10",
   apple: "bg-foreground/20 dark:bg-foreground/10",
@@ -97,7 +96,7 @@ const SNAP: Transition = { type: "spring", duration: 0.4, bounce: 0.5 }
 function Switch({
   variant = "elastic",
   size = "xl",
-  color = "auto",
+  color = "foreground",
   green = false,
   rounded = "full",
   squeeze = 0.18,
@@ -139,13 +138,13 @@ function Switch({
   const lift = useMotionValue(0)
   const fillOpacity = useTransform(x, [0, travel], [0, 1])
   const offOpacity = useTransform(x, [0, travel], [1, 0])
-  // The apple handle grows towards the middle, so the edge it sits on stays put
-  const appleX = useTransform(() => x.get() - widen.get() * (travel ? x.get() / travel : 0))
+  // The apple handle grows both ways, so it can overhang the track ends
+  const appleX = useTransform(() => x.get() - widen.get() / 2)
   const appleWidth = useTransform(widen, (w) => handleW + w)
   const appleHeight = useTransform(lift, (h) => handleH + h)
   // 0 at rest, 1 while pressed: the capsule goes from milky white to clear glass
   const glass = useMotionValue(0)
-  const glassBg = useTransform(glass, (g) => `rgba(255,255,255,${1 - 0.7 * g})`)
+  const glassBg = useTransform(glass, (g) => `color-mix(in oklab, var(--background) ${(1 - 0.7 * g) * 100}%, transparent)`)
   const glassBlur = useTransform(glass, (g) => `blur(${g * 10}px) saturate(${1 + g * 0.8})`)
   const glassShadow = useTransform(glass, (g) =>
     [
@@ -216,8 +215,7 @@ function Switch({
 
   const rootRef = React.useRef<HTMLElement>(null)
 
-  const fill =
-    color === "auto" ? (variant === "apple" && green ? IOS_GREEN : FOREGROUND) : ON_COLOR[color]
+  const fill = color === "foreground" && variant === "apple" && green ? IOS_GREEN : ON_COLOR[color]
 
   const control = (
     <SwitchPrimitive.Root
@@ -294,7 +292,7 @@ function Switch({
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-0 bg-linear-to-b from-white/30 via-transparent to-black/5",
+            "pointer-events-none absolute inset-0 bg-linear-to-b from-background/30 via-transparent to-foreground/5",
             TRACK_ROUNDED[rounded]
           )}
         />
@@ -330,7 +328,7 @@ function Switch({
             {...(thumbProps as React.ComponentProps<typeof motion.span>)}
             className={cn(
               "pointer-events-none z-10 block",
-              variant === "elastic" && "bg-white shadow-md ring-1 ring-black/10",
+              variant === "elastic" && "bg-background shadow-md ring-1 ring-foreground/10",
               HANDLE_ROUNDED[rounded]
             )}
             style={

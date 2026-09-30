@@ -324,7 +324,7 @@ function FieldInput({
               strokeWidth={2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+              className="size-4 shrink-0 text-success"
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.15 } }}

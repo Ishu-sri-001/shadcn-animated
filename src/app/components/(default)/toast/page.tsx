@@ -69,6 +69,7 @@ const controls = {
     value: true,
   },
   collapsibleDescription: {
+    disabled: (v) => !v.showDescription,
     group: "Toast",
     type: "checkbox",
     label: "Collapsible description",
@@ -132,6 +133,7 @@ const controls = {
     value: true,
   },
   timerBar: {
+    disabled: (v) => v.timeout === 0 || v.variant === "loading",
     group: "Animation",
     type: "checkbox",
     label: "Time-left bar",
@@ -140,6 +142,7 @@ const controls = {
 
   glass: { group: "Style", type: "checkbox", label: "Glass", value: true },
   accentEdge: {
+    disabled: (v) => v.variant === "default",
     group: "Style",
     type: "checkbox",
     label: "Coloured line",
@@ -154,9 +157,9 @@ const controls = {
       { label: "None", value: "none" },
       { label: "Medium", value: "md" },
       { label: "Large", value: "lg" },
-      { label: "XL", value: "xl" },
-      { label: "2XL", value: "2xl" },
-      { label: "3XL", value: "3xl" },
+      { label: "xl", value: "xl" },
+      { label: "2xl", value: "2xl" },
+      { label: "3xl", value: "3xl" },
       { label: "Full (pill)", value: "full" },
     ],
   },

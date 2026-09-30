@@ -84,6 +84,7 @@ const controls = {
     ],
   },
   morphWidth: {
+    disabled: (v) => v.dropdown !== "morph",
     group: "Dropdown",
     type: "slider",
     label: "Morph width",
@@ -94,6 +95,7 @@ const controls = {
     unit: "x",
   },
   delay: {
+    disabled: (v) => !v.staggerItems,
     group: "Palette",
     type: "slider",
     label: "Content delay",
@@ -128,15 +130,15 @@ const controls = {
     group: "Both",
     type: "select",
     label: "Roundness",
-    value: "xl",
+    value: "sm",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
-      { label: "2XL", value: "2xl" },
-      { label: "3XL", value: "3xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
+      { label: "2xl", value: "2xl" },
+      { label: "3xl", value: "3xl" },
     ],
   },
   itemHover: {
@@ -151,6 +153,7 @@ const controls = {
     ],
   },
   hoverColor: {
+    disabled: (v) => v.itemHover === "none",
     group: "Both",
     type: "select",
     label: "Hover colour",
@@ -172,6 +175,7 @@ const controls = {
     unit: "s",
   },
   bounce: {
+    disabled: (v) => v.dropdown === "fade" && v.itemHover !== "slide",
     group: "Both",
     type: "slider",
     label: "Bounce",
@@ -180,8 +184,10 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
+  textRoll: { group: "Both", type: "checkbox", label: "Text roll", value: false },
   staggerItems: { group: "Both", type: "checkbox", label: "Stagger items", value: true },
   stagger: {
+    disabled: (v) => !v.staggerItems,
     group: "Both",
     type: "slider",
     label: "Stagger delay",
@@ -208,6 +214,7 @@ export function CommandDemo() {
     itemHover: values.itemHover as CommandItemHover,
     hoverColor: values.hoverColor as CommandHoverColor,
     rounded: values.rounded as CommandRounded,
+    textRoll: values.textRoll,
   }
 
   React.useEffect(() => {

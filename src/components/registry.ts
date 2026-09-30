@@ -66,8 +66,8 @@ export const registry: RegistryItem[] = [
     description: "A panel that slides in from the edge and can be swiped away.",
   },
   {
-    slug: "field",
-    name: "Field",
+    slug: "form",
+    name: "Form",
     description: "Labels, hints and errors that hold a form's inputs together.",
   },
   {

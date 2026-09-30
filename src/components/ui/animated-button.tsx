@@ -90,7 +90,7 @@ const SHIMMER_SECONDS = 1.6
 // Springy settle for the press squeeze
 const PRESS_TRANSITION = "transition-[scale] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
 
-const GRADIENT = "bg-linear-to-r from-violet-500 via-fuchsia-500 to-orange-400"
+const GRADIENT = "bg-linear-to-r from-info via-success to-warning"
 
 // Colours for each tone, filled or plain, and the dot that fills over it
 const TONES: Record<
@@ -117,47 +117,47 @@ const TONES: Record<
   },
   destructive: {
     border: "border-destructive",
-    filled: "border-destructive bg-destructive text-white",
+    filled: "border-destructive bg-destructive text-destructive-foreground",
     filledFlip: "data-[active=true]:text-destructive",
     dot: "bg-background",
     plain: "text-destructive",
-    plainFlip: "data-[active=true]:text-white",
+    plainFlip: "data-[active=true]:text-destructive-foreground",
     plainDot: "bg-destructive",
   },
   success: {
-    border: "border-emerald-600",
-    filled: "border-emerald-600 bg-emerald-600 text-white",
-    filledFlip: "data-[active=true]:text-emerald-600",
+    border: "border-success",
+    filled: "border-success bg-success text-success-foreground",
+    filledFlip: "data-[active=true]:text-success",
     dot: "bg-background",
-    plain: "text-emerald-600",
-    plainFlip: "data-[active=true]:text-white",
-    plainDot: "bg-emerald-600",
+    plain: "text-success",
+    plainFlip: "data-[active=true]:text-success-foreground",
+    plainDot: "bg-success",
   },
   warning: {
-    border: "border-amber-500",
-    filled: "border-amber-500 bg-amber-500 text-amber-950",
-    filledFlip: "data-[active=true]:text-amber-600",
+    border: "border-warning",
+    filled: "border-warning bg-warning text-warning-foreground",
+    filledFlip: "data-[active=true]:text-warning",
     dot: "bg-background",
-    plain: "text-amber-600",
-    plainFlip: "data-[active=true]:text-amber-950",
-    plainDot: "bg-amber-500",
+    plain: "text-warning",
+    plainFlip: "data-[active=true]:text-warning-foreground",
+    plainDot: "bg-warning",
   },
   info: {
-    border: "border-sky-600",
-    filled: "border-sky-600 bg-sky-600 text-white",
-    filledFlip: "data-[active=true]:text-sky-600",
+    border: "border-info",
+    filled: "border-info bg-info text-info-foreground",
+    filledFlip: "data-[active=true]:text-info",
     dot: "bg-background",
-    plain: "text-sky-600",
-    plainFlip: "data-[active=true]:text-white",
-    plainDot: "bg-sky-600",
+    plain: "text-info",
+    plainFlip: "data-[active=true]:text-info-foreground",
+    plainDot: "bg-info",
   },
   gradient: {
-    border: "border-fuchsia-500",
-    filled: `border-transparent text-white ${GRADIENT}`,
-    filledFlip: "data-[active=true]:text-fuchsia-600",
+    border: "border-info",
+    filled: `border-transparent text-info-foreground ${GRADIENT}`,
+    filledFlip: "data-[active=true]:text-info",
     dot: "bg-background",
-    plain: "text-fuchsia-600",
-    plainFlip: "data-[active=true]:text-white",
+    plain: "text-info",
+    plainFlip: "data-[active=true]:text-info-foreground",
     plainDot: GRADIENT,
   },
 }
@@ -308,7 +308,7 @@ function StatusSlot({
   )
 }
 
-// The label rolls up and the next state's text rolls in, at a fixed width
+// The label rolls between states and sizes to the current text.
 function StatusLabel({
   status,
   idle,
@@ -327,12 +327,6 @@ function StatusLabel({
 
   return (
     <span className="relative inline-grid overflow-hidden">
-      {/* Hidden copies keep the width at the longest text, so the button never resizes */}
-      {[idleText, loadingText, successText].map((item, index) => (
-        <span key={index} aria-hidden className="invisible col-start-1 row-start-1 whitespace-nowrap">
-          {item}
-        </span>
-      ))}
       <AnimatePresence initial={false} mode="popLayout">
         <motion.span
           key={status}
@@ -590,7 +584,7 @@ function AnimatedButton({
             } as React.CSSProperties
           }
           className={cn(
-            "group/animated-button relative isolate inline-flex h-14 cursor-pointer items-center justify-center overflow-hidden px-8 text-lg font-medium whitespace-nowrap outline-none max-[1025px]:h-12 max-[1025px]:text-base max-md:h-11",
+            "group/animated-button relative isolate inline-flex h-14 w-fit cursor-pointer items-center justify-center overflow-hidden px-8 text-lg font-medium whitespace-nowrap outline-none max-[1025px]:h-12 max-[1025px]:text-base max-md:h-11",
             "focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50",
             status === "loading" && "pointer-events-none",
             plain
@@ -662,7 +656,7 @@ function AnimatedButton({
 
           <span
             className={cn(
-              "relative z-10 inline-flex items-center gap-3",
+              "relative z-10 inline-flex w-fit items-center gap-1.5",
               iconPosition === "start" && "flex-row-reverse"
             )}
           >

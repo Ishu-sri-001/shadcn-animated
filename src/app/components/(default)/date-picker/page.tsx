@@ -43,6 +43,7 @@ const controls = {
     ],
   },
   contentScale: {
+    disabled: (v) => v.contentAnimation === "fade",
     group: "Popup",
     type: "slider",
     label: "Start scale",
@@ -66,6 +67,7 @@ const controls = {
     ],
   },
   yearsBefore: {
+    disabled: (v) => v.captionLayout === "label" || v.captionLayout === "dropdown-months",
     group: "Month change",
     type: "slider",
     label: "Years before",
@@ -75,6 +77,7 @@ const controls = {
     step: 1,
   },
   yearsAfter: {
+    disabled: (v) => v.captionLayout === "label" || v.captionLayout === "dropdown-months",
     group: "Month change",
     type: "slider",
     label: "Years after",
@@ -95,6 +98,7 @@ const controls = {
     ],
   },
   monthSlideDistance: {
+    disabled: (v) => v.monthTransition !== "slide",
     group: "Month change",
     type: "slider",
     label: "Slide distance",
@@ -137,6 +141,7 @@ const controls = {
     unit: "s",
   },
   hoverBounce: {
+    disabled: (v) => v.hoverTransition === "fade",
     group: "Date hover",
     type: "slider",
     label: "Glide bounce",

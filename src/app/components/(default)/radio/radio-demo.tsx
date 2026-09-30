@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/radio-group"
 
 const shipping = [
-  { value: "Standard", description: "3–5 working days. Free.", accent: "#0ea5e9" },
-  { value: "Express", description: "Next working day. £4.99.", accent: "#f59e0b" },
-  { value: "Same day", description: "Order before noon. £9.99.", accent: "#f43f5e" },
-  { value: "Collect", description: "Pick up in store tomorrow.", accent: "#10b981" },
+  { value: "Standard", description: "3–5 working days. Free.", accent: "var(--info)" },
+  { value: "Express", description: "Next working day. £4.99.", accent: "var(--warning)" },
+  { value: "Same day", description: "Order before noon. £9.99.", accent: "var(--destructive)" },
+  { value: "Collect", description: "Pick up in store tomorrow.", accent: "var(--success)" },
 ]
 
 const controls = {
@@ -30,6 +30,7 @@ const controls = {
     ],
   },
   cardFill: {
+    disabled: (v) => v.variant === "default",
     group: "Style",
     type: "select",
     label: "Card fill",
@@ -41,11 +42,12 @@ const controls = {
   },
   showIcon: { group: "Style", type: "checkbox", label: "Show radio", value: true },
 
-  dotSlide: { group: "Choosing", type: "checkbox", label: "Dot slides between", value: false },
-  cardSlide: { group: "Choosing", type: "checkbox", label: "Card highlight slides between", value: true },
-  bounce: { group: "Choosing", type: "checkbox", label: "Springy pick", value: true },
+  dotSlide: { disabled: (v) => v.appearance === "full" || !v.showIcon, group: "Choosing", type: "checkbox", label: "Dot slides between", value: false },
+  cardSlide: { disabled: (v) => v.variant === "default", group: "Choosing", type: "checkbox", label: "Card highlight slides between", value: true },
+  bounce: { disabled: (v) => !v.showIcon, group: "Choosing", type: "checkbox", label: "Springy pick", value: true },
 
   appearance: {
+    disabled: (v) => !v.showIcon,
     group: "Radio",
     type: "select",
     label: "Look",

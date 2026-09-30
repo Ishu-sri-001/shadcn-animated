@@ -7,6 +7,7 @@ import { motion, useDragControls } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -17,9 +18,13 @@ import {
 } from "@/components/ui/select"
 import { ControlsSlider } from "@/components/controls-slider"
 
+type ControlState = Record<string, string | number | boolean>
+
 type BaseControl = {
   label: string
   group?: string
+  // Greys the control out when it has no effect
+  disabled?: (values: ControlState) => boolean
 }
 
 export type CheckboxControl = BaseControl & { type: "checkbox"; value: boolean }
@@ -39,7 +44,9 @@ export type SelectControl = BaseControl & {
   options: { label: string; value: string }[]
 }
 
-export type Control = CheckboxControl | SliderControl | SelectControl
+export type TextControl = BaseControl & { type: "text"; value: string; placeholder?: string }
+
+export type Control = CheckboxControl | SliderControl | SelectControl | TextControl
 
 export type ControlSchema = Record<string, Control>
 
@@ -148,6 +155,7 @@ export function ControlsPanel<S extends ControlSchema>({
                   <ControlRow
                     id={`control-${key}`}
                     control={control}
+                    disabled={control.disabled?.(values) ?? false}
                     value={values[key]}
                     onChange={(v) => set(key, v as S[typeof key]["value"])}
                   />
@@ -164,16 +172,21 @@ export function ControlsPanel<S extends ControlSchema>({
 function ControlRow({
   id,
   control,
+  disabled,
   value,
   onChange,
 }: {
   id: string
   control: Control
+  disabled: boolean
   value: Control["value"]
   onChange: (value: Control["value"]) => void
 }) {
   const label = (
-    <Label htmlFor={id} className="text-muted-foreground">
+    <Label
+      htmlFor={id}
+      className={cn("text-muted-foreground transition-opacity", disabled && "opacity-40")}
+    >
       {control.label}
     </Label>
   )
@@ -182,7 +195,23 @@ function ControlRow({
     return (
       <div className="flex items-center justify-between gap-3">
         {label}
-        <Checkbox id={id} checked={value as boolean} onCheckedChange={(c) => onChange(c)} />
+        <Checkbox id={id} disabled={disabled} checked={value as boolean} onCheckedChange={(c) => onChange(c)} />
+      </div>
+    )
+  }
+
+  if (control.type === "text") {
+    return (
+      <div className="flex flex-col gap-2">
+        {label}
+        <Input
+          id={id}
+          value={value as string}
+          disabled={disabled}
+          placeholder={control.placeholder}
+          spellCheck={false}
+          onChange={(event) => onChange(event.target.value)}
+        />
       </div>
     )
   }
@@ -193,13 +222,14 @@ function ControlRow({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           {label}
-          <span className="font-mono text-xs tabular-nums">
+          <span className={cn("font-mono text-xs tabular-nums transition-opacity", disabled && "opacity-40")}>
             {(value as number).toFixed(decimals)}
             {control.unit}
           </span>
         </div>
         <ControlsSlider
           id={id}
+          disabled={disabled}
           min={control.min}
           max={control.max}
           step={control.step ?? 1}
@@ -216,6 +246,7 @@ function ControlRow({
       <Select
         items={control.options}
         value={value as string}
+        disabled={disabled}
         onValueChange={(v) => v !== null && onChange(v)}
       >
         <SelectTrigger id={id} size="sm" className="w-[55%]">

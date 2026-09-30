@@ -57,14 +57,14 @@ const DELETE_STAGGER_MS = 60
 const seed: Item[] = [
   { id: "seed-1", name: "Q3-report.pdf", size: 2.4e6, type: "application/pdf", kind: "file", state: "done", progress: 100, delay: 0 },
   { id: "seed-2", name: "roast-schedule.xlsx", size: 1.1e6, type: "", kind: "file", state: "error", progress: 0, error: "Upload failed", retryable: true, delay: 0 },
-  { id: "seed-3", name: "hero.jpg", size: 1.2e6, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-amber-300 to-rose-400", delay: 0 },
-  { id: "seed-4", name: "beans.jpg", size: 8.6e5, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-emerald-300 to-sky-400", delay: 0 },
-  { id: "seed-5", name: "cup.jpg", size: 2.1e6, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-violet-300 to-fuchsia-400", delay: 0 },
+  { id: "seed-3", name: "hero.jpg", size: 1.2e6, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-warning to-destructive", delay: 0 },
+  { id: "seed-4", name: "beans.jpg", size: 8.6e5, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-success to-info", delay: 0 },
+  { id: "seed-5", name: "cup.jpg", size: 2.1e6, type: "image/jpeg", kind: "image", state: "done", progress: 100, gradient: "from-primary to-info", delay: 0 },
 ]
 
 const controls = {
   enter: { group: "Adding", type: "checkbox", label: "Spring in", value: true },
-  stagger: { group: "Adding", type: "slider", label: "Stagger", value: 0.08, min: 0, max: 0.3, step: 0.01, unit: "s" },
+  stagger: { disabled: (v) => !v.enter, group: "Adding", type: "slider", label: "Stagger", value: 0.08, min: 0, max: 0.3, step: 0.01, unit: "s" },
   flyIn: { group: "Adding", type: "checkbox", label: "Fly in from drop", value: true },
   marching: { group: "Adding", type: "checkbox", label: "Drop zone border", value: true },
 
@@ -75,6 +75,7 @@ const controls = {
   borderTrace: { group: "Progress", type: "checkbox", label: "Border trace", value: true },
   fill: { group: "Progress", type: "checkbox", label: "Card fill (images)", value: true },
   fillDirection: {
+    disabled: (v) => !v.fill,
     group: "Progress",
     type: "select",
     label: "Fill direction",
@@ -85,7 +86,7 @@ const controls = {
     ],
   },
 
-  shake: { group: "States", type: "checkbox", label: "Error shake", value: true },
+  shake: { disabled: (v) => !v.failures, group: "States", type: "checkbox", label: "Error shake", value: true },
 
   reveal: { group: "Hover", type: "checkbox", label: "Reveal remove button", value: true },
   zoom: { group: "Hover", type: "checkbox", label: "Image zoom", value: true },

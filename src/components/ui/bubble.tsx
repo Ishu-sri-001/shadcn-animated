@@ -981,7 +981,7 @@ function BubbleStatus({
               aria-hidden
               className={cn(
                 "size-3.5 transition-colors duration-500",
-                status === "read" && "text-sky-500"
+                status === "read" && "text-info"
               )}
             >
               <motion.path

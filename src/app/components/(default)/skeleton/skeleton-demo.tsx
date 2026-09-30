@@ -32,6 +32,7 @@ const controls = {
     ],
   },
   duration: {
+    disabled: (v) => v.animation === "none",
     group: "Skeleton appearance",
     type: "slider",
     label: "Animation cycle duration",
@@ -42,6 +43,7 @@ const controls = {
     unit: "s",
   },
   stagger: {
+    disabled: (v) => v.animation === "none",
     group: "Skeleton appearance",
     type: "slider",
     label: "Delay between placeholders",
@@ -58,10 +60,10 @@ const controls = {
     value: "md",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
       { label: "Full", value: "full" },
     ],
   },
@@ -79,6 +81,7 @@ const controls = {
     ],
   },
   swapDuration: {
+    disabled: (v) => v.swap === "none",
     group: "Content transition",
     type: "slider",
     label: "Content entrance duration",
@@ -89,6 +92,7 @@ const controls = {
     unit: "s",
   },
   swapStagger: {
+    disabled: (v) => v.swap === "none",
     group: "Content transition",
     type: "slider",
     label: "Delay between content items",
@@ -176,7 +180,7 @@ export function SkeletonDemo() {
 
   const content = (
     <div className="flex flex-col gap-4">
-      <div className={cn("h-[18vh] w-full bg-linear-to-br from-amber-200 to-orange-300 dark:from-amber-900 dark:to-orange-950", SKELETON_ROUNDED[values.rounded as SkeletonRounded])} />
+      <div className={cn("h-[18vh] w-full bg-linear-to-br from-warning/40 to-destructive/40", SKELETON_ROUNDED[values.rounded as SkeletonRounded])} />
       <div className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
           LK

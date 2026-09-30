@@ -163,7 +163,7 @@ function useHoverSquare(
         position,
         reduceMotion
           ? { duration: 0 }
-          : { type: "spring", visualDuration: duration, bounce }
+          : { type: "spring", visualDuration: duration * 0.6, bounce }
       )
     } else if (shown.current) {
       animateSquare(el, position, { duration: 0 })

@@ -31,10 +31,10 @@ const actions = [
 
 const rounded = [
   { label: "None", value: "none" },
-  { label: "SM", value: "sm" },
-  { label: "MD", value: "md" },
-  { label: "LG", value: "lg" },
-  { label: "XL", value: "xl" },
+  { label: "sm", value: "sm" },
+  { label: "md", value: "md" },
+  { label: "lg", value: "lg" },
+  { label: "xl", value: "xl" },
   { label: "Full", value: "full" },
 ]
 
@@ -92,24 +92,13 @@ const controls = {
     group: "Moving between",
     type: "select",
     label: "When it changes",
-    value: "swipe",
+    value: "slide",
     options: [
       { label: "Swap text", value: "instant" },
-      { label: "Morph and slide", value: "morph" },
       { label: "Morph and fade", value: "fade" },
-      { label: "Morph and swipe", value: "swipe" },
+      { label: "Morph and slide", value: "slide" },
       { label: "Morph and roll", value: "roll" },
     ],
-  },
-  distance: {
-    group: "Moving between",
-    type: "slider",
-    label: "Slide distance (slide only)",
-    value: 24,
-    min: 0,
-    max: 80,
-    step: 4,
-    unit: "px",
   },
   duration: {
     group: "Moving between",
@@ -124,6 +113,7 @@ const controls = {
 
   elastic: { group: "Feel", type: "checkbox", label: "Elastic", value: true },
   bounce: {
+    disabled: (v) => !v.elastic && v.change === "instant",
     group: "Feel",
     type: "slider",
     label: "Bounce",
@@ -132,8 +122,8 @@ const controls = {
     max: 0.6,
     step: 0.05,
   },
-  stretch: { group: "Feel", type: "checkbox", label: "Stretches with speed (elastic)", value: true },
-  tilt: { group: "Feel", type: "checkbox", label: "Leans with speed (elastic)", value: true },
+  stretch: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Stretches with speed (elastic)", value: true },
+  tilt: { disabled: (v) => !v.elastic, group: "Feel", type: "checkbox", label: "Leans with speed (elastic)", value: true },
   stiffness: {
     group: "Feel",
     type: "slider",
@@ -154,16 +144,6 @@ const controls = {
       { label: "Fade", value: "fade" },
       { label: "Nothing", value: "none" },
     ],
-  },
-  delay: {
-    group: "Show and hide",
-    type: "slider",
-    label: "Open delay",
-    value: 0,
-    min: 0,
-    max: 1,
-    step: 0.05,
-    unit: "s",
   },
   closeDelay: {
     group: "Show and hide",
@@ -191,7 +171,6 @@ export function TooltipDemo() {
           side={values.side as FloatingTooltipSide}
           offset={values.offset as FloatingTooltipOffset}
           change={values.change as FloatingTooltipChange}
-          distance={values.distance}
           duration={values.duration}
           bounce={values.bounce}
           elastic={values.elastic}
@@ -199,7 +178,6 @@ export function TooltipDemo() {
           tilt={values.tilt}
           stiffness={values.stiffness}
           appear={values.appear as FloatingTooltipAppear}
-          delay={values.delay}
           closeDelay={values.closeDelay}
         >
           <div className="flex flex-wrap items-center justify-center gap-3">

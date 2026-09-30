@@ -9,7 +9,7 @@ import type { RegistryItem } from "@/components/registry"
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 const easeOutCubic = [0.33, 1, 0.68, 1] as const
-const glide = { type: "spring", visualDuration: 0.3, bounce: 0.15 } as const
+const glide = { type: "spring", visualDuration: 0.3 * 0.6, bounce: 0.15 } as const
 
 const listVariants: Variants = {
   hidden: {},

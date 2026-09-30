@@ -13,6 +13,7 @@ import {
   useSpring,
   useTransform,
   type MotionStyle,
+  type MotionValue,
   type Transition,
 } from "motion/react"
 
@@ -100,6 +101,12 @@ const THUMB_SIZE: Record<SliderEdgeSize, string> = {
   lg: "size-5",
 }
 
+// Thumb box sizes in px, matching THUMB_SIZE
+const THUMB_PX: Record<SliderEdgeSize, number> = { sm: 12, md: 16, lg: 20 }
+
+// Gap kept between the bar and the track end, px
+const BAR_GAP = 3
+
 const THUMB_SCALE: Record<SliderEdgePress, number> = { none: 1, grow: 1.25, shrink: 0.8 }
 
 // The bar thumb's resting dot, in px
@@ -122,7 +129,7 @@ function useMotionOk(transition: Transition): Transition {
 }
 
 const SliderContext = React.createContext<
-  (SliderMotion & { step: number; followCursor: boolean; expanded: boolean }) | null
+  (SliderMotion & { step: number; followCursor: boolean; expanded: boolean; fillEnd: MotionValue<number>; raw: [number, number]; pull: MotionValue<number> }) | null
 >(null)
 
 function useSliderMotion() {
@@ -227,10 +234,17 @@ function Slider({
   min = 0,
   max = 100,
   step = 1,
+  smooth = false,
   onValueChange,
   ...props
-}: SliderPrimitive.Root.Props & Partial<SliderMotion>) {
+}: SliderPrimitive.Root.Props &
+  Partial<SliderMotion> & {
+    /** Slide freely instead of snapping to each step. */
+    smooth?: boolean
+  }) {
   const vertical = props.orientation === "vertical"
+  // Smooth still lands on tenths, never more precise than that
+  const nativeStep = smooth ? Math.min(step, 0.1) : step
   const followCursor = bubble === "hover" && !vertical
   const reduceMotion = useReducedMotion()
   const railSpring = useMotionOk(RAIL_SPRING)
@@ -253,7 +267,7 @@ function Slider({
       radius,
       edgeSize,
       format,
-      step,
+      step: nativeStep,
       followCursor,
     }),
     [
@@ -273,7 +287,7 @@ function Slider({
       radius,
       edgeSize,
       format,
-      step,
+      nativeStep,
       followCursor,
     ]
   )
@@ -307,9 +321,9 @@ function Slider({
     const project = (e: PointerEvent) => {
       const rect = el.getBoundingClientRect()
       const fraction = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
-      const stepped = Math.round((fraction * (max - min)) / step) * step + min
+      const stepped = Math.round((fraction * (max - min)) / nativeStep) * nativeStep + min
       cursor.jump(fraction * 100)
-      setHoverValue(Math.min(max, Number(stepped.toFixed(decimalsOf(step)))))
+      setHoverValue(Math.min(max, Number(stepped.toFixed(decimalsOf(nativeStep)))))
       return rect
     }
 
@@ -394,7 +408,7 @@ function Slider({
       el.removeEventListener("pointerleave", onLeave)
       el.removeEventListener("pointerdown", onDown)
     }
-  }, [disabled, vertical, stretching, stretch, reduceMotion, min, max, step, cursor, pull])
+  }, [disabled, vertical, stretching, stretch, reduceMotion, min, max, nativeStep, cursor, pull])
 
   // Stretch from the far edge, squash to match, and nudge towards the pull
   // Base UI moves the value in code on key presses (no native input event), so follow the
@@ -423,13 +437,23 @@ function Slider({
       : options.thicken === "drag" && pressed
   const values = Array.isArray(current) ? current : [current as number]
   // Shade the stretch between the value and the cursor, so you see where a click will land
-  const valuePercent = ((values[0] - min) / (max - min)) * 100
-  const ghostLeft = useTransform(cursor, (c) => toPercent(Math.min(c, valuePercent)))
-  const ghostWidth = useTransform(cursor, (c) => toPercent(Math.abs(c - valuePercent)))
-  const cursorAhead = useTransform(cursor, (c) => c > valuePercent)
+  // The fill runs to the raw value when no edge is shown, so it reaches the track ends
+  const toRaw = (v: number) => ((v - min) / (max - min)) * 100
+  const rawStart = toRaw(values[0])
+  const rawEnd = toRaw(values[values.length - 1])
+  // Where the fill really ends, which is not the raw value once the thumb is inset
+  const fillEnd = useMotionValue(((values[0] - min) / (max - min)) * 100)
+  const ghostLeft = useTransform(() => toPercent(Math.min(cursor.get(), fillEnd.get())))
+  const ghostWidth = useTransform(() => toPercent(Math.abs(cursor.get() - fillEnd.get())))
+  const cursorAhead = useTransform(() => cursor.get() > fillEnd.get())
   const [ahead, setAhead] = React.useState(false)
   React.useEffect(() => cursorAhead.on("change", setAhead), [cursorAhead])
-  const context = React.useMemo(() => ({ ...options, expanded }), [options, expanded])
+  const ghostExtend =
+    !ahead && options.edgeVariant === "bar" && options.showEdge && expanded ? `${EDGE_EXTEND}px` : "0px"
+  const context = React.useMemo(
+    () => ({ ...options, expanded, fillEnd, raw: [rawStart, rawEnd] as [number, number], pull: pullSpring }),
+    [options, expanded, fillEnd, rawStart, rawEnd, pullSpring]
+  )
 
   return (
     <SliderContext.Provider value={context}>
@@ -441,7 +465,7 @@ function Slider({
         value={value}
         min={min}
         max={max}
-        step={step}
+        step={nativeStep}
         thumbAlignment="edge"
         onValueChange={(next, details) => {
           setOwnValue(next)
@@ -460,7 +484,8 @@ function Slider({
           <SliderPrimitive.Track
             data-slot="slider-track"
             className={cn(
-              "relative grow overflow-hidden bg-foreground/30 select-none data-horizontal:w-full data-vertical:h-full",
+              // Min size keeps the springy shrink from dipping below the resting size
+              "relative grow overflow-hidden bg-foreground/30 select-none data-horizontal:min-h-px data-horizontal:w-full data-vertical:h-full data-vertical:min-w-px",
               GROW,
               RADIUS[options.radius],
               "group-has-focus-visible/control:ring-2 group-has-focus-visible/control:ring-ring/60 group-has-focus-visible/control:ring-offset-2 group-has-focus-visible/control:ring-offset-background",
@@ -495,9 +520,20 @@ function Slider({
                   "pointer-events-none absolute inset-y-0",
                   RADIUS[options.radius],
                   // Ahead of the fill it previews more fill; behind it, it lightens what you'd drop
-                  ahead ? "bg-foreground/20" : "z-[2] bg-background/25"
+                  ahead ? "rounded-l-none bg-foreground/20" : "z-[2] bg-background/25"
                 )}
-                style={{ left: ghostLeft, width: ghostWidth }}
+                style={
+                  {
+                    "--ghost-left": ghostLeft,
+                    "--ghost-width": ghostWidth,
+                    // Ahead, start under the fill so its rounded end leaves no gap
+                    "--ghost-lead": ahead ? "2rem" : "0px",
+                    left: "calc(var(--ghost-left) - var(--ghost-lead))",
+                    // Behind the value, run to the far end of the fill like the bar edge does
+                    "--ghost-extend": ghostExtend,
+                    width: "calc(var(--ghost-width) + var(--ghost-extend) + var(--ghost-lead))",
+                  } as unknown as MotionStyle
+                }
                 initial={false}
                 animate={{ opacity: hovering && !pressed && !disabled ? 1 : 0 }}
                 transition={{ duration: reduceMotion ? 0 : 0.2 }}
@@ -506,7 +542,8 @@ function Slider({
             <SliderPrimitive.Indicator
               data-slot="slider-range"
               className={cn(
-                "bg-foreground select-none data-horizontal:h-full data-vertical:w-full",
+                // Percent height ignores the track min size, so repeat it
+                "bg-foreground select-none data-horizontal:h-full data-horizontal:min-h-px data-vertical:w-full data-vertical:min-w-px",
                 RADIUS[options.radius]
               )}
               render={(indicatorProps, state) => (
@@ -560,15 +597,22 @@ function SliderIndicatorElement({
 }: React.ComponentProps<"div"> & { dragging: boolean }) {
   const options = useSliderMotion()
   // Base UI sizes the fill with CSS variables; spring those instead
-  const startTarget = readPercent(style, "--start-position")
-  const sizeTarget = readPercent(style, "--relative-size")
-  const range = sizeTarget !== undefined
+  const range = readPercent(style, "--relative-size") !== undefined
+  // With no edge shown there is no thumb to sit on, so the fill spans the raw value
+  const flush = !options.showEdge
+  const [rawStart, rawEnd] = options.raw
+  const startTarget = flush ? (range ? rawStart : rawEnd) : readPercent(style, "--start-position")
+  const sizeTarget = flush ? rawEnd - rawStart : readPercent(style, "--relative-size")
 
   const start = useSmoothPercent(startTarget, dragging)
   const end = useSmoothPercent(
-    startTarget !== undefined && range ? startTarget + sizeTarget : undefined,
+    startTarget !== undefined && sizeTarget !== undefined && range ? startTarget + sizeTarget : undefined,
     dragging
   )
+  React.useEffect(() => {
+    options.fillEnd.set(start.get())
+    return start.on("change", (v) => options.fillEnd.set(v))
+  }, [start, options.fillEnd])
   const startCss = useTransform(start, toPercent)
   const sizeCss = useTransform(() => toPercent(end.get() - start.get()))
 
@@ -627,6 +671,7 @@ function SliderThumb({ index }: { index: number }) {
       render={(thumbProps, state) => (
         <SliderThumbElement
           {...thumbProps}
+          index={index}
           value={state.values[index]}
           dragging={state.dragging}
           options={options}
@@ -725,6 +770,7 @@ function BubbleLabel({
 }
 
 function SliderThumbElement({
+  index,
   value,
   dragging,
   options,
@@ -732,6 +778,7 @@ function SliderThumbElement({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
+  index: number
   value: number
   dragging: boolean
   options: ReturnType<typeof useSliderMotion>
@@ -740,7 +787,28 @@ function SliderThumbElement({
   const popSpring = useMotionOk({ type: "spring", visualDuration: 0.25, bounce: 0.4 })
   const fade = useMotionOk({ duration: 0.18, ease: smoothEase })
   const position = useSmoothPercent(readPercent(style, "--position"), dragging)
-  const positionCss = useTransform(position, toPercent)
+  // The track stretches from its far end, so the thumb rides along and can pass the old end
+  const positionCss = useTransform(() => {
+    const v = options.pull.get()
+    const scale = 1 + Math.abs(v)
+    const at = position.get()
+    return toPercent(v >= 0 ? at * scale : 100 - scale * (100 - at))
+  })
+
+  // Slide the bar towards each end, so it keeps a small gap there instead of the thumb's inset
+  const rawPosition = useSmoothPercent(options.raw[index] ?? options.raw[0], dragging)
+  const halfBar = options.expanded ? 3 : DOT_SIZE[options.edgeSize] / 2
+  const reach = useSpring(halfBar + BAR_GAP, { stiffness: 400, damping: 30 })
+  const reduceMotion = useReducedMotion()
+  React.useEffect(() => {
+    if (reduceMotion) reach.jump(halfBar + BAR_GAP)
+    else reach.set(halfBar + BAR_GAP)
+  }, [reach, halfBar, reduceMotion])
+  const barShift = useTransform(
+    () =>
+      (reach.get() - THUMB_PX[options.edgeSize] / 2) * (1 - (2 * rawPosition.get()) / 100) +
+      options.pull.get() * NUDGE
+  )
 
   const [kbFocus, setKbFocus] = React.useState(false)
   const onThumb = options.bubble === "dragging" || (options.bubble === "hover" && !options.followCursor)
@@ -765,9 +833,10 @@ function SliderThumbElement({
             // A mid tone at rest reads on both the fill and the track; the grown bar goes white on the fill
             options.expanded
               ? "bg-background shadow-background"
-              : "bg-black dark:bg-white"
+              : "bg-foreground"
           )}
           initial={false}
+          style={{ marginLeft: barShift }}
           animate={{
             x: "-50%",
             y: "-50%",

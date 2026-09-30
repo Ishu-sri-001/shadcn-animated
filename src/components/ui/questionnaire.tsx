@@ -391,8 +391,9 @@ function QuestionnaireChoice({
   className,
   ...props
 }: React.ComponentProps<typeof QuestionnairePrimitive.Choice>) {
-  const { choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover } =
+  const { choiceColor, choiceIndicator, indicatorBorder, indicatorRounded, choiceLayout, choiceHover, duration } =
     useQuestionnaire()
+  const reduceMotion = useReducedMotion()
   const card = choiceLayout === "card"
   const bare = choiceIndicator === "check" && !indicatorBorder
   const primary = choiceColor === "primary"
@@ -456,10 +457,10 @@ function QuestionnaireChoice({
         </motion.label>
       )}
       className={cn(
-        "group/questionnaire-choice relative isolate flex cursor-pointer items-start gap-2.5 text-start text-base outline-none select-none",
+        "group/questionnaire-choice relative isolate flex cursor-pointer items-center text-start text-base outline-none select-none",
         card
           ? "min-h-14 rounded-lg border border-transparent px-4 py-3"
-          : "min-h-9 rounded-md py-1.5 text-muted-foreground transition-colors hover:text-foreground data-checked:font-medium data-checked:text-foreground",
+          : "min-h-9 rounded-none border-b border-border py-2.5 text-muted-foreground transition-colors hover:text-foreground data-checked:font-medium data-checked:text-foreground",
         "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className
       )}
@@ -471,14 +472,25 @@ function QuestionnaireChoice({
       />
       <span
         aria-hidden="true"
+        className={cn(
+          "pointer-events-none flex shrink-0 items-center overflow-hidden transition-[width,margin-right,opacity] ease-[cubic-bezier(0.45,0,0.25,1)]",
+          choiceIndicator === "radio"
+            ? "mr-2.5 w-5 opacity-100"
+            : "mr-0 w-0 opacity-0",
+          choiceIndicator === "check" &&
+            "group-data-checked/questionnaire-choice:mr-2.5 group-data-checked/questionnaire-choice:w-5 group-data-checked/questionnaire-choice:opacity-100"
+        )}
+        style={{ transitionDuration: `${reduceMotion ? 0 : duration}s` }}
+      >
+      <span
+        aria-hidden="true"
         data-slot="questionnaire-choice-indicator"
         data-indicator={choiceIndicator}
         className={cn(
-          "pointer-events-none relative flex size-5 shrink-0 translate-y-[--spacing(0.25)] items-center justify-center rounded-md border border-input bg-background shadow-xs transition-[background-color,border-color,color,border-radius] duration-300 group-hover/questionnaire-choice:border-foreground/40 group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-checked/questionnaire-choice:border-primary dark:bg-input/30",
+          "pointer-events-none relative flex size-5 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-[background-color,border-color,color,border-radius] duration-300 group-hover/questionnaire-choice:border-foreground/40 group-data-checked/questionnaire-choice:border-primary dark:bg-input/30",
           "group-data-checked/questionnaire-choice:bg-primary group-data-checked/questionnaire-choice:text-primary-foreground dark:group-data-checked/questionnaire-choice:bg-primary",
           choiceIndicator === "radio" && "rounded-full",
           choiceIndicator === "check" && INDICATOR_ROUNDED[indicatorRounded],
-          choiceIndicator === "none" && "hidden",
           solid &&
             "group-data-checked/questionnaire-choice:border-primary-foreground group-data-checked/questionnaire-choice:bg-primary-foreground group-data-checked/questionnaire-choice:text-primary dark:group-data-checked/questionnaire-choice:bg-primary-foreground",
           bare &&
@@ -518,6 +530,7 @@ function QuestionnaireChoice({
           />
         </svg>
       </span>
+      </span>
       <QuestionnairePrimitive.ChoiceLabel
         data-slot="questionnaire-choice-label"
         className={cn(
@@ -531,7 +544,7 @@ function QuestionnaireChoice({
       </QuestionnairePrimitive.ChoiceLabel>
       <QuestionnairePrimitive.ChoiceShortcut
         data-slot="questionnaire-choice-shortcut"
-        className="pointer-events-none ms-auto hidden size-5 shrink-0 translate-y-[--spacing(0.45)] items-center justify-center rounded-md border border-input bg-background font-mono text-[0.625rem] leading-none font-medium text-muted-foreground group-has-data-[slot=questionnaire-choice-description]/questionnaire-choice:translate-y-0.5 group-data-[shortcut]/questionnaire-choice:inline-flex"
+        className="pointer-events-none ms-2.5 hidden size-5 shrink-0 items-center justify-center rounded-md border border-input bg-background font-mono text-[0.625rem] leading-none font-medium text-muted-foreground group-data-[shortcut]/questionnaire-choice:inline-flex"
       />
     </QuestionnairePrimitive.Choice>
   )

@@ -57,6 +57,7 @@ const lineButton = cn(
 const controls = {
   entrance: { group: "Entrance", type: "checkbox", label: "Staggered rows", value: true },
   rowCellsStagger: {
+    disabled: (v) => !v.entrance,
     group: "Entrance",
     type: "checkbox",
     label: "Row cells stagger",
@@ -84,6 +85,7 @@ const controls = {
     unit: "s",
   },
   stagger: {
+    disabled: (v) => !v.entrance,
     group: "Timing",
     type: "slider",
     label: "Stagger",
@@ -105,6 +107,7 @@ const controls = {
     ],
   },
   hoverTone: {
+    disabled: (v) => v.highlight === "none",
     group: "Hover",
     type: "select",
     label: "Hover colour",
@@ -119,8 +122,9 @@ const controls = {
   highlightTotal: { group: "Data", type: "checkbox", label: "Highlight total", value: false },
   pagination: { group: "Data", type: "checkbox", label: "Pagination", value: false },
   selectable: { group: "Selection", type: "checkbox", label: "Row checkboxes", value: false },
-  selectAll: { group: "Selection", type: "checkbox", label: "Select all", value: true },
+  selectAll: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Select all", value: true },
   selectMark: {
+    disabled: (v) => !v.selectable,
     group: "Selection",
     type: "select",
     label: "Select mark",
@@ -130,7 +134,7 @@ const controls = {
       { label: "Filled circle", value: "circle" },
     ],
   },
-  actionBar: { group: "Selection", type: "checkbox", label: "Action bar", value: true },
+  actionBar: { disabled: (v) => !v.selectable, group: "Selection", type: "checkbox", label: "Action bar", value: true },
   drag: {
     group: "Rows",
     type: "checkbox",
@@ -160,11 +164,11 @@ const controls = {
     value: "lg",
     options: [
       { label: "None", value: "none" },
-      { label: "SM", value: "sm" },
-      { label: "MD", value: "md" },
-      { label: "LG", value: "lg" },
-      { label: "XL", value: "xl" },
-      { label: "2XL", value: "2xl" },
+      { label: "sm", value: "sm" },
+      { label: "md", value: "md" },
+      { label: "lg", value: "lg" },
+      { label: "xl", value: "xl" },
+      { label: "2xl", value: "2xl" },
     ],
   },
   horizontalLines: { group: "Layout", type: "checkbox", label: "Horizontal lines", value: true },
@@ -174,6 +178,7 @@ const controls = {
   stickyHeader: { group: "Layout", type: "checkbox", label: "Sticky header", value: true },
   expandFullTable: { group: "Layout", type: "checkbox", label: "Expand full table", value: false },
   height: {
+    disabled: (v) => !!v.expandFullTable,
     group: "Layout",
     type: "slider",
     label: "Table height",
@@ -183,7 +188,7 @@ const controls = {
     step: 5,
     unit: "vh",
   },
-  stickyFooter: { group: "Layout", type: "checkbox", label: "Sticky last row", value: true },
+  stickyFooter: { disabled: (v) => !v.highlightTotal, group: "Layout", type: "checkbox", label: "Sticky last row", value: true },
   skeleton: { group: "Layout", type: "checkbox", label: "Loading skeleton", value: true },
 } satisfies ControlSchema
 

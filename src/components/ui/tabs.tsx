@@ -224,7 +224,7 @@ function TabsTrigger({
 }: Omit<TabsPrimitive.Tab.Props, "render">) {
   const c = useTabs()
   const active = c.value === value
-  const move = useMotionOk({ type: "spring", duration: c.duration, bounce: c.bounce })
+  const move = useMotionOk({ type: "spring", duration: c.duration * 0.6, bounce: c.bounce })
   const quick = useMotionOk({ duration: 0.25, ease: fadeEase })
   const bg = cn("absolute inset-0 z-0", ACTIVE_BG[c.activeColor], ROUNDED[c.rounded])
   // Inside the tab (not hanging below it), so the scrolling row never clips or scrolls vertically

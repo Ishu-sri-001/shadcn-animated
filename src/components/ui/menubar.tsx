@@ -61,6 +61,8 @@ type MenubarMotion = {
   textRoll: boolean
   triggerTextRoll: boolean
   pressFeedback: boolean
+  /** Menus open on hover by default; turn this on to require a click. */
+  openOnClick: boolean
   contentSwitch: MenubarContentSwitch
   contentShift: MenubarContentShift
   chevrons: boolean
@@ -156,7 +158,17 @@ function useMenubar() {
   return context
 }
 
+// Grace period for the pointer to cross the gap to the panel
+const HOVER_CLOSE_MS = 160
+
 const MenubarMenuContext = React.createContext("")
+
+// Hover opening is done here: Base UI only hover-opens a menubar menu once another is open
+const MenubarHoverContext = React.createContext({
+  enter: () => {},
+  leave: () => {},
+  stay: () => {},
+})
 
 // Close then open this fast = switching
 const SWITCH_WINDOW_MS = 100
@@ -176,6 +188,7 @@ function Menubar({
   textRoll = false,
   triggerTextRoll = true,
   pressFeedback = true,
+  openOnClick = false,
   contentSwitch = "slide",
   contentShift = "lg",
   chevrons = true,
@@ -265,6 +278,7 @@ function Menubar({
         textRoll,
         triggerTextRoll,
         pressFeedback,
+        openOnClick,
         contentSwitch,
         contentShift,
         chevrons,
@@ -296,6 +310,7 @@ function Menubar({
       textRoll,
       triggerTextRoll,
       pressFeedback,
+      openOnClick,
       contentSwitch,
       contentShift,
       chevrons,
@@ -329,11 +344,30 @@ function Menubar({
 function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typeof DropdownMenu>) {
   const { motion: options, onMenuOpenChange } = useMenubar()
   const menu = React.useId()
+  const [hoverOpen, setHoverOpen] = React.useState(props.defaultOpen ?? false)
+  const closeTimer = React.useRef<number | undefined>(undefined)
+  const hover = React.useMemo(() => {
+    const stay = () => window.clearTimeout(closeTimer.current)
+    return {
+      stay,
+      enter: () => {
+        stay()
+        setHoverOpen(true)
+      },
+      leave: () => {
+        stay()
+        closeTimer.current = window.setTimeout(() => setHoverOpen(false), HOVER_CLOSE_MS)
+      },
+    }
+  }, [])
+  React.useEffect(() => hover.stay, [hover])
 
   return (
     <MenubarMenuContext.Provider value={menu}>
+    <MenubarHoverContext.Provider value={hover}>
       <DropdownMenu
         data-slot="menubar-menu"
+        open={hoverOpen}
         animation={options.animation}
         duration={options.duration}
         stagger={options.stagger}
@@ -345,11 +379,13 @@ function DesktopMenubarMenu({ onOpenChange, ...props }: React.ComponentProps<typ
         textRoll={options.textRoll}
         pressFeedback={options.pressFeedback}
         onOpenChange={(open, details) => {
+          setHoverOpen(open)
           onMenuOpenChange(menu, open)
           onOpenChange?.(open, details)
         }}
         {...props}
       />
+    </MenubarHoverContext.Provider>
     </MenubarMenuContext.Provider>
   )
 }
@@ -407,6 +443,7 @@ function DesktopMenubarTrigger({
 }) {
   const { id, motion: options, active, highlightOn, highlightVisible, setHovered } = useMenubar()
   const menu = React.useContext(MenubarMenuContext)
+  const hover = React.useContext(MenubarHoverContext)
   const marker = options.triggerHighlight
   const leave = () => setHovered(null)
   const showChevron = chevron ?? options.chevrons
@@ -418,7 +455,7 @@ function DesktopMenubarTrigger({
       data-slot="menubar-trigger"
       data-menubar-menu={menu}
       className={cn(
-        "relative isolate flex items-center font-medium transition-colors outline-hidden select-none",
+        "relative isolate flex items-center gap-2 font-medium transition-colors outline-hidden select-none",
         TRIGGER_SIZE[options.size],
         INNER_ROUNDED[options.rounded],
         marker === "pill" &&
@@ -429,11 +466,14 @@ function DesktopMenubarTrigger({
       )}
       onPointerEnter={(event) => {
         onPointerEnter?.(event)
-        if (event.pointerType === "mouse") setHovered(menu)
+        if (event.pointerType !== "mouse") return
+        setHovered(menu)
+        if (!options.openOnClick) hover.enter()
       }}
       onPointerLeave={(event) => {
         onPointerLeave?.(event)
         leave()
+        if (!options.openOnClick && event.pointerType === "mouse") hover.leave()
       }}
       onFocus={(event) => {
         onFocus?.(event)
@@ -455,7 +495,7 @@ function DesktopMenubarTrigger({
           data-slot="menubar-trigger-icon"
           open={open}
           duration={options.duration}
-          className="ml-1 size-3 text-muted-foreground"
+          className="size-3 text-muted-foreground"
         />
       )}
       {marker !== "none" && highlightOn === menu && (
@@ -467,7 +507,7 @@ function DesktopMenubarTrigger({
             marker === "pill"
               ? cn("inset-0 rounded-[inherit]", TRIGGER_FILL[options.triggerHighlightColor])
               : cn(
-                  "inset-x-2.5 -bottom-1.5 h-0.5 rounded-full",
+                  "inset-x-2.5 bottom-0.5 h-0.5 rounded-full",
                   options.triggerHighlightColor === "primary"
                     ? "bg-primary"
                     : "bg-muted-foreground"
@@ -476,7 +516,7 @@ function DesktopMenubarTrigger({
           initial={false}
           animate={{ opacity: highlightVisible ? 1 : 0 }}
           transition={{
-            layout: { type: "spring", visualDuration: 0.3, bounce: 0.15 },
+            layout: { type: "spring", visualDuration: 0.3 * 0.6, bounce: 0.15 },
             opacity: { duration: 0.2, ease: "easeOut" },
           }}
         />
@@ -602,7 +642,7 @@ function MorphBox({
 }
 
 // power2.out, matching directional-menu
-const GLIDE = { duration: 0.26, ease: [0.25, 0.46, 0.45, 0.94] } as const
+const GLIDE = { duration: 0.26 * 0.6, ease: [0.25, 0.46, 0.45, 0.94] } as const
 
 // Old contents slide out inside new box
 function slideOutPrevious(
@@ -665,6 +705,7 @@ function DesktopMenubarContent({
 }: MenuPrimitive.Popup.Props &
   Pick<MenuPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
   const dropdown = useDropdownMenu()
+  const hover = React.useContext(MenubarHoverContext)
   const menubar = useMenubar()
   const menu = React.useContext(MenubarMenuContext)
   const { triggerRef } = dropdown
@@ -736,9 +777,14 @@ function DesktopMenubarContent({
                 initial={switchedIn ? targetOf(variants.open) : "closed"}
                 animate={dropdown.open ? "open" : "closed"}
                 variants={variants}
+                onPointerEnter={(event) => {
+                  rest.onPointerEnter?.(event)
+                  if (!options.openOnClick) hover.stay()
+                }}
                 onPointerLeave={(event) => {
                   rest.onPointerLeave?.(event)
                   dropdown.releaseActiveItem()
+                  if (!options.openOnClick && event.pointerType === "mouse") hover.leave()
                 }}
                 onAnimationComplete={(definition) => {
                   if (definition === "closed" && !dropdown.open) dropdown.onExitComplete()
@@ -923,6 +969,8 @@ function DesktopMenubarSubContent({
   return (
     <DropdownMenuSubContent
       data-slot="menubar-sub-content"
+      // Keeps the submenu clear of the parent panel
+      sideOffset={24}
       className={cn("min-w-40", className)}
       {...props}
     />
